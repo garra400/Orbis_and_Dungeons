@@ -83,42 +83,42 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     static {
         Map<String, RaceDetails> tmp = new LinkedHashMap<>();
         tmp.put("elf", new RaceDetails(
-                "Elfo",
-                "Agil e incansavel, move-se como o vento.",
+                "Elf",
+                "Agile and tireless, moves like the wind.",
                 List.of(
-                        "Swift Movement: +15 Stamina maxima.",
-                        "Tireless: 2.5x mais stamina que outras racas.",
-                        "Never Stops: Corre, pula e age sem parar."
+                        "Swift Movement: +15 Max Stamina.",
+                        "Tireless: 2.5x more stamina than other races.",
+                        "Never Stops: Runs, jumps and acts endlessly."
                 ),
                 List.of(
-                        "Frail Body: Vida base de 100 (sem bonus).",
-                        "Glass Cannon: Depende de mobilidade para sobreviver."
+                        "Frail Body: Base health of 100 (no bonus).",
+                        "Glass Cannon: Relies on mobility to survive."
                 )
         ));
         tmp.put("orc", new RaceDetails(
                 "Orc",
-                "Tanque de guerra, resiste ao impossivel.",
+                "War tank, resists the impossible.",
                 List.of(
-                        "Iron Skin: +75 Vida maxima.",
-                        "Tank Build: 175 vida base (igual melhor armadura).",
-                        "Unstoppable: Com armadura chega a 250 vida total."
+                        "Iron Skin: +75 Max Health.",
+                        "Tank Build: 175 base health (same as best armor).",
+                        "Unstoppable: Reaches 250 total health with armor."
                 ),
                 List.of(
-                        "Heavy Build: Stamina base de 10 (sem bonus).",
-                        "Slow to Act: Menos acoes consecutivas possiveis."
+                        "Heavy Build: Base stamina of 10 (no bonus).",
+                        "Slow to Act: Fewer consecutive actions possible."
                 )
         ));
         tmp.put("human", new RaceDetails(
-                "Humano",
-                "Versatil e equilibrado, se adapta a tudo.",
+                "Human",
+                "Versatile and balanced, adapts to everything.",
                 List.of(
-                        "Balanced Build: +35 Vida e +5 Stamina.",
-                        "Adaptable: 135 vida e 15 stamina.",
-                        "All-Rounder: Bom em todas as situacoes."
+                        "Balanced Build: +35 Health and +5 Stamina.",
+                        "Adaptable: 135 health and 15 stamina.",
+                        "All-Rounder: Good in all situations."
                 ),
                 List.of(
-                        "Jack of All Trades: Nao se destaca em nada.",
-                        "Average: Menos especializado que outras racas."
+                        "Jack of All Trades: Doesn't excel at anything.",
+                        "Average: Less specialized than other races."
                 )
         ));
         RACES = Collections.unmodifiableMap(tmp);
