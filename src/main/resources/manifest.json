@@ -1,11 +1,11 @@
 {
     "Group": "OrbisAndDungeons",
     "Name": "RaceSelection",
-    "Version": "2026.1.20-36902",
+    "Version": "2026.1.20-48883",
     "Description": "Tela de escolha de raca com detalhes e confirmacao obrigatoria.",
     "Authors": [
         {
-            "Name": "Garra"
+            "Name": "Garra400"
         }
     ],
     "Website": "",

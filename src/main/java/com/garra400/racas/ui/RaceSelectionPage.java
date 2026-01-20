@@ -1,12 +1,14 @@
 package com.garra400.racas.ui;
 
 import com.garra400.racas.RaceManager;
-import com.hypixel.hytale.codec.ExtraInfo;
-import com.hypixel.hytale.codec.codecs.map.MapCodec;
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
+import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -14,17 +16,54 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import org.bson.BsonDocument;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Pagina de selecao de racas.
+ * Race Selection Page - Interactive UI for choosing player race
+ * 
+ * Uses InteractiveCustomUIPage pattern (like Tutorial2/3 examples):
+ * - EventData class with BuilderCodec for type-safe event handling
+ * - No sendUpdate() calls - UI is set once in build()
+ * - Events trigger handleDataEvent() which processes and closes page
  */
-public class RaceSelectionPage extends CustomUIPage {
+public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage.RaceEventData> {
+
+    /**
+     * EventData class - receives button click data
+     * 
+     * Fields:
+     * - action: Which button was clicked ("select" or "confirm")
+     * - race: Which race was selected ("elf", "orc", "human")
+     */
+    public static class RaceEventData {
+        public String action;
+        public String race;
+
+        /**
+         * Codec for serializing/deserializing event data
+         * Pattern from Tutorial2Page.java - defines how to map JSON to fields
+         */
+        public static final BuilderCodec<RaceEventData> CODEC = 
+            BuilderCodec.builder(RaceEventData.class, RaceEventData::new)
+                .append(
+                    new KeyedCodec<>("Action", Codec.STRING),
+                    (RaceEventData o, String v) -> o.action = v,
+                    (RaceEventData o) -> o.action
+                )
+                .add()
+                .append(
+                    new KeyedCodec<>("Race", Codec.STRING),
+                    (RaceEventData o, String v) -> o.race = v,
+                    (RaceEventData o) -> o.race
+                )
+                .add()
+                .build();
+    }
 
     private static final class RaceDetails {
         final String title;
@@ -85,91 +124,109 @@ public class RaceSelectionPage extends CustomUIPage {
         RACES = Collections.unmodifiableMap(tmp);
     }
 
-    private String selectedRace = "elf";
+    private final String selectedRace;
 
-    public RaceSelectionPage(PlayerRef playerRef) {
-        super(playerRef, CustomPageLifetime.CantClose);
+    public RaceSelectionPage(@Nonnull PlayerRef playerRef) {
+        this(playerRef, "elf");
+    }
+
+    public RaceSelectionPage(@Nonnull PlayerRef playerRef, String selectedRace) {
+        // Pass CODEC to parent - this enables typed event handling
+        super(playerRef, CustomPageLifetime.CantClose, RaceEventData.CODEC);
+        this.selectedRace = selectedRace;
     }
 
     @Override
-    public void build(Ref<EntityStore> playerStoreRef, UICommandBuilder command, UIEventBuilder events, Store<EntityStore> store) {
-        // Carrega o arquivo .ui
-        command.append("Pages/race_selection.ui");
+    public void build(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull UIEventBuilder evt,
+            @Nonnull Store<EntityStore> store
+    ) {
+        // Load UI layout
+        cmd.append("Pages/race_selection.ui");
 
-        // Vincula cliques
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonElf",
-                EventData.of("event", "select").append("race", "elf"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonOrc",
-                EventData.of("event", "select").append("race", "orc"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonHuman",
-                EventData.of("event", "select").append("race", "human"), true);
+        // Set initial values - Tutorial3Page pattern
+        applyRaceToUI(cmd, selectedRace);
 
-        // Confirmar
-        events.addEventBinding(CustomUIEventBindingType.Activating, "#ConfirmSelection",
-                EventData.of("event", "confirm").append("race", selectedRace), true);
+        // Bind race selection buttons - Tutorial2Page pattern
+        // Each button sends action="select" + race="racename"
+        evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#RaceButtonElf",
+                new EventData().append("Action", "select").append("Race", "elf")
+        );
+        evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#RaceButtonOrc",
+                new EventData().append("Action", "select").append("Race", "orc")
+        );
+        evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#RaceButtonHuman",
+                new EventData().append("Action", "select").append("Race", "human")
+        );
 
-        applySelection(command, selectedRace);
+        // Bind confirm button
+        evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#ConfirmSelection",
+                new EventData().append("Action", "confirm")
+        );
     }
 
     @Override
-    public void handleDataEvent(Ref<EntityStore> playerStoreRef, Store<EntityStore> store, String rawJson) {
-        Map<String, String> data = decodeEvent(rawJson);
-        String event = data.get("event");
-        if ("select".equals(event)) {
-            String race = data.get("race");
-            if (race != null && RACES.containsKey(race)) {
-                selectedRace = race;
-                UICommandBuilder cmd = new UICommandBuilder();
-                applySelection(cmd, race);
-                sendUpdate(cmd, false);
+    public void handleDataEvent(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull RaceEventData data
+    ) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        
+        // Handle button clicks - FormPage pattern
+        if ("select".equals(data.action)) {
+            // Race selection button clicked
+            if (data.race != null && RACES.containsKey(data.race)) {
+                // Reopen directly with new selection (without closing first)
+                player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race));
             }
             return;
         }
 
-        if ("confirm".equals(event)) {
-            String raceFromEvent = data.get("race");
-            if (raceFromEvent != null) {
-                selectedRace = raceFromEvent;
-            }
-            Player player = store != null ? store.getComponent(playerStoreRef, Player.getComponentType()) : null;
-            RaceManager.Race race = RaceManager.fromKey(selectedRace);
-            if (player != null) {
+        if ("confirm".equals(data.action)) {
+            // Apply the selected race
+            try {
+                RaceManager.Race race = RaceManager.fromKey(selectedRace);
                 RaceManager.applyRace(player, race);
+            } catch (Exception e) {
+                // Silently fail
             }
-            close();
+            
+            // Close the page - Tutorial2/3 pattern
+            player.getPageManager().setPage(ref, store, Page.None);
         }
     }
 
-    private Map<String, String> decodeEvent(String rawJson) {
-        if (rawJson == null || rawJson.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        try {
-            ExtraInfo extra = ExtraInfo.THREAD_LOCAL.get();
-            Map<String, String> map = MapCodec.STRING_HASH_MAP_CODEC.decode(BsonDocument.parse(rawJson), extra);
-            return map != null ? map : Collections.emptyMap();
-        } catch (Exception e) {
-            return Collections.emptyMap();
-        }
-    }
-
-    private void applySelection(UICommandBuilder command, String raceKey) {
+    /**
+     * Apply race details to UI elements using cmd.set()
+     * Pattern from Tutorial3Page - set values dynamically
+     */
+    private void applyRaceToUI(UICommandBuilder cmd, String raceKey) {
         RaceDetails details = RACES.getOrDefault(raceKey, RACES.get("human"));
-        command.set("#SelectedRaceName.Text", details.title);
-        command.set("#SelectedRaceTagline.Text", details.tagline);
+        
+        cmd.set("#SelectedRaceName.Text", details.title);
+        cmd.set("#SelectedRaceTagline.Text", details.tagline);
 
-        // Positivos
-        setListLine(command, "#PositiveLine1", details.positives, 0);
-        setListLine(command, "#PositiveLine2", details.positives, 1);
-        setListLine(command, "#PositiveLine3", details.positives, 2);
+        setListLine(cmd, "#PositiveLine1", details.positives, 0);
+        setListLine(cmd, "#PositiveLine2", details.positives, 1);
+        setListLine(cmd, "#PositiveLine3", details.positives, 2);
 
-        // Negativos
-        setListLine(command, "#NegativeLine1", details.negatives, 0);
-        setListLine(command, "#NegativeLine2", details.negatives, 1);
+        setListLine(cmd, "#NegativeLine1", details.negatives, 0);
+        setListLine(cmd, "#NegativeLine2", details.negatives, 1);
     }
 
-    private void setListLine(UICommandBuilder command, String elementId, List<String> lines, int index) {
+    private void setListLine(UICommandBuilder cmd, String elementId, List<String> lines, int index) {
         String value = index < lines.size() ? lines.get(index) : "";
-        command.set(elementId + ".Text", value);
+        cmd.set(elementId + ".Text", value);
     }
 }
