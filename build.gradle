@@ -73,7 +73,6 @@ tasks.named('processResources') {
 }
 
 processResources {
-
     doLast {
         def jsonMinifyStart = System.currentTimeMillis()
         def jsonMinified = 0
@@ -91,6 +90,17 @@ processResources {
             }
         }
         project.logger.lifecycle("Minified ${jsonMinified} files. Saved ${jsonBytesSaved} bytes before compression. Took ${System.currentTimeMillis() - jsonMinifyStart}ms.")
+    }
+}
+
+// Adiciona a UI com ambos caminhos (Common e common) direto no jar para lidar com case-sensitive.
+tasks.named('jar') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    from('src/main/resources/Common/UI/Custom/Pages/race_selection.ui') {
+        into 'Common/UI/Custom/Pages'
+    }
+    from('src/main/resources/Common/UI/Custom/Pages/race_selection.ui') {
+        into 'common/ui/custom/pages'
     }
 }
 

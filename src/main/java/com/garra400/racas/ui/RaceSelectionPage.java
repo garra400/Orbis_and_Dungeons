@@ -94,20 +94,20 @@ public class RaceSelectionPage extends CustomUIPage {
 
     @Override
     public void build(Ref<EntityStore> playerStoreRef, UICommandBuilder command, UIEventBuilder events, Store<EntityStore> store) {
-        // 1. Carrega o arquivo .ui (caminho relativo a Common/UI/)
-        // Use caminho explicito para evitar problema de path em lookup.
+        // 1. Carrega o arquivo .ui (caminho relativo a custom/pages/)
+        // Lookup padrão do Hytale: "race_selection" => common/ui/custom/pages/race_selection.ui
         command.append("Custom/Pages/race_selection");
 
         // 2. Vincula cliques
-        events.addEventBinding(CustomUIEventBindingType.Activating, "btn_race_elf",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonElf",
                 EventData.of("event", "select").append("race", "elf"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "btn_race_orc",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonOrc",
                 EventData.of("event", "select").append("race", "orc"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "btn_race_human",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonHuman",
                 EventData.of("event", "select").append("race", "human"), true);
 
         // Confirmar
-        events.addEventBinding(CustomUIEventBindingType.Activating, "btn_confirm_race",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "ConfirmSelection",
                 EventData.of("event", "confirm").append("race", selectedRace), true);
 
         applySelection(command, selectedRace);

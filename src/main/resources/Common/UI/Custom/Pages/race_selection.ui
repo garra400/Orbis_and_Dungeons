@@ -54,7 +54,6 @@ $C.@PageOverlay {
           Padding: (Top: 10);
 
           Button #RaceButtonElf {
-            Id: "btn_race_elf";
             Anchor: (Width: 240, Height: 72);
             LayoutMode: Left;
             Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
@@ -93,7 +92,6 @@ $C.@PageOverlay {
           }
 
           Button #RaceButtonOrc {
-            Id: "btn_race_orc";
             Anchor: (Width: 240, Height: 72, Top: 10);
             LayoutMode: Left;
             Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
@@ -132,7 +130,6 @@ $C.@PageOverlay {
           }
 
           Button #RaceButtonHuman {
-            Id: "btn_race_human";
             Anchor: (Width: 240, Height: 72, Top: 10);
             LayoutMode: Left;
             Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
@@ -274,7 +271,6 @@ $C.@PageOverlay {
       Background: (Color: #0d0d0d(0.9));
 
       Button #ConfirmSelection {
-        Id: "btn_confirm_race";
         Anchor: (Width: 220, Height: 48);
         Padding: (Left: 14, Right: 14, Top: 8, Bottom: 8);
         Background: (Color: #2d7b4c(0.9));
@@ -290,7 +286,6 @@ $C.@PageOverlay {
             RenderBold: true,
             TextColor: #ffffff
           );
-          Alignment: Center;
         }
       }
     }
