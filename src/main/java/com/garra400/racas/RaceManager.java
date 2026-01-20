@@ -69,8 +69,50 @@ public final class RaceManager {
 
         stats.update();
 
-        // Marca que o jogador ja escolheu uma raca (persistente durante sessao do servidor)
-        RaceMod.markRaceAsSelected(playerRef);
+        // No need to mark race as selected - persistence is automatic via stat modifiers
+    }
+
+    /**
+     * Checks if player already has race modifiers applied.
+     * This method checks if the player's stats differ from base values,
+     * indicating that race modifiers have been applied.
+     * 
+     * This persists across server restarts and player reconnections because
+     * stat modifiers are saved with the player data.
+     * 
+     * @param player Player to check
+     * @return true if race modifiers are already applied, false otherwise
+     */
+    public static boolean hasRaceApplied(Player player) {
+        if (player == null) {
+            return false;
+        }
+        
+        try {
+            EntityStatMap stats = EntityStatsModule.get(player);
+            if (stats == null) {
+                return false;
+            }
+
+            // Check if Health or Stamina max values differ from base (100 and 10)
+            // If they do, it means race modifiers are applied
+            var healthStat = stats.get("Health");
+            var staminaStat = stats.get("Stamina");
+            
+            // Base values: Health=100, Stamina=10
+            // If max differs from base, race is applied
+            if (healthStat != null && healthStat.getMax() != 100f) {
+                return true; // Orc or Human applied
+            }
+            
+            if (staminaStat != null && staminaStat.getMax() != 10f) {
+                return true; // Elf or Human applied
+            }
+            
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private static void applyBonus(EntityStatMap stats, String statId, float amount) {
