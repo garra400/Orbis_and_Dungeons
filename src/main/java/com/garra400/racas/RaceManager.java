@@ -26,18 +26,18 @@ public final class RaceManager {
     private static final Map<Race, Map<String, Float>> RACE_BONUSES = Map.of(
             Race.ELF, Map.of(
                     "Health", 0f,
-                    "Stamina", 8f,
-                    "Mana", 15f
+                    "Stamina", 0f,
+                    "Mana", 100f     // Dobro de mana
             ),
             Race.ORC, Map.of(
-                    "Health", 25f,
-                    "Stamina", 12f,
-                    "Mana", -8f
+                    "Health", 100f,  // Dobro de vida
+                    "Stamina", 0f,
+                    "Mana", 0f
             ),
             Race.HUMAN, Map.of(
-                    "Health", 12f,
-                    "Stamina", 10f,
-                    "Mana", 6f
+                    "Health", 0f,
+                    "Stamina", 100f, // Dobro de stamina
+                    "Mana", 0f
             )
     );
 

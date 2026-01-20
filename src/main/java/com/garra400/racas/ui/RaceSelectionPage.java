@@ -84,41 +84,41 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         Map<String, RaceDetails> tmp = new LinkedHashMap<>();
         tmp.put("elf", new RaceDetails(
                 "Elfo",
-                "Agil e preciso, otima sinergia com arco e magia leve.",
+                "Mestre da magia arcana com reservas inesgotaveis.",
                 List.of(
-                        "Corpse Smell: Undead e Phantoms ficam neutros.",
-                        "Keen Senses: bonus de critico a distancia.",
-                        "Wind Step: ligeiro bonus de velocidade ao pular."
+                        "Arcane Reservoir: +100 Mana maxima.",
+                        "Magicborn: Dobro de poder magico disponivel.",
+                        "Endless Energy: Nunca fica sem mana em batalha."
                 ),
                 List.of(
-                        "Fragile Frame: recebe mais dano fisico.",
-                        "Lean Appetite: fome drena um pouco mais rapido."
+                        "Frail Body: Vida e stamina base normais.",
+                        "Magic Dependent: Depende fortemente de mana."
                 )
         ));
         tmp.put("orc", new RaceDetails(
                 "Orc",
-                "Forca bruta, frontliner que aguenta pancada.",
+                "Tanque imbativel, sobrevive onde outros cairiam.",
                 List.of(
-                        "Brutal Strikes: dano corpo-a-corpo aumentado.",
-                        "Thick Skin: resistencia fisica melhorada.",
-                        "Battle Hunger: cura leve ao eliminar inimigos."
+                        "Iron Constitution: +100 Vida maxima.",
+                        "Unbreakable: Dobro de vida para suportar batalhas.",
+                        "Last Stand: Aguenta dano extremo antes de cair."
                 ),
                 List.of(
-                        "Blunt Mind: penalidade leve em magia.",
-                        "Hearty Diet: consome mais comida por tick."
+                        "Brute Force: Stamina e mana base normais.",
+                        "Slow Recovery: Regeneracao de mana nula."
                 )
         ));
         tmp.put("human", new RaceDetails(
                 "Humano",
-                "Versatil e equilibrado, se adapta a qualquer funcao.",
+                "Guerreiro incansavel, nunca para de lutar.",
                 List.of(
-                        "Adaptive: bonus moderado em todas as proficiencias.",
-                        "Industrious: pequenas reducoes de tempo de craft.",
-                        "Diplomatic: melhor relacao com NPCs neutros."
+                        "Tireless: +100 Stamina maxima.",
+                        "Endurance Master: Dobro de stamina para acoes.",
+                        "Marathon Runner: Corre, luta e age sem parar."
                 ),
                 List.of(
-                        "Average Body: sem resistencias naturais.",
-                        "No Specialty: bonus menores que racas focadas."
+                        "Balanced: Vida e mana base normais.",
+                        "No Magic Boost: Poder magico limitado."
                 )
         ));
         RACES = Collections.unmodifiableMap(tmp);
