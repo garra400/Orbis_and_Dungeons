@@ -1,0 +1,13 @@
+@PageOverlay {
+  LayoutMode: Overlay;
+  Padding: (Full: 0);
+}
+
+@DecoratedContainer {
+  LayoutMode: Top;
+  Padding: (Full: 0);
+  BorderWidth: 2;
+  BorderColor: #404040;
+  Background: (Color: #1a1a1a(0.95));
+  CornerRadius: 8;
+}

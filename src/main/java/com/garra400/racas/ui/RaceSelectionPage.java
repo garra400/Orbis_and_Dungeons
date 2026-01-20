@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pagina de selecao de racas. Usa o arquivo common/ui/custom/pages/race_selection.ui.
- * Mantem a tela travada (CantClose) ate clicar em "Selecionar".
+ * Pagina de selecao de racas.
  */
 public class RaceSelectionPage extends CustomUIPage {
 
@@ -94,20 +93,19 @@ public class RaceSelectionPage extends CustomUIPage {
 
     @Override
     public void build(Ref<EntityStore> playerStoreRef, UICommandBuilder command, UIEventBuilder events, Store<EntityStore> store) {
-        // 1. Carrega o arquivo .ui (caminho relativo a custom/pages/)
-        // Lookup padrão do Hytale: "race_selection" => common/ui/custom/pages/race_selection.ui
-        command.append("Custom/Pages/race_selection");
+        // Carrega o arquivo .ui
+        command.append("Pages/race_selection.ui");
 
-        // 2. Vincula cliques
-        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonElf",
+        // Vincula cliques
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonElf",
                 EventData.of("event", "select").append("race", "elf"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonOrc",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonOrc",
                 EventData.of("event", "select").append("race", "orc"), true);
-        events.addEventBinding(CustomUIEventBindingType.Activating, "RaceButtonHuman",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#RaceButtonHuman",
                 EventData.of("event", "select").append("race", "human"), true);
 
         // Confirmar
-        events.addEventBinding(CustomUIEventBindingType.Activating, "ConfirmSelection",
+        events.addEventBinding(CustomUIEventBindingType.Activating, "#ConfirmSelection",
                 EventData.of("event", "confirm").append("race", selectedRace), true);
 
         applySelection(command, selectedRace);
@@ -157,17 +155,17 @@ public class RaceSelectionPage extends CustomUIPage {
 
     private void applySelection(UICommandBuilder command, String raceKey) {
         RaceDetails details = RACES.getOrDefault(raceKey, RACES.get("human"));
-        command.set("SelectedRaceName.Text", details.title);
-        command.set("SelectedRaceTagline.Text", details.tagline);
+        command.set("#SelectedRaceName.Text", details.title);
+        command.set("#SelectedRaceTagline.Text", details.tagline);
 
         // Positivos
-        setListLine(command, "PositiveLine1", details.positives, 0);
-        setListLine(command, "PositiveLine2", details.positives, 1);
-        setListLine(command, "PositiveLine3", details.positives, 2);
+        setListLine(command, "#PositiveLine1", details.positives, 0);
+        setListLine(command, "#PositiveLine2", details.positives, 1);
+        setListLine(command, "#PositiveLine3", details.positives, 2);
 
         // Negativos
-        setListLine(command, "NegativeLine1", details.negatives, 0);
-        setListLine(command, "NegativeLine2", details.negatives, 1);
+        setListLine(command, "#NegativeLine1", details.negatives, 0);
+        setListLine(command, "#NegativeLine2", details.negatives, 1);
     }
 
     private void setListLine(UICommandBuilder command, String elementId, List<String> lines, int index) {
