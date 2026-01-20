@@ -73,6 +73,9 @@ tasks.named('processResources') {
 }
 
 processResources {
+    // Mantem o caminho padrao da UI em maiusculas (Common/UI/Custom/Pages)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
     doLast {
         def jsonMinifyStart = System.currentTimeMillis()
         def jsonMinified = 0
