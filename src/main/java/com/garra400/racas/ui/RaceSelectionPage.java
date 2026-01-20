@@ -197,7 +197,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
             // Apply the selected race
             try {
                 RaceManager.Race race = RaceManager.fromKey(selectedRace);
-                RaceManager.applyRace(player, race);
+                RaceManager.applyRace(player, race, playerRef);
             } catch (Exception e) {
                 // Silently fail
             }

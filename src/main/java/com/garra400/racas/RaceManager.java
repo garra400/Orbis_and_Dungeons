@@ -5,6 +5,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatsModule;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 import java.util.Locale;
 import java.util.Map;
@@ -55,7 +56,7 @@ public final class RaceManager {
         };
     }
 
-    public static void applyRace(Player player, Race race) {
+    public static void applyRace(Player player, Race race, PlayerRef playerRef) {
         if (player == null || race == null) {
             return;
         }
@@ -70,6 +71,9 @@ public final class RaceManager {
         applyBonus(stats, "Mana", bonuses.getOrDefault("Mana", 0f));
 
         stats.update();
+
+        // Marca que o jogador ja escolheu uma raca (persistente durante sessao do servidor)
+        RaceMod.markRaceAsSelected(playerRef);
     }
 
     private static void applyBonus(EntityStatMap stats, String statId, float amount) {
