@@ -84,41 +84,41 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         Map<String, RaceDetails> tmp = new LinkedHashMap<>();
         tmp.put("elf", new RaceDetails(
                 "Elfo",
-                "Mestre da magia arcana com reservas inesgotaveis.",
+                "Agil e incansavel, move-se como o vento.",
                 List.of(
-                        "Arcane Reservoir: +100 Mana maxima.",
-                        "Magicborn: Dobro de poder magico disponivel.",
-                        "Endless Energy: Nunca fica sem mana em batalha."
+                        "Swift Movement: +15 Stamina maxima.",
+                        "Tireless: 2.5x mais stamina que outras racas.",
+                        "Never Stops: Corre, pula e age sem parar."
                 ),
                 List.of(
-                        "Frail Body: Vida e stamina base normais.",
-                        "Magic Dependent: Depende fortemente de mana."
+                        "Frail Body: Vida base de 100 (sem bonus).",
+                        "Glass Cannon: Depende de mobilidade para sobreviver."
                 )
         ));
         tmp.put("orc", new RaceDetails(
                 "Orc",
-                "Tanque imbativel, sobrevive onde outros cairiam.",
+                "Tanque de guerra, resiste ao impossivel.",
                 List.of(
-                        "Iron Constitution: +100 Vida maxima.",
-                        "Unbreakable: Dobro de vida para suportar batalhas.",
-                        "Last Stand: Aguenta dano extremo antes de cair."
+                        "Iron Skin: +75 Vida maxima.",
+                        "Tank Build: 175 vida base (igual melhor armadura).",
+                        "Unstoppable: Com armadura chega a 250 vida total."
                 ),
                 List.of(
-                        "Brute Force: Stamina e mana base normais.",
-                        "Slow Recovery: Regeneracao de mana nula."
+                        "Heavy Build: Stamina base de 10 (sem bonus).",
+                        "Slow to Act: Menos acoes consecutivas possiveis."
                 )
         ));
         tmp.put("human", new RaceDetails(
                 "Humano",
-                "Guerreiro incansavel, nunca para de lutar.",
+                "Versatil e equilibrado, se adapta a tudo.",
                 List.of(
-                        "Tireless: +100 Stamina maxima.",
-                        "Endurance Master: Dobro de stamina para acoes.",
-                        "Marathon Runner: Corre, luta e age sem parar."
+                        "Balanced Build: +35 Vida e +5 Stamina.",
+                        "Adaptable: 135 vida e 15 stamina.",
+                        "All-Rounder: Bom em todas as situacoes."
                 ),
                 List.of(
-                        "Balanced: Vida e mana base normais.",
-                        "No Magic Boost: Poder magico limitado."
+                        "Jack of All Trades: Nao se destaca em nada.",
+                        "Average: Menos especializado que outras racas."
                 )
         ));
         RACES = Collections.unmodifiableMap(tmp);

@@ -24,21 +24,19 @@ public final class RaceManager {
     private static final String MOD_PREFIX = "race_mod_";
 
     // Valores de bonus (MAX) por statId.
+    // Base do jogo: Vida=100, Stamina=10 (vida max com armadura=175)
     private static final Map<Race, Map<String, Float>> RACE_BONUSES = Map.of(
             Race.ELF, Map.of(
                     "Health", 0f,
-                    "Stamina", 0f,
-                    "Mana", 100f     // Dobro de mana
+                    "Stamina", 15f   // 10 -> 25 (2.5x stamina base)
             ),
             Race.ORC, Map.of(
-                    "Health", 100f,  // Dobro de vida
-                    "Stamina", 0f,
-                    "Mana", 0f
+                    "Health", 75f,   // 100 -> 175 (igual armadura melhor)
+                    "Stamina", 0f
             ),
             Race.HUMAN, Map.of(
-                    "Health", 0f,
-                    "Stamina", 100f, // Dobro de stamina
-                    "Mana", 0f
+                    "Health", 35f,   // 100 -> 135 (intermediario)
+                    "Stamina", 5f    // 10 -> 15 (intermediario)
             )
     );
 
@@ -68,7 +66,6 @@ public final class RaceManager {
         Map<String, Float> bonuses = RACE_BONUSES.getOrDefault(race, Map.of());
         applyBonus(stats, "Health", bonuses.getOrDefault("Health", 0f));
         applyBonus(stats, "Stamina", bonuses.getOrDefault("Stamina", 0f));
-        applyBonus(stats, "Mana", bonuses.getOrDefault("Mana", 0f));
 
         stats.update();
 
