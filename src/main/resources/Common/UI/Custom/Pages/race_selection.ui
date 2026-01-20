@@ -1,0 +1,298 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {
+
+  $C.@DecoratedContainer {
+    Anchor: (Width: 1100, Height: 720);
+
+    Group #Header {
+      LayoutMode: Top;
+      Padding: (Full: 14);
+      Background: (Color: #0d0d0d(0.85));
+
+      Label #Title {
+        @Text = "Selecione sua Raca";
+        Style: (
+          FontSize: 22,
+          RenderBold: true,
+          TextColor: #ffffff
+        );
+      }
+
+      Label #Subtitle {
+        @Text = "Escolha uma raca para continuar. A tela so fecha depois da selecao.";
+        Anchor: (Top: 6);
+        Style: (
+          FontSize: 14,
+          TextColor: #c0c0c0
+        );
+      }
+    }
+
+    Group #Content {
+      LayoutMode: Left;
+      Padding: (Left: 14, Right: 14, Top: 12, Bottom: 12);
+
+      Group #RaceListPanel {
+        Anchor: (Width: 280, Height: 560);
+        LayoutMode: Top;
+        Padding: (Full: 12);
+        Background: (Color: #1a1a1a(0.75));
+
+        Label #RaceListTitle {
+          @Text = "Racas Disponiveis";
+          Style: (
+            FontSize: 18,
+            RenderBold: true,
+            TextColor: #ffffff
+          );
+        }
+
+        Group #RaceButtons {
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Padding: (Top: 10);
+
+          Button #RaceButtonElf {
+            Id: "btn_race_elf";
+            Anchor: (Width: 240, Height: 72);
+            LayoutMode: Left;
+            Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
+            Background: (Color: #0f0f0f(0.9));
+            Style: (
+              Hovered: (Background: #1d1d1d(0.9)),
+              Pressed: (Background: #2b2b2b(0.95))
+            );
+
+            Sprite #RaceIcon {
+              Anchor: (Width: 48, Height: 48, Right: 12);
+              TexturePath: "Common/Icons/ItemsGenerated/Weapon_Bow_Mithril.png";
+              Frame: (Width: 64, Height: 64, PerRow: 1, Count: 1);
+            }
+
+            Group {
+              LayoutMode: Top;
+
+              Label #RaceName {
+                @Text = "Elfo";
+                Style: (
+                  FontSize: 16,
+                  RenderBold: true,
+                  TextColor: #ffffff
+                );
+              }
+
+              Label #RaceShort {
+                @Text = "Agil, preciso e afinado com magia leve.";
+                Style: (
+                  FontSize: 13,
+                  TextColor: #c0c0c0
+                );
+              }
+            }
+          }
+
+          Button #RaceButtonOrc {
+            Id: "btn_race_orc";
+            Anchor: (Width: 240, Height: 72, Top: 10);
+            LayoutMode: Left;
+            Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
+            Background: (Color: #0f0f0f(0.9));
+            Style: (
+              Hovered: (Background: #1d1d1d(0.9)),
+              Pressed: (Background: #2b2b2b(0.95))
+            );
+
+            Sprite #RaceIcon {
+              Anchor: (Width: 48, Height: 48, Right: 12);
+              TexturePath: "Common/Icons/ItemsGenerated/Weapon_Battleaxe_Mithril.png";
+              Frame: (Width: 64, Height: 64, PerRow: 1, Count: 1);
+            }
+
+            Group {
+              LayoutMode: Top;
+
+              Label #RaceName {
+                @Text = "Orc";
+                Style: (
+                  FontSize: 16,
+                  RenderBold: true,
+                  TextColor: #ffffff
+                );
+              }
+
+              Label #RaceShort {
+                @Text = "Forca bruta, alto dano corpo-a-corpo.";
+                Style: (
+                  FontSize: 13,
+                  TextColor: #c0c0c0
+                );
+              }
+            }
+          }
+
+          Button #RaceButtonHuman {
+            Id: "btn_race_human";
+            Anchor: (Width: 240, Height: 72, Top: 10);
+            LayoutMode: Left;
+            Padding: (Left: 10, Right: 10, Top: 10, Bottom: 10);
+            Background: (Color: #0f0f0f(0.9));
+            Style: (
+              Hovered: (Background: #1d1d1d(0.9)),
+              Pressed: (Background: #2b2b2b(0.95))
+            );
+
+            Sprite #RaceIcon {
+              Anchor: (Width: 48, Height: 48, Right: 12);
+              TexturePath: "Common/Icons/ItemsGenerated/Armor_Mithril_Head.png";
+              Frame: (Width: 64, Height: 64, PerRow: 1, Count: 1);
+            }
+
+            Group {
+              LayoutMode: Top;
+
+              Label #RaceName {
+                @Text = "Humano";
+                Style: (
+                  FontSize: 16,
+                  RenderBold: true,
+                  TextColor: #ffffff
+                );
+              }
+
+              Label #RaceShort {
+                @Text = "Equilibrado, bom para qualquer build.";
+                Style: (
+                  FontSize: 13,
+                  TextColor: #c0c0c0
+                );
+              }
+            }
+          }
+        }
+      }
+
+      Group #RaceDetailPanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Padding: (Full: 16);
+        Background: (Color: #0f0f0f(0.85));
+
+        Label #SelectedRaceName {
+          @Text = "Selecione uma raca";
+          Style: (
+            FontSize: 22,
+            RenderBold: true,
+            TextColor: #ffffff
+          );
+        }
+
+        Label #SelectedRaceTagline {
+          @Text = "Clique em uma raca a esquerda para ver detalhes.";
+          Anchor: (Top: 4);
+          Style: (
+            FontSize: 14,
+            TextColor: #c0c0c0
+          );
+        }
+
+        Group #RaceDetails {
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Anchor: (Top: 12);
+          Background: (Color: #161616(0.9));
+          Padding: (Full: 14);
+
+          Label #PositivesTitle {
+            @Text = "Positives";
+            Style: (
+              FontSize: 18,
+              RenderBold: true,
+              TextColor: #5cc45c
+            );
+          }
+
+          Label #PositiveLine1 {
+            @Text = "Corpse Smell: All undead mobs & Phantoms are neutral to you.";
+            Anchor: (Top: 6);
+            Style: (
+              FontSize: 14,
+              TextColor: #c2ffc2
+            );
+          }
+
+          Label #PositiveLine2 {
+            @Text = "Diseased Body: Chance to inflict Weakness to target on contact.";
+            Style: (
+              FontSize: 14,
+              TextColor: #c2ffc2
+            );
+          }
+
+          Label #PositiveLine3 {
+            @Text = "Lifesteal: Killing non-undead mobs with melee heals you.";
+            Style: (
+              FontSize: 14,
+              TextColor: #c2ffc2
+            );
+          }
+
+          Label #NegativesTitle {
+            @Text = "Negatives";
+            Anchor: (Top: 10);
+            Style: (
+              FontSize: 18,
+              RenderBold: true,
+              TextColor: #d75f5f
+            );
+          }
+
+          Label #NegativeLine1 {
+            @Text = "Bottomless Stomach: Food fills half the regular amount of hunger.";
+            Anchor: (Top: 6);
+            Style: (
+              FontSize: 14,
+              TextColor: #ffc2c2
+            );
+          }
+
+          Label #NegativeLine2 {
+            @Text = "Fragile Body: Poison, Wither, and Fire hurt you twice as much.";
+            Style: (
+              FontSize: 14,
+              TextColor: #ffc2c2
+            );
+          }
+        }
+      }
+    }
+
+    Group #Footer {
+      Anchor: (Height: 70, Bottom: 0, Left: 0, Right: 0);
+      Padding: (Full: 14);
+      LayoutMode: Right;
+      Background: (Color: #0d0d0d(0.9));
+
+      Button #ConfirmSelection {
+        Id: "btn_confirm_race";
+        Anchor: (Width: 220, Height: 48);
+        Padding: (Left: 14, Right: 14, Top: 8, Bottom: 8);
+        Background: (Color: #2d7b4c(0.9));
+        Style: (
+          Hovered: (Background: #34985a(0.9)),
+          Pressed: (Background: #2c6d46(0.95))
+        );
+
+        Label {
+          @Text = "Selecionar";
+          Style: (
+            FontSize: 16,
+            RenderBold: true,
+            TextColor: #ffffff
+          );
+          Alignment: Center;
+        }
+      }
+    }
+  }
+}
