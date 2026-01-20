@@ -94,8 +94,9 @@ public class RaceSelectionPage extends CustomUIPage {
 
     @Override
     public void build(Ref<EntityStore> playerStoreRef, UICommandBuilder command, UIEventBuilder events, Store<EntityStore> store) {
-        // 1. Carrega o arquivo .ui (caminho relativo a 'custom/pages/')
-        command.append("race_selection");
+        // 1. Carrega o arquivo .ui (caminho relativo a Common/UI/)
+        // Use caminho explicito para evitar problema de path em lookup.
+        command.append("Custom/Pages/race_selection");
 
         // 2. Vincula cliques
         events.addEventBinding(CustomUIEventBindingType.Activating, "btn_race_elf",
