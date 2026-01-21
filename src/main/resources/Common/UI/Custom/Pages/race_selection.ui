@@ -5,7 +5,7 @@ Group {
   Padding: (Full: 20);
 
   Label #Title {
-    Text: "Selecione sua Raca";
+    Text: "Select Your Race";
     Anchor: (Height: 40);
     Style: (
       FontSize: 24,
@@ -15,7 +15,7 @@ Group {
   }
 
   Label #Subtitle {
-    Text: "Escolha uma raca para continuar.";
+    Text: "Choose a race to continue.";
     Anchor: (Height: 25);
     Style: (
       FontSize: 14,
@@ -43,7 +43,7 @@ Group {
         Background: #0f0f0f(0.9);
 
         Label {
-          Text: "ELFO";
+          Text: "ELF";
           Anchor: (Height: 20);
           Style: (
             FontSize: 16,
@@ -53,7 +53,7 @@ Group {
         }
 
         Label {
-          Text: "Agil e preciso";
+          Text: "Agile and precise";
           Anchor: (Height: 18);
           Style: (
             FontSize: 12,
@@ -83,7 +83,7 @@ Group {
         }
 
         Label {
-          Text: "Forca bruta";
+          Text: "Brute force";
           Anchor: (Height: 18);
           Style: (
             FontSize: 12,
@@ -103,7 +103,7 @@ Group {
         Background: #0f0f0f(0.9);
 
         Label {
-          Text: "HUMANO";
+          Text: "HUMAN";
           Anchor: (Height: 20);
           Style: (
             FontSize: 16,
@@ -113,7 +113,7 @@ Group {
         }
 
         Label {
-          Text: "Versatil e equilibrado";
+          Text: "Versatile and balanced";
           Anchor: (Height: 18);
           Style: (
             FontSize: 12,
@@ -130,7 +130,7 @@ Group {
       Background: #0f0f0f(0.85);
 
       Label #SelectedRaceName {
-        Text: "Elfo";
+        Text: "Elf";
         Anchor: (Height: 30);
         Style: (
           FontSize: 20,
@@ -140,7 +140,7 @@ Group {
       }
 
       Label #SelectedRaceTagline {
-        Text: "Agil e preciso, otima sinergia com arco e magia leve.";
+        Text: "Agile and tireless, moves like the wind.";
         Anchor: (Height: 22);
         Style: (
           FontSize: 13,
@@ -153,7 +153,7 @@ Group {
       }
 
       Label {
-        Text: "POSITIVOS";
+        Text: "STRENGTHS";
         Anchor: (Height: 22);
         Style: (
           FontSize: 14,
@@ -194,7 +194,7 @@ Group {
       }
 
       Label {
-        Text: "NEGATIVOS";
+        Text: "WEAKNESSES";
         Anchor: (Height: 22);
         Style: (
           FontSize: 14,
@@ -233,7 +233,7 @@ Group {
     Background: #2d7b4c;
 
     Label {
-      Text: "Confirmar Selecao";
+      Text: "Confirm Selection";
       Style: (
         FontSize: 16,
         RenderBold: true,
