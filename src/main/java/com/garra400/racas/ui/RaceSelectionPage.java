@@ -95,13 +95,26 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
                         "Glass Cannon: Relies on mobility to survive."
                 )
         ));
+        tmp.put("berserker", new RaceDetails(
+                "Berserker",
+                "Frenzied axe wielder.",
+                List.of(
+                        "Savage Strikes: +50% damage with Weapon_Axe and Weapon_Battleaxe.",
+                        "Lean Build: No base stat bonus (Health 100, Stamina 10).",
+                        "Specialization: Bonus only while axes are equipped."
+                ),
+                List.of(
+                        "No defensive boost: same durability as base.",
+                        "No stamina/health bonus beyond base values."
+                )
+        ));
         tmp.put("orc", new RaceDetails(
                 "Orc",
                 "War tank, resists the impossible.",
                 List.of(
-                        "Iron Skin: +75 Max Health.",
-                        "Tank Build: 175 base health (same as best armor).",
-                        "Unstoppable: Reaches 250 total health with armor."
+                        "Iron Skin: +75 Max Health (175 base).",
+                        "Tank Build: Pairs well with heavy armor.",
+                        "Steady Defense: No weapon-specific damage bonus."
                 ),
                 List.of(
                         "Heavy Build: Base stamina of 10 (no bonus).",
@@ -160,6 +173,11 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
                 CustomUIEventBindingType.Activating,
                 "#RaceButtonOrc",
                 new EventData().append("Action", "select").append("Race", "orc")
+        );
+        evt.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                "#RaceButtonBerserker",
+                new EventData().append("Action", "select").append("Race", "berserker")
         );
         evt.addEventBinding(
                 CustomUIEventBindingType.Activating,

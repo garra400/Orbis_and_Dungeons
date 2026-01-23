@@ -96,6 +96,36 @@ Group {
         Anchor: (Height: 10);
       }
 
+      Button #RaceButtonBerserker {
+        Anchor: (Width: 280, Height: 80);
+        LayoutMode: Top;
+        Padding: (Full: 12);
+        Background: #0f0f0f(0.9);
+
+        Label {
+          Text: "BERSERKER";
+          Anchor: (Height: 20);
+          Style: (
+            FontSize: 16,
+            RenderBold: true,
+            TextColor: #ffffff
+          );
+        }
+
+        Label {
+          Text: "Frenzied axe wielder";
+          Anchor: (Height: 18);
+          Style: (
+            FontSize: 12,
+            TextColor: #c0c0c0
+          );
+        }
+      }
+
+      Group {
+        Anchor: (Height: 10);
+      }
+
       Button #RaceButtonHuman {
         Anchor: (Width: 280, Height: 80);
         LayoutMode: Top;

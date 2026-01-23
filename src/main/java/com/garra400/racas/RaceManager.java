@@ -10,6 +10,7 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
 
 import java.util.Locale;
 import java.util.Map;
@@ -23,7 +24,8 @@ public final class RaceManager {
     public enum Race {
         ELF,
         ORC,
-        HUMAN
+        HUMAN,
+        BERSERKER
     }
 
     private static final String MOD_PREFIX = "race_mod_";
@@ -48,7 +50,19 @@ public final class RaceManager {
             Race.HUMAN, Map.of(
                     "Health", 35f,   // 100 -> 135 (intermediario)
                     "Stamina", 5f    // 10 -> 15 (intermediario)
+            ),
+            Race.BERSERKER, Map.of(
+                    "Health", 0f,
+                    "Stamina", 0f    // foco em dano, sem bônus base
             )
+    );
+
+    // Regras de multiplicador de dano por arma para cada raça.
+    private static final Map<Race, WeaponRule[]> RACE_WEAPON_RULES = Map.of(
+            Race.BERSERKER, new WeaponRule[]{
+                    new WeaponRule(1.5f, "Weapon_Battleaxe", "weapon_battleaxe", "Weapon_Axe", "weapon_axe"),
+                    new WeaponRule(1.5f, "battleaxe", "axe") // fallback amplo
+            }
     );
 
     private RaceManager() {
@@ -71,6 +85,7 @@ public final class RaceManager {
         return switch (key.toLowerCase(Locale.ROOT)) {
             case "elf" -> Race.ELF;
             case "orc" -> Race.ORC;
+            case "berserker" -> Race.BERSERKER;
             default -> Race.HUMAN;
         };
     }
@@ -79,7 +94,7 @@ public final class RaceManager {
         if (player == null || race == null) {
             return;
         }
-        
+
         // Apply stat bonuses
         EntityStatMap stats = EntityStatsModule.get(player); // deprecated in API, mas funcional
         if (stats == null) {
@@ -96,6 +111,34 @@ public final class RaceManager {
         if (playerRef != null) {
             saveRaceSelection(playerRef, race);
         }
+    }
+
+    /**
+     * Resolve a player's race enum using persistent data (and fallback).
+     */
+    public static Race resolveRace(Player player) {
+        return fromKey(getPlayerRace(player));
+    }
+
+    /**
+     * Retorna o multiplicador de dano por arma para a raça atual do jogador.
+     * Se não houver regra, retorna 1.0f.
+     */
+    public static float getWeaponDamageMultiplier(Player player, ItemStack weapon) {
+        if (player == null || weapon == null || weapon.isEmpty()) {
+            return 1.0f;
+        }
+        Race race = resolveRace(player);
+        WeaponRule[] rules = RACE_WEAPON_RULES.get(race);
+        if (rules == null || rules.length == 0) {
+            return 1.0f;
+        }
+        for (WeaponRule rule : rules) {
+            if (rule.matches(weapon)) {
+                return rule.multiplier();
+            }
+        }
+        return 1.0f;
     }
 
     /**
@@ -434,5 +477,39 @@ public final class RaceManager {
         }
         Modifier modifier = new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, amount);
         stats.putModifier(stat.getIndex(), modKey, modifier);
+    }
+
+    private record WeaponRule(float multiplier, String... idFragments) {
+        boolean matches(ItemStack stack) {
+            String itemId = stack.getItemId();
+            if (itemId != null && containsAny(itemId)) {
+                return true;
+            }
+            var item = stack.getItem();
+            if (item != null) {
+                String configId = item.getId();
+                if (configId != null && containsAny(configId)) {
+                    return true;
+                }
+                String anim = item.getPlayerAnimationsId();
+                if (anim != null && containsAny(anim)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private boolean containsAny(String value) {
+            String lower = value.toLowerCase(Locale.ROOT);
+            for (String frag : idFragments) {
+                if (frag == null || frag.isEmpty()) {
+                    continue;
+                }
+                if (value.contains(frag) || lower.contains(frag.toLowerCase(Locale.ROOT))) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
