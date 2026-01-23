@@ -2,6 +2,82 @@
 
 ---
 
+## Version 2026.1.23 - Persistent File-Based Cache System & Berserker Class
+
+### 🎉 What's New
+
+#### New Berserker Class
+- **Berserker Race Added**: Aggressive melee-focused class with enhanced weapon damage
+- **Weapon Damage System**: New per-class weapon damage modifiers system
+  - Each class can have custom damage multipliers for different weapon types
+  - Berserker excels in close-quarters combat with bonus melee damage
+
+#### Modular Race System Architecture
+- **Flexible Attribute System**: New modular parameter system for defining races
+  - **Health** (Vida): Customizable max health per class
+  - **Stamina**: Customizable stamina pool per class
+  - **Breath** (Fôlego): Customizable breath/oxygen capacity per class
+  - **Mana**: Customizable mana pool for magical abilities per class
+  - **Weapon Damage**: Per-class weapon damage modifiers
+  
+- **Easy Class Addition**: Simplified process for adding new races/classes
+  - Define attributes through clear parameters
+  - Automatic application of stat modifiers
+  - Consistent behavior across all classes
+
+- **Future-Ready**: Architecture prepared for upcoming features
+  - Resistance/Defense modifiers (coming soon)
+  - Expandable to additional stat types
+
+#### File-Based Race Cache
+- **Added `RaceStorage` System**: New file-based caching layer for race data persistence
+- **Dual Persistence Strategy**: Race data is now stored in both component system AND file cache
+- **Improved Reliability**: File cache (`race_cache.txt`) acts as backup and faster lookup mechanism
+- **Cross-Session Support**: Race data persists even if components fail to load
+
+### 🐛 Bug Fixes
+
+#### Fixed: Race Selection Prompt on Portal Travel
+**Issue:** Players were prompted to select their race again when entering portals or traveling between dimensions.
+
+**Root Cause:** The game temporarily unloads and reloads player entities during portal transitions, causing the race tracking system to lose the player's selection.
+
+**Solution:** The new file-based storage system (`RaceStorage`) maintains race data independently of entity lifecycle, preventing re-selection prompts during portal travel.
+
+### 🔧 Technical Improvements
+
+#### Storage System
+- **`RaceStorage.java` Class**: New storage manager with concurrent thread-safe operations
+  - Stores player UUID, username, and race ID
+  - Format: `uuid|username|raceId` (one entry per line)
+  - Automatic save on every race change
+  - Load on mod initialization
+  
+- **Enhanced `RaceManager`**:
+  - Now saves to both component system and file storage
+  - Fallback mechanism: checks file storage if component data is unavailable
+  - Better resilience against data loss
+  - Portal travel now preserves race selection
+
+- **Updated `RaceMod`**:
+  - Initializes `RaceStorage` on startup with mod data directory
+  - Ensures storage directory exists before operations
+
+#### Storage Location
+- File: `<mod_data_directory>/race_cache.txt`
+- Thread-safe concurrent access
+- UTF-8 encoding for proper character support
+
+#### Fallback Chain
+When loading a player's race, the system now checks:
+1. Memory cache (fastest)
+2. Component system (primary persistence)
+3. **File storage (new fallback layer)**
+
+This triple-redundancy ensures race selections are never lost during portal travel or server restarts.
+
+---
+
 ## Version 2026.1.21 - Component System & Admin Commands
 
 ### 🎉 What's New

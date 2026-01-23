@@ -3,6 +3,7 @@ package com.garra400.racas;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.RaceStorage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -14,7 +15,6 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifie
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +54,15 @@ public final class RaceManager {
             saveRaceSelection(playerRef, raceId, true);
         }
         cacheRace(player, raceId);
+        String username = null;
+        try {
+            PlayerRef ref = player.getPlayerRef();
+            if (ref != null) {
+                username = ref.getUsername();
+            }
+        } catch (Exception ignored) {
+        }
+        RaceStorage.put(player.getUuid(), username, raceId);
     }
 
     /**
@@ -126,6 +135,12 @@ public final class RaceManager {
                 saveRaceSelection(playerRef, cached, false);
                 return cached;
             }
+            String storageRace = RaceStorage.get(playerRef.getUuid());
+            if (storageRace != null) {
+                cacheRace(playerRef, storageRace);
+                saveRaceSelection(playerRef, storageRace, false);
+                return storageRace;
+            }
             // Não inferir automaticamente se não há seleção persistida.
             return null;
         } catch (Exception e) {
@@ -156,13 +171,23 @@ public final class RaceManager {
     }
 
     public static String getPlayerRaceInfo(Player player) {
+        String raceId = getPlayerRace(player);
         RaceData data = getPlayerRaceData(player);
-        if (data == null || !data.hasSelectedRace()) {
+        return formatRaceInfo(raceId, data);
+    }
+
+    public static String formatRaceInfo(String raceId, RaceData data) {
+        if (raceId == null) {
             return "No race selected";
         }
 
-        RaceDefinition def = RaceRegistry.get(data.getSelectedRace());
+        RaceDefinition def = RaceRegistry.get(raceId);
         String raceName = def.displayName();
+
+        if (data == null || !data.hasSelectedRace() || data.getSelectionTimestampLong() == 0L) {
+            return raceName;
+        }
+
         String date = data.getSelectionDateFormatted();
         long days = data.getDaysSinceSelection();
 
@@ -175,6 +200,31 @@ public final class RaceManager {
         } else {
             return raceName + " (selected on " + date + ")";
         }
+    }
+
+    public static String getStoredRace(PlayerRef playerRef) {
+        if (playerRef == null) {
+            return null;
+        }
+        String cached = cacheLookup(playerRef);
+        if (cached != null) {
+            return cached;
+        }
+        String storageRace = RaceStorage.get(playerRef.getUuid());
+        if (storageRace == null && playerRef.getUsername() != null) {
+            storageRace = RaceStorage.getByName(playerRef.getUsername());
+        }
+        if (storageRace != null) {
+            cacheRace(playerRef, storageRace);
+        }
+        return storageRace;
+    }
+
+    public static String getStoredRaceByName(String username) {
+        if (username == null) {
+            return null;
+        }
+        return RaceStorage.getByName(username);
     }
 
     public static boolean resetRace(Player player, PlayerRef playerRef) {
@@ -203,6 +253,14 @@ public final class RaceManager {
                 RaceData emptyData = new RaceData();
                 holder.putComponent(raceDataType, (RaceData) emptyData.clone());
             }
+            try {
+                UUID uuid = player.getUuid();
+                if (uuid != null) {
+                    LAST_KNOWN_RACE.remove(uuid);
+                    RaceStorage.remove(uuid);
+                }
+            } catch (Exception ignored) {
+            }
 
             return true;
         } catch (Exception e) {
@@ -228,6 +286,18 @@ public final class RaceManager {
         try {
             if (player != null && raceId != null) {
                 UUID uuid = player.getUuid();
+                if (uuid != null) {
+                    LAST_KNOWN_RACE.put(uuid, raceId);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void cacheRace(PlayerRef ref, String raceId) {
+        try {
+            if (ref != null && raceId != null) {
+                UUID uuid = ref.getUuid();
                 if (uuid != null) {
                     LAST_KNOWN_RACE.put(uuid, raceId);
                 }

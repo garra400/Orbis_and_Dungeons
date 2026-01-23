@@ -4,6 +4,7 @@ import com.garra400.racas.commands.RaceInfoCommand;
 import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.storage.RaceStorage;
 import com.garra400.racas.systems.RaceDamageBoostSystem;
 import com.garra400.racas.ui.RaceSelectionPage;
 import com.hypixel.hytale.component.ComponentType;
@@ -36,6 +37,9 @@ public class RaceMod extends JavaPlugin {
 
     @Override
     protected void start() {
+        // Init storage for race cache
+        RaceStorage.init(getDataDirectory());
+
         // Register the RaceData component with Hytale's persistence system
         raceDataType = getEntityStoreRegistry().registerComponent(
             RaceData.class,      // Component class

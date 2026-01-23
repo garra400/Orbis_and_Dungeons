@@ -1,7 +1,6 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
-import com.garra400.racas.RaceMod;
 import com.garra400.racas.components.RaceData;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -42,62 +41,58 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world
     ) {
-        // Check if targeting another player
-        String targetPlayerName = playerArg.get(ctx);
-        PlayerRef targetRef;
-        Player targetPlayer;
-        
-        if (targetPlayerName == null || targetPlayerName.isEmpty()) {
-            // Self-targeting
+        String targetNameArg = playerArg.get(ctx);
+        PlayerRef targetRef = null;
+        Player targetPlayer = null;
+        String displayName;
+        RaceData raceData = null;
+
+        if (targetNameArg == null || targetNameArg.isEmpty()) {
             targetRef = playerRef;
             targetPlayer = store.getComponent(ref, Player.getComponentType());
-            if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Error: Could not get player data"));
-                return;
-            }
+            displayName = targetRef != null ? targetRef.getUsername() : "you";
         } else {
-            // Target another player
-            targetRef = Universe.get().getPlayerByUsername(targetPlayerName, NameMatching.EXACT_IGNORE_CASE);
-            if (targetRef == null) {
-                ctx.sendMessage(Message.raw("Player not found: " + targetPlayerName));
-                return;
-            }
-            
-            // Get target player entity
-            UUID worldUuid = targetRef.getWorldUuid();
-            if (worldUuid == null) {
-                ctx.sendMessage(Message.raw("Target player is not in a world"));
-                return;
-            }
-            
-            UUID uuid = targetRef.getUuid();
-            targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(uuid);
-            if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Target player is not online"));
-                return;
-            }
-        }
-        
-        try {
-            // Get race info
-            String info = RaceManager.getPlayerRaceInfo(targetPlayer);
-            String playerName = targetRef.getUsername();
-            
-            ctx.sendMessage(Message.raw("=== Race Info for " + playerName + " ==="));
-            ctx.sendMessage(Message.raw(info));
-            
-            // Show timestamp if available
-            if (targetRef.getHolder() != null) {
-                RaceData data = targetRef.getHolder().getComponent(RaceMod.getRaceDataType());
-                if (data != null && data.getSelectionTimestamp() != null && !data.getSelectionTimestamp().isEmpty()) {
-                    ctx.sendMessage(Message.raw("Selected: " + data.getSelectionDateFormatted()));
-                    long days = data.getDaysSinceSelection();
-                    if (days >= 0) {
-                        ctx.sendMessage(Message.raw("Days ago: " + days));
-                    }
+            targetRef = Universe.get().getPlayerByUsername(targetNameArg, NameMatching.EXACT_IGNORE_CASE);
+            displayName = targetRef != null ? targetRef.getUsername() : targetNameArg;
+            if (targetRef != null) {
+                UUID worldUuid = targetRef.getWorldUuid();
+                if (worldUuid != null) {
+                    UUID uuid = targetRef.getUuid();
+                    targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(uuid);
                 }
             }
-            
+        }
+
+        try {
+            String raceId = null;
+            if (targetPlayer != null) {
+                raceId = RaceManager.getPlayerRace(targetPlayer);
+                raceData = RaceManager.getPlayerRaceData(targetPlayer);
+            }
+            if (raceId == null && targetRef != null) {
+                raceId = RaceManager.getStoredRace(targetRef);
+            }
+            if (raceId == null) {
+                raceId = RaceManager.getStoredRaceByName(displayName);
+            }
+
+            if (raceId == null) {
+                ctx.sendMessage(Message.raw("No race recorded for " + displayName + "."));
+                return;
+            }
+
+            String info = RaceManager.formatRaceInfo(raceId, raceData);
+            ctx.sendMessage(Message.raw("=== Race Info for " + displayName + " ==="));
+            ctx.sendMessage(Message.raw(info));
+
+            if (raceData != null && raceData.getSelectionTimestamp() != null && !raceData.getSelectionTimestamp().isEmpty()) {
+                ctx.sendMessage(Message.raw("Selected: " + raceData.getSelectionDateFormatted()));
+                long days = raceData.getDaysSinceSelection();
+                if (days >= 0) {
+                    ctx.sendMessage(Message.raw("Days ago: " + days));
+                }
+            }
+
             ctx.sendMessage(Message.raw("=============================="));
         } catch (Exception e) {
             ctx.sendMessage(Message.raw("Error getting race info: " + e.getMessage()));
