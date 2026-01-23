@@ -72,6 +72,22 @@ Each class is specialized for a specific weapon type with unique playstyles:
 - Base races (Human/Elf/Orc): High stats, no weapon bonuses, versatile
 - Specialized classes: Lower stats, weapon bonuses, require specific playstyle
 
+### 🖥️ User Interface Improvements
+
+#### Paginated Race Selection
+- **Dynamic Pagination System**: Race selection UI now supports multiple pages
+  - 4 classes per page for cleaner visual presentation
+  - Previous/Next navigation buttons for page switching
+  - Page indicator shows current page (e.g., "Page 1 / 2")
+- **Fixed UI Elements**: Page counter position locked to prevent text shifting
+- **Dynamic Button Generation**: Buttons are generated with unique IDs for proper event handling
+- **Scalable Design**: UI automatically adapts to number of available races
+
+### 🐛 Bug Fixes
+- Fixed Elf class descriptions that incorrectly mentioned infinite stamina
+- Corrected UI event binding system to use unique button identifiers
+- Fixed page info label positioning to prevent movement during navigation
+
 ---
 
 ## Version 2026.1.23-hotfix - Race Info Access
