@@ -15,6 +15,9 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Race management using modular RaceDefinition files.
@@ -26,6 +29,7 @@ public final class RaceManager {
 
     private static final String MOD_PREFIX = "race_mod_";
     private static ComponentType<EntityStore, RaceData> raceDataType;
+    private static final Map<UUID, String> LAST_KNOWN_RACE = new ConcurrentHashMap<>();
 
     private RaceManager() {}
 
@@ -45,21 +49,30 @@ public final class RaceManager {
         if (player == null || raceId == null) {
             return;
         }
-        RaceDefinition race = RaceRegistry.get(raceId);
+        applyRaceStats(player, raceId);
+        if (playerRef != null) {
+            saveRaceSelection(playerRef, raceId, true);
+        }
+        cacheRace(player, raceId);
+    }
 
-        EntityStatMap stats = EntityStatsModule.get(player); // deprecated in API, mas funcional
+    /**
+     * Reaplica apenas os bônus de stats sem alterar o timestamp salvo.
+     */
+    public static void applyRaceStats(Player player, String raceId) {
+        if (player == null || raceId == null) {
+            return;
+        }
+        RaceDefinition race = RaceRegistry.get(raceId);
+        EntityStatMap stats = EntityStatsModule.get(player); // deprecated em API, mas funcional
         if (stats != null) {
             applyBonus(stats, "Health", race.healthBonus());
             applyBonus(stats, "Stamina", race.staminaBonus());
             stats.update();
         }
-
-        if (playerRef != null) {
-            saveRaceSelection(playerRef, race.id());
-        }
     }
 
-    private static void saveRaceSelection(PlayerRef playerRef, String raceId) {
+    private static void saveRaceSelection(PlayerRef playerRef, String raceId, boolean updateTimestamp) {
         if (playerRef == null || raceId == null || raceDataType == null) {
             return;
         }
@@ -72,7 +85,9 @@ public final class RaceManager {
 
             RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
             raceData.setSelectedRace(raceId);
-            raceData.setSelectionTimestampLong(System.currentTimeMillis());
+            if (updateTimestamp) {
+                raceData.setSelectionTimestampLong(System.currentTimeMillis());
+            }
             holder.putComponent(raceDataType, (RaceData) raceData.clone());
         } catch (Exception e) {
             e.printStackTrace();
@@ -90,29 +105,31 @@ public final class RaceManager {
 
         PlayerRef playerRef = player.getPlayerRef();
         if (playerRef == null) {
+            // fallback para cache em memória
+            String cached = cacheLookup(player);
+            if (cached != null) {
+                return cached;
+            }
             return inferRaceFromStats(player);
         }
 
         try {
             Holder holder = playerRef.getHolder();
-            if (holder == null) {
-                return inferRaceFromStats(player);
+            if (holder != null) {
+                RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
+                if (raceData != null && raceData.hasSelectedRace()) {
+                    return raceData.getSelectedRace();
+                }
             }
-
-            RaceData raceData = (RaceData) holder.getComponent(raceDataType);
-            if (raceData != null && raceData.hasSelectedRace()) {
-                return raceData.getSelectedRace();
+            String cached = cacheLookup(playerRef);
+            if (cached != null) {
+                saveRaceSelection(playerRef, cached, false);
+                return cached;
             }
-
-            String inferred = inferRaceFromStats(player);
-            if (inferred != null) {
-                migrateToComponentSystem(playerRef, inferred);
-                return inferred;
-            }
-
+            // Não inferir automaticamente se não há seleção persistida.
             return null;
         } catch (Exception e) {
-            return inferRaceFromStats(player);
+            return null;
         }
     }
 
@@ -132,7 +149,7 @@ public final class RaceManager {
                 return null;
             }
 
-            return (RaceData) holder.getComponent(raceDataType);
+            return (RaceData) holder.ensureAndGetComponent(raceDataType);
         } catch (Exception e) {
             return null;
         }
@@ -199,8 +216,52 @@ public final class RaceManager {
             return 1.0f;
         }
         String raceId = getPlayerRace(player);
+        return getWeaponDamageMultiplier(raceId, weapon);
+    }
+
+    public static float getWeaponDamageMultiplier(String raceId, ItemStack weapon) {
         RaceDefinition race = RaceRegistry.get(raceId);
         return race.resolveWeaponMultiplier(weapon);
+    }
+
+    private static void cacheRace(Player player, String raceId) {
+        try {
+            if (player != null && raceId != null) {
+                UUID uuid = player.getUuid();
+                if (uuid != null) {
+                    LAST_KNOWN_RACE.put(uuid, raceId);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static String cacheLookup(Player player) {
+        if (player == null) {
+            return null;
+        }
+        try {
+            UUID uuid = player.getUuid();
+            if (uuid != null) {
+                return LAST_KNOWN_RACE.get(uuid);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private static String cacheLookup(PlayerRef ref) {
+        if (ref == null) {
+            return null;
+        }
+        try {
+            UUID uuid = ref.getUuid();
+            if (uuid != null) {
+                return LAST_KNOWN_RACE.get(uuid);
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     // --- Helpers ---

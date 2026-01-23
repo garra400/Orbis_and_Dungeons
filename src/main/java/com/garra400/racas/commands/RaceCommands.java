@@ -266,7 +266,7 @@ public class RaceCommands extends AbstractCommandCollection {
                     context.sendMessage(Message.raw("§e" + info));
 
                     // Show timestamp if available
-                    if (targetRef.getHolder() != null) {
+                    if (RaceMod.getRaceDataType() != null && targetRef.getHolder() != null) {
                         RaceData data = targetRef.getHolder().getComponent(RaceMod.getRaceDataType());
                         if (data != null && data.getSelectionTimestamp() != null && !data.getSelectionTimestamp().isEmpty()) {
                             context.sendMessage(Message.raw("§7Selected: " + data.getSelectionDateFormatted()));
