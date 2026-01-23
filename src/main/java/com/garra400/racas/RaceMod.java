@@ -4,6 +4,7 @@ import com.garra400.racas.commands.RaceInfoCommand;
 import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.systems.OrcDamageBoostSystem;
 import com.garra400.racas.ui.RaceSelectionPage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.event.EventRegistry;
@@ -44,6 +45,9 @@ public class RaceMod extends JavaPlugin {
 
         // Pass component type to RaceManager so it can access/modify race data
         RaceManager.setRaceDataType(raceDataType);
+
+        // Damage: Orcs causam 1.5x com battleaxes/martelos
+        getEntityStoreRegistry().registerSystem(new OrcDamageBoostSystem());
 
         // Register simple player commands (like Basic UIs approach)
         CommandRegistry commands = getCommandRegistry();

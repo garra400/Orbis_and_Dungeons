@@ -1,6 +1,39 @@
-# Orbis and Dungeons - Version 2026.1.20 Release Notes
+# Orbis and Dungeons - Changelog
 
-## 🎉 What's New
+---
+
+## Version 2026.1.21 - Component System & Admin Commands
+
+### 🎉 What's New
+
+#### Component-Based Architecture
+- **Migrated to Component System**: Race data is now stored using Hytale's persistent component system (`RaceData` component)
+- **Persistent Storage**: Race selection, timestamp, and player data now persist across server restarts
+- **Better Performance**: Eliminated memory-based tracking in favor of entity components
+
+#### New Admin Commands
+Added three new operator commands for race management:
+
+**`/racetrade <race> [--player <username>]`**
+- Change your race or another player's race
+- Arguments: `HUMAN`, `ELF`, or `ORC`
+- Example: `/racetrade elf --player Steve`
+
+**`/racereset [--player <username>]`**
+- Reset race selection (player must reconnect to choose again)
+- Example: `/racereset --player Alex`
+
+**`/raceinfo [--player <username>]`**
+- Display detailed race information including selection date
+- Example: `/raceinfo --player Notch`
+
+All commands support the optional `--player` argument for operators to manage other players' races.
+
+---
+
+## Version 2026.1.20 Release Notes
+
+### 🎉 What's New
 
 This release focuses on **fixing critical multiplayer issues** and improving overall stability and user experience.
 
