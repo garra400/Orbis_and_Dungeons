@@ -2,6 +2,89 @@
 
 ---
 
+## Version 2026.1.24 - Weapon-Specialized Classes
+
+### 🎉 What's New
+
+#### Four New Combat Classes
+Each class is specialized for a specific weapon type with unique playstyles:
+
+**⚔️ Swordsman** - *Balanced Warrior*
+- **Health:** 110 HP (+10)
+- **Stamina:** 15 (+5)
+- **Weapon Bonus:** +20% damage with swords
+- **Playstyle:** Jack-of-all-trades with sword specialization
+
+**🛡️ Crusader** - *Mace Specialist*
+- **Health:** 130 HP (+30)
+- **Stamina:** 10 (+0)
+- **Weapon Bonus:** +15% damage with maces and hammers
+- **Playstyle:** Tanky frontline fighter with no mobility
+
+**🗡️ Assassin** - *Dagger Master*
+- **Health:** 80 HP (-20)
+- **Stamina:** 20 (+10)
+- **Weapon Bonus:** +35% damage with daggers
+- **Playstyle:** Glass cannon with high burst damage
+
+**🏹 Archer** - *Ranged Specialist*
+- **Health:** 65 HP (-35)
+- **Stamina:** 18 (+8)
+- **Weapon Bonus:** +40% damage with bows and crossbows
+- **Playstyle:** High damage at range but very fragile
+
+### ⚖️ Balance Changes
+
+#### Berserker (Rebalanced)
+- **Health:** 75 HP (-25)
+- **Stamina:** 18 (+8)
+- **Weapon Bonus:** +30% damage with axes
+- **Impact:** High damage output but sacrifices survivability
+
+### 📊 Class Comparison Table
+
+| Class      | Health | Stamina | Weapon Type      | Damage Bonus | Total Power* |
+|------------|--------|---------|------------------|--------------|--------------|
+| Orc        | 175    | 10      | None             | 0%           | 185          |
+| Human      | 135    | 15      | None             | 0%           | 150          |
+| Crusader   | 130    | 10      | Mace/Hammer      | +15%         | 155          |
+| Elf        | 100    | 25      | None             | 0%           | 125          |
+| Swordsman  | 110    | 15      | Sword            | +20%         | 145          |
+| Assassin   | 80     | 20      | Dagger           | +35%         | 135          |
+| Berserker  | 75     | 18      | Axe              | +30%         | 123          |
+| Archer     | 65     | 18      | Bow/Crossbow     | +40%         | 123          |
+
+*Total Power = HP + Stamina + (Damage% × 100) - rough approximation
+
+### 🎮 Design Philosophy
+
+**Trade-offs Over Pure Power:**
+- Specialized classes trade stats for damage bonuses
+- Human/Elf/Orc remain competitive for players who prefer stats
+- No "best" class - each has clear strengths and weaknesses
+
+**Weapon Specialization:**
+- Damage bonuses are modest (+15% to +40%)
+- Lower stats balance the offensive bonuses
+- Glass cannons (Assassin/Archer) have highest damage but lowest survivability
+
+**Class Identity:**
+- Base races (Human/Elf/Orc): High stats, no weapon bonuses, versatile
+- Specialized classes: Lower stats, weapon bonuses, require specific playstyle
+
+---
+
+## Version 2026.1.23-hotfix - Race Info Access
+
+### 🐛 Bug Fixes
+- `raceinfo` now reads the cache/file (`race_cache.txt`) so it shows a player’s race even if the target is offline or their component isn’t loaded.
+
+### 🔧 Changes
+- `/raceinfo` is now open to all players (no OP/permission required).
+
+
+---
+
 ## Version 2026.1.23 - Persistent File-Based Cache System & Berserker Class
 
 ### 🎉 What's New

@@ -32,6 +32,12 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
         super("raceinfo", "Show race information", false);
         this.playerArg = withOptionalArg("player", "Target player (self if omitted)", ArgTypes.STRING);
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        // Libera o comando para todos (sem perm node/OP)
+        return false;
+    }
     
     @Override
     protected void execute(

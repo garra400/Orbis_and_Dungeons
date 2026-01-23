@@ -20,27 +20,29 @@ public class BerserkerRace implements RaceDefinition {
 
     @Override
     public float healthBonus() {
-        return 0f;
+        return -25f;
     }
 
     @Override
     public float staminaBonus() {
-        return 0f;
+        return 8f;
     }
 
     @Override
     public List<String> strengths() {
         return List.of(
-                "Savage Strikes: +50% damage with Weapon_Axe and Weapon_Battleaxe.",
-                "Specialization: Bonus only while axes are equipped."
+                "Savage Strikes: +30% damage with axes and battleaxes.",
+                "Aggressive: +8 Stamina for sustained combat.",
+                "High Risk, High Reward: Strong offense, weak defense."
         );
     }
 
     @Override
     public List<String> weaknesses() {
         return List.of(
-                "No defensive boost: base health 100.",
-                "No stamina bonus: base stamina 10."
+                "Reckless: -25 Health (only 75 HP total).",
+                "All-In Fighter: Must kill before being killed.",
+                "Axe Dependent: Bonus only with axes equipped."
         );
     }
 
