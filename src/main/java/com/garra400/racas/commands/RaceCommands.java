@@ -3,6 +3,8 @@ package com.garra400.racas.commands;
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.RaceMod;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.races.RaceDefinition;
+import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
@@ -17,6 +19,7 @@ import com.hypixel.hytale.server.core.universe.Universe;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * Race command collection: /race with subcommands
@@ -68,11 +71,9 @@ public class RaceCommands extends AbstractCommandCollection {
                 try {
                     // Get race argument (required)
                     String raceName = raceArg.get(context);
-                    RaceManager.Race race;
-                    try {
-                        race = RaceManager.Race.valueOf(raceName.toUpperCase());
-                    } catch (IllegalArgumentException e) {
-                        context.sendMessage(Message.raw("§cInvalid race: " + raceName + ". Valid: HUMAN, ELF, ORC"));
+                    String raceId = raceName != null ? raceName.toLowerCase() : null;
+                    if (!RaceRegistry.exists(raceId)) {
+                        context.sendMessage(Message.raw("§cInvalid race: " + raceName + ". Valid: " + listValid()));
                         return;
                     }
 
@@ -110,14 +111,14 @@ public class RaceCommands extends AbstractCommandCollection {
                     }
 
                     // Apply race
-                    RaceManager.applyRace(player, race, targetRef);
+                    RaceManager.applyRace(player, raceId, targetRef);
                     
                     // Send confirmation
                     if (playerName == null || playerName.isEmpty()) {
-                        context.sendMessage(Message.raw("§aYour race has been changed to " + race.name() + "!"));
+                        context.sendMessage(Message.raw("§aYour race has been changed to " + raceId + "!"));
                     } else {
-                        context.sendMessage(Message.raw("§aChanged " + targetRef.getUsername() + "'s race to " + race.name() + "!"));
-                        player.sendMessage(Message.raw("§eYour race has been changed to " + race.name() + " by an administrator."));
+                        context.sendMessage(Message.raw("§aChanged " + targetRef.getUsername() + "'s race to " + raceId + "!"));
+                        player.sendMessage(Message.raw("§eYour race has been changed to " + raceId + " by an administrator."));
                     }
                     
                 } catch (Exception e) {
@@ -283,5 +284,11 @@ public class RaceCommands extends AbstractCommandCollection {
                 }
             });
         }
+    }
+
+    private static String listValid() {
+        return RaceRegistry.all().stream()
+                .map(RaceDefinition::id)
+                .collect(Collectors.joining(", "));
     }
 }

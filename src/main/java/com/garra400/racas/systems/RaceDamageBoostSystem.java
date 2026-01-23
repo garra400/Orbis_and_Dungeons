@@ -7,7 +7,6 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.SystemGroup;
 import com.hypixel.hytale.component.query.Query;
-import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.entity.EntityUtils;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
@@ -17,10 +16,8 @@ import com.hypixel.hytale.server.core.modules.entity.damage.DamageEventSystem;
 import com.hypixel.hytale.server.core.modules.entity.damage.DamageModule;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import java.util.Locale;
-
 // Aplica multiplicadores de dano configurados por raça (ex.: Berserker com axes/battleaxes).
-public class OrcDamageBoostSystem extends DamageEventSystem {
+public class RaceDamageBoostSystem extends DamageEventSystem {
 
     private static final Query<EntityStore> QUERY = AllLegacyLivingEntityTypesQuery.INSTANCE;
 
@@ -70,40 +67,5 @@ public class OrcDamageBoostSystem extends DamageEventSystem {
         if (multiplier > 1.0f) {
             damage.setAmount(damage.getAmount() * multiplier);
         }
-    }
-
-    private boolean isAxeOrBattleAxe(ItemStack stack) {
-        Item item = stack.getItem();
-        if (item != null) {
-            String anim = item.getPlayerAnimationsId();
-            if (anim != null && (anim.equalsIgnoreCase("battleaxe") || anim.equalsIgnoreCase("axe"))) {
-                return true;
-            }
-
-            String itemConfigId = item.getId();
-            if (itemConfigId != null) {
-                // Case-sensitive first (ex: "Weapon_Battleaxe_Foo"), fallback para lowercase.
-                if (itemConfigId.contains("Weapon_Battleaxe") || itemConfigId.contains("Weapon_Axe")) {
-                    return true;
-                }
-                String idLower = itemConfigId.toLowerCase(Locale.ROOT);
-                if (idLower.contains("weapon_battleaxe") || idLower.contains("weapon_axe")) {
-                    return true;
-                }
-            }
-        }
-
-        String itemId = stack.getItemId();
-        if (itemId != null) {
-            if (itemId.contains("Weapon_Battleaxe") || itemId.contains("Weapon_Axe")) {
-                return true;
-            }
-            String normalized = itemId.toLowerCase(Locale.ROOT);
-            if (normalized.contains("weapon_battleaxe") || normalized.contains("weapon_axe")) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

@@ -1,6 +1,8 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.races.RaceDefinition;
+import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -18,6 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Command to change race: /racetrade <race> [--player <name>]
@@ -30,8 +33,8 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
     private final OptionalArg<String> playerArg;
     
     public RaceTradeCommand() {
-        super("racetrade", "Change race (HUMAN/ELF/ORC)", false);
-        this.raceArg = withRequiredArg("race", "Race name (HUMAN/ELF/ORC)", ArgTypes.STRING);
+        super("racetrade", "Change race", false);
+        this.raceArg = withRequiredArg("race", "Race name (" + listValid() + ")", ArgTypes.STRING);
         this.playerArg = withOptionalArg("player", "Target player (self if omitted)", ArgTypes.STRING);
     }
     
@@ -45,12 +48,10 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
     ) {
         // Get race argument
         String raceName = raceArg.get(ctx);
-        RaceManager.Race race;
-        try {
-            race = RaceManager.Race.valueOf(raceName.toUpperCase());
-        } catch (IllegalArgumentException e) {
+        String raceId = raceName != null ? raceName.toLowerCase() : null;
+        if (!RaceRegistry.exists(raceId)) {
             ctx.sendMessage(Message.raw("Invalid race: " + raceName));
-            ctx.sendMessage(Message.raw("Valid races: HUMAN, ELF, ORC"));
+            ctx.sendMessage(Message.raw("Valid races: " + listValid()));
             return;
         }
         
@@ -92,16 +93,20 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
         
         // Apply race
         try {
-            RaceManager.applyRace(targetPlayer, race, targetRef);
+            RaceManager.applyRace(targetPlayer, raceId, targetRef);
             
             if (targetPlayerName == null || targetPlayerName.isEmpty()) {
-                ctx.sendMessage(Message.raw("Your race has been changed to " + race.name() + "!"));
+                ctx.sendMessage(Message.raw("Your race has been changed to " + raceId + "!"));
             } else {
-                ctx.sendMessage(Message.raw("Changed " + targetRef.getUsername() + "'s race to " + race.name() + "!"));
-                targetPlayer.sendMessage(Message.raw("Your race has been changed to " + race.name() + " by an administrator."));
+                ctx.sendMessage(Message.raw("Changed " + targetRef.getUsername() + "'s race to " + raceId + "!"));
+                targetPlayer.sendMessage(Message.raw("Your race has been changed to " + raceId + " by an administrator."));
             }
         } catch (Exception e) {
             ctx.sendMessage(Message.raw("Error changing race: " + e.getMessage()));
         }
+    }
+
+    private String listValid() {
+        return RaceRegistry.all().stream().map(RaceDefinition::id).collect(Collectors.joining(", "));
     }
 }

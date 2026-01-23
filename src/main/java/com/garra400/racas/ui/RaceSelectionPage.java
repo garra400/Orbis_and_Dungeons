@@ -1,6 +1,8 @@
 package com.garra400.racas.ui;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.races.RaceDefinition;
+import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -65,78 +67,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
                 .build();
     }
 
-    private static final class RaceDetails {
-        final String title;
-        final String tagline;
-        final List<String> positives;
-        final List<String> negatives;
-
-        RaceDetails(String title, String tagline, List<String> positives, List<String> negatives) {
-            this.title = title;
-            this.tagline = tagline;
-            this.positives = positives;
-            this.negatives = negatives;
-        }
-    }
-
-    private static final Map<String, RaceDetails> RACES;
-    static {
-        Map<String, RaceDetails> tmp = new LinkedHashMap<>();
-        tmp.put("elf", new RaceDetails(
-                "Elf",
-                "Agile and tireless, moves like the wind.",
-                List.of(
-                        "Swift Movement: +15 Max Stamina.",
-                        "Tireless: 2.5x more stamina than other races.",
-                        "Never Stops: Runs, jumps and acts endlessly."
-                ),
-                List.of(
-                        "Frail Body: Base health of 100 (no bonus).",
-                        "Glass Cannon: Relies on mobility to survive."
-                )
-        ));
-        tmp.put("berserker", new RaceDetails(
-                "Berserker",
-                "Frenzied axe wielder.",
-                List.of(
-                        "Savage Strikes: +50% damage with Weapon_Axe and Weapon_Battleaxe.",
-                        "Lean Build: No base stat bonus (Health 100, Stamina 10).",
-                        "Specialization: Bonus only while axes are equipped."
-                ),
-                List.of(
-                        "No defensive boost: same durability as base.",
-                        "No stamina/health bonus beyond base values."
-                )
-        ));
-        tmp.put("orc", new RaceDetails(
-                "Orc",
-                "War tank, resists the impossible.",
-                List.of(
-                        "Iron Skin: +75 Max Health (175 base).",
-                        "Tank Build: Pairs well with heavy armor.",
-                        "Steady Defense: No weapon-specific damage bonus."
-                ),
-                List.of(
-                        "Heavy Build: Base stamina of 10 (no bonus).",
-                        "Slow to Act: Fewer consecutive actions possible."
-                )
-        ));
-        tmp.put("human", new RaceDetails(
-                "Human",
-                "Versatile and balanced, adapts to everything.",
-                List.of(
-                        "Balanced Build: +35 Health and +5 Stamina.",
-                        "Adaptable: 135 health and 15 stamina.",
-                        "All-Rounder: Good in all situations."
-                ),
-                List.of(
-                        "Jack of All Trades: Doesn't excel at anything.",
-                        "Average: Less specialized than other races."
-                )
-        ));
-        RACES = Collections.unmodifiableMap(tmp);
-    }
-
+    private static final Map<String, RaceDetails> RACES = buildRaceDetails();
     private final String selectedRace;
 
     public RaceSelectionPage(@Nonnull PlayerRef playerRef) {
@@ -204,7 +135,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         // Handle button clicks - FormPage pattern
         if ("select".equals(data.action)) {
             // Race selection button clicked
-            if (data.race != null && RACES.containsKey(data.race)) {
+            if (data.race != null && RaceRegistry.exists(data.race)) {
                 // Reopen directly with new selection (without closing first)
                 player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race));
             }
@@ -214,8 +145,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         if ("confirm".equals(data.action)) {
             // Apply the selected race
             try {
-                RaceManager.Race race = RaceManager.fromKey(selectedRace);
-                RaceManager.applyRace(player, race, playerRef);
+                RaceManager.applyRace(player, selectedRace, playerRef);
             } catch (Exception e) {
                 // Silently fail
             }
@@ -231,6 +161,9 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
      */
     private void applyRaceToUI(UICommandBuilder cmd, String raceKey) {
         RaceDetails details = RACES.getOrDefault(raceKey, RACES.get("human"));
+        if (details == null) {
+            details = RACES.get("human");
+        }
         
         cmd.set("#SelectedRaceName.Text", details.title);
         cmd.set("#SelectedRaceTagline.Text", details.tagline);
@@ -246,5 +179,20 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     private void setListLine(UICommandBuilder cmd, String elementId, List<String> lines, int index) {
         String value = index < lines.size() ? lines.get(index) : "";
         cmd.set(elementId + ".Text", value);
+    }
+
+    private record RaceDetails(String title, String tagline, List<String> positives, List<String> negatives) {}
+
+    private static Map<String, RaceDetails> buildRaceDetails() {
+        Map<String, RaceDetails> map = new LinkedHashMap<>();
+        for (RaceDefinition def : RaceRegistry.all()) {
+            map.put(def.id(), new RaceDetails(
+                    def.displayName(),
+                    def.tagline(),
+                    def.strengths(),
+                    def.weaknesses()
+            ));
+        }
+        return Collections.unmodifiableMap(map);
     }
 }
