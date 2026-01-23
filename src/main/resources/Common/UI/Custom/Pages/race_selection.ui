@@ -35,122 +35,6 @@ Group {
       Anchor: (Width: 280);
       LayoutMode: Top;
       Padding: (Right: 10);
-
-      Button #RaceButtonElf {
-        Anchor: (Width: 280, Height: 80);
-        LayoutMode: Top;
-        Padding: (Full: 12);
-        Background: #0f0f0f(0.9);
-
-        Label {
-          Text: "ELF";
-          Anchor: (Height: 20);
-          Style: (
-            FontSize: 16,
-            RenderBold: true,
-            TextColor: #ffffff
-          );
-        }
-
-        Label {
-          Text: "Agile and precise";
-          Anchor: (Height: 18);
-          Style: (
-            FontSize: 12,
-            TextColor: #c0c0c0
-          );
-        }
-      }
-
-      Group {
-        Anchor: (Height: 10);
-      }
-
-      Button #RaceButtonOrc {
-        Anchor: (Width: 280, Height: 80);
-        LayoutMode: Top;
-        Padding: (Full: 12);
-        Background: #0f0f0f(0.9);
-
-        Label {
-          Text: "ORC";
-          Anchor: (Height: 20);
-          Style: (
-            FontSize: 16,
-            RenderBold: true,
-            TextColor: #ffffff
-          );
-        }
-
-        Label {
-          Text: "Brute force";
-          Anchor: (Height: 18);
-          Style: (
-            FontSize: 12,
-            TextColor: #c0c0c0
-          );
-        }
-      }
-
-      Group {
-        Anchor: (Height: 10);
-      }
-
-      Button #RaceButtonBerserker {
-        Anchor: (Width: 280, Height: 80);
-        LayoutMode: Top;
-        Padding: (Full: 12);
-        Background: #0f0f0f(0.9);
-
-        Label {
-          Text: "BERSERKER";
-          Anchor: (Height: 20);
-          Style: (
-            FontSize: 16,
-            RenderBold: true,
-            TextColor: #ffffff
-          );
-        }
-
-        Label {
-          Text: "Frenzied axe wielder";
-          Anchor: (Height: 18);
-          Style: (
-            FontSize: 12,
-            TextColor: #c0c0c0
-          );
-        }
-      }
-
-      Group {
-        Anchor: (Height: 10);
-      }
-
-      Button #RaceButtonHuman {
-        Anchor: (Width: 280, Height: 80);
-        LayoutMode: Top;
-        Padding: (Full: 12);
-        Background: #0f0f0f(0.9);
-
-        Label {
-          Text: "HUMAN";
-          Anchor: (Height: 20);
-          Style: (
-            FontSize: 16,
-            RenderBold: true,
-            TextColor: #ffffff
-          );
-        }
-
-        Label {
-          Text: "Versatile and balanced";
-          Anchor: (Height: 18);
-          Style: (
-            FontSize: 12,
-            TextColor: #c0c0c0
-          );
-        }
-      }
     }
 
     Group #RaceDetailPanel {
@@ -257,20 +141,82 @@ Group {
     Anchor: (Height: 15);
   }
 
-  Button #ConfirmSelection {
-    Anchor: (Width: 200, Height: 50);
-    Padding: (Full: 12);
-    Background: #2d7b4c;
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 50);
 
-    Label {
-      Text: "Confirm Selection";
+    Button #PrevPageButton {
+      Anchor: (Width: 120, Height: 50);
+      Padding: (Full: 10);
+      Background: #3a3a3a;
+
+      Label {
+        Text: "< Previous";
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+
+    Group {
+      Anchor: (Width: 10);
+    }
+
+    Label #PageInfo {
+      Text: "Page 1 / 2";
+      Anchor: (Width: 100);
       Style: (
-        FontSize: 16,
-        RenderBold: true,
+        FontSize: 14,
         TextColor: #ffffff,
         HorizontalAlignment: Center,
         VerticalAlignment: Center
       );
+    }
+
+    Group {
+      Anchor: (Width: 10);
+    }
+
+    Button #NextPageButton {
+      Anchor: (Width: 120, Height: 50);
+      Padding: (Full: 10);
+      Background: #3a3a3a;
+
+      Label {
+        Text: "Next >";
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+
+    Group {
+      Anchor: (Width: 20);
+    }
+
+    Button #ConfirmSelection {
+      Anchor: (Width: 200, Height: 50);
+      Padding: (Full: 12);
+      Background: #2d7b4c;
+
+      Label {
+        Text: "Confirm Selection";
+        Style: (
+          FontSize: 16,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
     }
   }
 }

@@ -20,6 +20,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,29 +28,14 @@ import java.util.Map;
 
 /**
  * Race Selection Page - Interactive UI for choosing player race
- * 
- * Uses InteractiveCustomUIPage pattern (like Tutorial2/3 examples):
- * - EventData class with BuilderCodec for type-safe event handling
- * - No sendUpdate() calls - UI is set once in build()
- * - Events trigger handleDataEvent() which processes and closes page
+ * Uses pagination with 4 races per page
  */
 public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage.RaceEventData> {
 
-    /**
-     * EventData class - receives button click data
-     * 
-     * Fields:
-     * - action: Which button was clicked ("select" or "confirm")
-     * - race: Which race was selected ("elf", "orc", "human")
-     */
     public static class RaceEventData {
         public String action;
         public String race;
 
-        /**
-         * Codec for serializing/deserializing event data
-         * Pattern from Tutorial2Page.java - defines how to map JSON to fields
-         */
         public static final BuilderCodec<RaceEventData> CODEC = 
             BuilderCodec.builder(RaceEventData.class, RaceEventData::new)
                 .append(
@@ -68,16 +54,20 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     }
 
     private static final Map<String, RaceDetails> RACES = buildRaceDetails();
+    private static final List<String> ALL_RACE_IDS = List.of("elf", "orc", "berserker", "human", "swordsman", "crusader", "assassin", "archer");
+    private static final int RACES_PER_PAGE = 4;
+    
     private final String selectedRace;
+    private final int currentPage;
 
     public RaceSelectionPage(@Nonnull PlayerRef playerRef) {
-        this(playerRef, "elf");
+        this(playerRef, "elf", 0);
     }
 
-    public RaceSelectionPage(@Nonnull PlayerRef playerRef, String selectedRace) {
-        // Pass CODEC to parent - this enables typed event handling
+    public RaceSelectionPage(@Nonnull PlayerRef playerRef, String selectedRace, int page) {
         super(playerRef, CustomPageLifetime.CantClose, RaceEventData.CODEC);
         this.selectedRace = selectedRace;
+        this.currentPage = page;
     }
 
     @Override
@@ -87,41 +77,66 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
             @Nonnull UIEventBuilder evt,
             @Nonnull Store<EntityStore> store
     ) {
-        // Load UI layout
         cmd.append("Pages/race_selection.ui");
-
-        // Set initial values - Tutorial3Page pattern
         applyRaceToUI(cmd, selectedRace);
-
-        // Bind race selection buttons - Tutorial2Page pattern
-        // Each button sends action="select" + race="racename"
-        evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#RaceButtonElf",
-                new EventData().append("Action", "select").append("Race", "elf")
-        );
-        evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#RaceButtonOrc",
-                new EventData().append("Action", "select").append("Race", "orc")
-        );
-        evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#RaceButtonBerserker",
-                new EventData().append("Action", "select").append("Race", "berserker")
-        );
-        evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#RaceButtonHuman",
-                new EventData().append("Action", "select").append("Race", "human")
-        );
-
-        // Bind confirm button
-        evt.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                "#ConfirmSelection",
-                new EventData().append("Action", "confirm")
-        );
+        buildRaceButtons(cmd, evt);
+        
+        // Page navigation
+        int totalPages = (ALL_RACE_IDS.size() + RACES_PER_PAGE - 1) / RACES_PER_PAGE;
+        cmd.set("#PageInfo.Text", "Page " + (currentPage + 1) + " / " + totalPages);
+        cmd.set("#PrevPageButton.Visible", currentPage > 0);
+        cmd.set("#NextPageButton.Visible", currentPage < totalPages - 1);
+        
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#PrevPageButton", 
+                new EventData().append("Action", "prevpage"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#NextPageButton", 
+                new EventData().append("Action", "nextpage"));
+        evt.addEventBinding(CustomUIEventBindingType.Activating, "#ConfirmSelection", 
+                new EventData().append("Action", "confirm"));
+    }
+    
+    private void buildRaceButtons(UICommandBuilder cmd, UIEventBuilder evt) {
+        cmd.clear("#RaceListPanel");
+        cmd.appendInline("#RaceListPanel", "Group #RaceButtons { LayoutMode: Top; }");
+        
+        int start = currentPage * RACES_PER_PAGE;
+        int end = Math.min(start + RACES_PER_PAGE, ALL_RACE_IDS.size());
+        
+        for (int i = start; i < end; i++) {
+            String raceId = ALL_RACE_IDS.get(i);
+            RaceDetails details = RACES.get(raceId);
+            if (details == null) continue;
+            
+            int btnIndex = i - start;
+            String buttonId = "#RaceButton" + btnIndex;
+            
+            cmd.appendInline("#RaceButtons", String.format("""
+                Button %s {
+                  Anchor: (Width: 280, Height: 80);
+                  LayoutMode: Top;
+                  Padding: (Full: 10);
+                  Background: #0f0f0f(0.9);
+                  Label {
+                    Text: "%s";
+                    Anchor: (Height: 22);
+                    Style: (FontSize: 16, RenderBold: true, TextColor: #ffffff);
+                  }
+                  Label {
+                    Text: "%s";
+                    Anchor: (Height: 18);
+                    Style: (FontSize: 12, TextColor: #c0c0c0);
+                  }
+                }
+                """, buttonId, details.title.toUpperCase(), details.tagline));
+            
+            if (i < end - 1) {
+                cmd.appendInline("#RaceButtons", "Group { Anchor: (Height: 10); }");
+            }
+            
+            evt.addEventBinding(CustomUIEventBindingType.Activating, 
+                    buttonId, 
+                    new EventData().append("Action", "select").append("Race", raceId));
+        }
     }
 
     @Override
@@ -132,25 +147,29 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     ) {
         Player player = store.getComponent(ref, Player.getComponentType());
         
-        // Handle button clicks - FormPage pattern
         if ("select".equals(data.action)) {
-            // Race selection button clicked
             if (data.race != null && RaceRegistry.exists(data.race)) {
-                // Reopen directly with new selection (without closing first)
-                player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race));
+                player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race, currentPage));
             }
+            return;
+        }
+        
+        if ("prevpage".equals(data.action)) {
+            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage - 1));
+            return;
+        }
+        
+        if ("nextpage".equals(data.action)) {
+            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage + 1));
             return;
         }
 
         if ("confirm".equals(data.action)) {
-            // Apply the selected race
             try {
                 RaceManager.applyRace(player, selectedRace, playerRef);
             } catch (Exception e) {
                 // Silently fail
             }
-            
-            // Close the page - Tutorial2/3 pattern
             player.getPageManager().setPage(ref, store, Page.None);
         }
     }

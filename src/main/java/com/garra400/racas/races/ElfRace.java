@@ -32,9 +32,9 @@ public class ElfRace implements RaceDefinition {
     @Override
     public List<String> strengths() {
         return List.of(
-                "Swift Movement: +15 Max Stamina (25 total).",
-                "Tireless: 2.5x more stamina than base.",
-                "Mobility Focus: Great for sustained actions."
+                "Swift Movement: +15 Stamina (25 total).",
+                "High Mobility: More sprinting and dodging ability.",
+                "Agile Fighter: Great for hit-and-run tactics."
         );
     }
 
@@ -42,7 +42,7 @@ public class ElfRace implements RaceDefinition {
     public List<String> weaknesses() {
         return List.of(
                 "Frail Body: No extra health (100 base).",
-                "Relies on mobility to survive."
+                "Low Survivability: Must avoid direct combat."
         );
     }
 
