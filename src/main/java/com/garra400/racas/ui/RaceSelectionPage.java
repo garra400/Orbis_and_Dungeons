@@ -54,11 +54,11 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     }
 
     private static final Map<String, RaceDetails> RACES = buildRaceDetails();
-    private static final List<String> ALL_RACE_IDS = List.of("elf", "orc", "berserker", "human", "swordsman", "crusader", "assassin", "archer");
     private static final int RACES_PER_PAGE = 4;
     
     private final String selectedRace;
     private final int currentPage;
+    private final List<String> allRaceIds;
 
     public RaceSelectionPage(@Nonnull PlayerRef playerRef) {
         this(playerRef, "elf", 0);
@@ -68,6 +68,11 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         super(playerRef, CustomPageLifetime.CantClose, RaceEventData.CODEC);
         this.selectedRace = selectedRace;
         this.currentPage = page;
+        // Build race list dynamically from registry
+        this.allRaceIds = new ArrayList<>();
+        for (RaceDefinition race : RaceRegistry.all()) {
+            allRaceIds.add(race.id());
+        }
     }
 
     @Override
@@ -82,7 +87,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         buildRaceButtons(cmd, evt);
         
         // Page navigation
-        int totalPages = (ALL_RACE_IDS.size() + RACES_PER_PAGE - 1) / RACES_PER_PAGE;
+        int totalPages = (allRaceIds.size() + RACES_PER_PAGE - 1) / RACES_PER_PAGE;
         cmd.set("#PageInfo.Text", "Page " + (currentPage + 1) + " / " + totalPages);
         cmd.set("#PrevPageButton.Visible", currentPage > 0);
         cmd.set("#NextPageButton.Visible", currentPage < totalPages - 1);
@@ -100,10 +105,10 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         cmd.appendInline("#RaceListPanel", "Group #RaceButtons { LayoutMode: Top; }");
         
         int start = currentPage * RACES_PER_PAGE;
-        int end = Math.min(start + RACES_PER_PAGE, ALL_RACE_IDS.size());
+        int end = Math.min(start + RACES_PER_PAGE, allRaceIds.size());
         
         for (int i = start; i < end; i++) {
-            String raceId = ALL_RACE_IDS.get(i);
+            String raceId = allRaceIds.get(i);
             RaceDetails details = RACES.get(raceId);
             if (details == null) continue;
             

@@ -2,6 +2,130 @@
 
 ---
 
+## Version 2026.1.25 - JSON Update (The Most Requested Feature!)
+
+### 🎉 What's New - Community-Requested Feature!
+
+#### JSON-Based Race Configuration System
+**The feature you've all been asking for is finally here!** Players can now customize and balance races without touching any code!
+
+### 📝 How It Works
+
+#### File Location
+Your race configuration is stored in a JSON file at:
+```
+%APPDATA%\Roaming\Hytale\UserData\Saves\[World Name]\mods\OrbisAndDungeons_RaceSelection\races_config.json
+```
+
+Simply navigate to your world's `mods` folder and edit the `races_config.json` file!
+
+#### What You Can Do
+
+**1. Modify Existing Classes:**
+- Change health and stamina values
+- Adjust weapon damage multipliers
+- Edit class descriptions and taglines
+- Tweak strengths and weaknesses
+
+**2. Balance The Game Your Way:**
+- Find Berserker too weak? Buff his HP!
+- Think Archer is overpowered? Lower the damage bonus!
+- Want all classes to start with 150 HP? Go for it!
+- Create your own meta!
+
+**3. Add Your Own Custom Classes:**
+- Create completely new races with unique stats
+- Define custom weapon specializations
+- Design your own class identity
+- No coding required - just edit the JSON!
+
+### 🔧 How To Use
+
+#### Modifying Classes
+1. Open `races_config.json` in your world's mods folder
+2. Find the class you want to modify
+3. Change the values (HP, Stamina, damage multipliers, etc.)
+4. Save the file
+5. In-game, use `/racereload` command (or restart server)
+6. Done! Changes are applied instantly
+
+#### Adding New Classes
+1. Copy an existing race entry in the JSON
+2. Change the `"id"` to something unique (e.g., "necromancer")
+3. Modify all the stats and descriptions
+4. Save the file
+5. Use `/racereload` command
+6. Your new class appears in the selection UI automatically!
+
+### 📋 Example Configuration
+
+```json
+{
+  "id": "necromancer",
+  "displayName": "Necromancer",
+  "tagline": "Master of dark arts and death magic.",
+  "healthBonus": -10.0,
+  "staminaBonus": 12.0,
+  "strengths": [
+    "90 HP (-10)",
+    "22 Stamina (+12)",
+    "Magic specialist"
+  ],
+  "weaknesses": [
+    "Fragile in melee",
+    "Weak against holy damage"
+  ],
+  "weapons": [
+    {
+      "types": ["staff", "wand"],
+      "damageMultiplier": 1.25
+    }
+  ]
+}
+```
+
+### 🎮 Dynamic UI System
+
+**Fully Automatic:**
+- UI automatically detects all races from JSON
+- Pagination adjusts based on number of classes
+- 4 races per page, unlimited pages supported
+- No code changes needed - ever!
+
+**Scalability:**
+- 8 classes = 2 pages
+- 12 classes = 3 pages
+- 20 classes = 5 pages
+- Add as many as you want!
+
+### ⚡ New Commands
+
+#### `/racereload`
+- **Permission:** Requires OP/admin
+- **Function:** Reloads race configuration from JSON without server restart
+- **Usage:** After editing races_config.json, run this command to apply changes instantly
+- **Effect:** All race stats, bonuses, and descriptions update immediately
+
+### 🛠️ Technical Details
+
+**Configuration Format:**
+- `healthBonus`: Bonus HP relative to base (100 HP baseline)
+- `staminaBonus`: Bonus stamina relative to base (10 Stamina baseline)
+- `weapons`: Array of weapon type bonuses
+  - `types`: Keywords to match weapon IDs (e.g., "sword", "axe", "bow")
+  - `damageMultiplier`: Damage multiplier (1.0 = normal, 1.30 = +30%)
+
+**Auto-Generation:**
+- First run creates default config with all 8 current classes
+- Includes detailed stat information in strengths/weaknesses
+- Pretty-printed JSON for easy editing
+
+### 📚 Documentation
+
+For detailed configuration guide, see: `docs/RACE_CONFIGURATION.md`
+
+---
+
 ## Version 2026.1.24 - Weapon-Specialized Classes
 
 ### 🎉 What's New
