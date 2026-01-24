@@ -64,15 +64,15 @@ public final class RaceConfigLoader {
     private static void generateDefaultConfig() {
         configs.clear();
         
-        // Elf
+        // Elf - Base: 100 HP, 10 Stamina
         configs.put("elf", new RaceConfig(
             "elf",
             "Elf",
             "Agile and tireless, moves like the wind.",
             0f,
             15f,
-            List.of("High stamina pool", "Extended mobility", "Fast movement"),
-            List.of("Lower base health", "Requires stamina management"),
+            List.of("100 HP (base)", "25 Stamina (+15)", "Extended mobility"),
+            List.of("No health bonus", "Stamina-dependent playstyle"),
             List.of()
         ));
 
@@ -83,8 +83,8 @@ public final class RaceConfigLoader {
             "Brutish and relentless, crushes all opposition.",
             75f,
             0f,
-            List.of("Massive health pool", "High survivability", "Tank role"),
-            List.of("No stamina bonus", "Limited mobility"),
+            List.of("175 HP (+75)", "Massive health pool", "Tank role"),
+            List.of("10 Stamina (base)", "Limited mobility"),
             List.of()
         ));
 
@@ -95,7 +95,7 @@ public final class RaceConfigLoader {
             "Balanced and adaptable, jack of all trades.",
             35f,
             5f,
-            List.of("Well-rounded stats", "Good health pool", "Versatile playstyle"),
+            List.of("135 HP (+35)", "15 Stamina (+5)", "Well-rounded stats"),
             List.of("No specialization", "Average at everything"),
             List.of()
         ));
@@ -107,8 +107,8 @@ public final class RaceConfigLoader {
             "Reckless warrior who trades defense for raw power.",
             -25f,
             8f,
-            List.of("+30% axe damage", "High burst damage", "Aggressive playstyle"),
-            List.of("Very low health", "Glass cannon", "High risk gameplay"),
+            List.of("+30% axe damage", "18 Stamina (+8)", "High burst damage"),
+            List.of("75 HP (-25)", "Glass cannon", "High risk gameplay"),
             List.of(new RaceConfig.WeaponConfig(List.of("axe"), 1.30f))
         ));
 
@@ -119,7 +119,7 @@ public final class RaceConfigLoader {
             "Balanced warrior with sword mastery.",
             10f,
             5f,
-            List.of("+20% sword damage", "Balanced stats", "Reliable combatant"),
+            List.of("+20% sword damage", "110 HP (+10)", "15 Stamina (+5)"),
             List.of("Requires swords to shine", "No defensive bonuses"),
             List.of(new RaceConfig.WeaponConfig(List.of("sword"), 1.20f))
         ));
@@ -131,8 +131,8 @@ public final class RaceConfigLoader {
             "Armored champion wielding heavy weapons.",
             30f,
             0f,
-            List.of("+15% mace/hammer damage", "High health pool", "Frontline fighter"),
-            List.of("No mobility bonuses", "Slow playstyle"),
+            List.of("+15% mace/hammer damage", "130 HP (+30)", "Frontline fighter"),
+            List.of("10 Stamina (base)", "Slow playstyle"),
             List.of(new RaceConfig.WeaponConfig(List.of("mace", "hammer"), 1.15f))
         ));
 
@@ -143,8 +143,8 @@ public final class RaceConfigLoader {
             "Silent killer who strikes from the shadows.",
             -20f,
             10f,
-            List.of("+35% dagger damage", "High mobility", "Burst damage expert"),
-            List.of("Very fragile", "Requires stealth", "High skill floor"),
+            List.of("+35% dagger damage", "20 Stamina (+10)", "High mobility"),
+            List.of("80 HP (-20)", "Very fragile", "High skill floor"),
             List.of(new RaceConfig.WeaponConfig(List.of("dagger"), 1.35f))
         ));
 
@@ -155,8 +155,8 @@ public final class RaceConfigLoader {
             "Master of ranged combat, deadly from afar.",
             -35f,
             8f,
-            List.of("+40% bow/crossbow damage", "Ranged superiority", "High DPS"),
-            List.of("Extremely fragile", "Useless in melee", "Positioning critical"),
+            List.of("+40% bow/crossbow damage", "18 Stamina (+8)", "Ranged superiority"),
+            List.of("65 HP (-35)", "Extremely fragile", "Positioning critical"),
             List.of(new RaceConfig.WeaponConfig(List.of("bow", "crossbow"), 1.40f))
         ));
     }
