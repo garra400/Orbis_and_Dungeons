@@ -1,5 +1,8 @@
 package com.garra400.racas.races;
 
+import com.garra400.racas.storage.RaceConfig;
+import com.garra400.racas.storage.RaceConfigLoader;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -9,18 +12,32 @@ public final class RaceRegistry {
     private static final Map<String, RaceDefinition> DEFINITIONS = new LinkedHashMap<>();
     private static final String DEFAULT_ID = "human";
 
-    static {
-        register(new ElfRace());
-        register(new OrcRace());
-        register(new HumanRace());
-        register(new BerserkerRace());
-        register(new SwordsmanRace());
-        register(new CrusaderRace());
-        register(new AssassinRace());
-        register(new ArcherRace());
-    }
-
     private RaceRegistry() {}
+
+    /**
+     * Loads all races from JSON configuration.
+     * Should be called after RaceConfigLoader.init()
+     */
+    public static void loadFromConfig() {
+        DEFINITIONS.clear();
+        
+        for (RaceConfig config : RaceConfigLoader.getAllConfigs()) {
+            register(new ConfigurableRace(config));
+        }
+        
+        // Fallback to hardcoded races if config is empty
+        if (DEFINITIONS.isEmpty()) {
+            System.err.println("No races loaded from config, using fallback");
+            register(new ElfRace());
+            register(new OrcRace());
+            register(new HumanRace());
+            register(new BerserkerRace());
+            register(new SwordsmanRace());
+            register(new CrusaderRace());
+            register(new AssassinRace());
+            register(new ArcherRace());
+        }
+    }
 
     public static void register(RaceDefinition definition) {
         if (definition == null || definition.id() == null) {
@@ -46,5 +63,14 @@ public final class RaceRegistry {
 
     public static boolean exists(String id) {
         return id != null && DEFINITIONS.containsKey(id.toLowerCase());
+    }
+    
+    /**
+     * Reloads all races from the JSON configuration file.
+     * Useful for applying config changes without restart.
+     */
+    public static void reload() {
+        RaceConfigLoader.reload();
+        loadFromConfig();
     }
 }

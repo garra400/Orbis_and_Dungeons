@@ -1,9 +1,12 @@
 package com.garra400.racas;
 
 import com.garra400.racas.commands.RaceInfoCommand;
+import com.garra400.racas.commands.RaceReloadCommand;
 import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.RaceConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.garra400.racas.systems.RaceDamageBoostSystem;
 import com.garra400.racas.ui.RaceSelectionPage;
@@ -37,6 +40,12 @@ public class RaceMod extends JavaPlugin {
 
     @Override
     protected void start() {
+        // Init configuration system - must be first
+        RaceConfigLoader.init(getDataDirectory());
+        
+        // Load races from JSON config
+        RaceRegistry.loadFromConfig();
+        
         // Init storage for race cache
         RaceStorage.init(getDataDirectory());
 
@@ -58,6 +67,7 @@ public class RaceMod extends JavaPlugin {
         commands.registerCommand(new RaceTradeCommand());
         commands.registerCommand(new RaceResetCommand());
         commands.registerCommand(new RaceInfoCommand());
+        commands.registerCommand(new RaceReloadCommand());
 
         // Register event listener
         EventRegistry events = getEventRegistry();
