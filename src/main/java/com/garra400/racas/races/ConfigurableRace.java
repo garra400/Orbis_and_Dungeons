@@ -1,6 +1,6 @@
 package com.garra400.racas.races;
 
-import com.garra400.racas.storage.RaceConfig;
+import com.garra400.racas.storage.config.RaceConfig;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 
 import java.util.ArrayList;

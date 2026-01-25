@@ -38,11 +38,14 @@ Defines base racial traits:
     "110 Stamina (+0)",
     "Slow stamina regeneration"
   ],
-  "weapons": []
+  "weapons": [],
+  "damageResistances": {}
 }
 ```
 
 **Note:** Races no longer have weapon specializations. All weapon bonuses are handled by classes.
+
+**New in v2026.1.27:** Races can now have `damageResistances` (see [DAMAGE_RESISTANCE_GUIDE.md](DAMAGE_RESISTANCE_GUIDE.md)).
 
 ### classes_config.json
 
@@ -71,9 +74,12 @@ Defines combat specializations:
       "types": ["axe", "battleaxe"],
       "damageMultiplier": 1.3
     }
-  ]
+  ],
+  "damageResistances": {}
 }
 ```
+
+**New in v2026.1.27:** Classes can now have `damageResistances` (see [DAMAGE_RESISTANCE_GUIDE.md](DAMAGE_RESISTANCE_GUIDE.md)).
 
 ---
 
@@ -181,6 +187,14 @@ After choosing a race, players select their class:
 - **Strengths**: Adaptable, no major weaknesses
 - **Weaknesses**: No specialization, average in all areas
 - **Playstyle**: Jack-of-all-trades, flexible strategy
+
+### Tiefling (NEW!)
+- **Health Bonus**: -15
+- **Stamina Bonus**: +12
+- **Resistances**: Fire (0.0), Lava (0.0), Magic (1.5)
+- **Strengths**: Immune to fire/lava, high mobility
+- **Weaknesses**: Fragile, vulnerable to magic (+50%)
+- **Playstyle**: Fire-immune mobility specialist, dominates lava zones
 
 ---
 

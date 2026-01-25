@@ -1,6 +1,8 @@
-package com.garra400.racas.storage;
+package com.garra400.racas.storage.config;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Configuration for a combat class, loaded from JSON.
@@ -15,6 +17,7 @@ public class ClassConfig {
     public List<String> strengths;
     public List<String> weaknesses;
     public List<WeaponConfig> weapons;
+    public Map<String, Float> damageResistances; // damage type -> resistance multiplier (0.0 = immune, 1.0 = normal)
 
     public static class WeaponConfig {
         public List<String> types;
@@ -35,7 +38,8 @@ public class ClassConfig {
     public ClassConfig(String id, String displayName, String tagline, 
                        float health, float stamina,
                        List<String> strengths, List<String> weaknesses,
-                       List<WeaponConfig> weapons) {
+                       List<WeaponConfig> weapons,
+                       Map<String, Float> damageResistances) {
         this.id = id;
         this.displayName = displayName;
         this.tagline = tagline;
@@ -44,5 +48,6 @@ public class ClassConfig {
         this.strengths = strengths;
         this.weaknesses = weaknesses;
         this.weapons = weapons;
+        this.damageResistances = damageResistances != null ? damageResistances : new HashMap<>();
     }
 }

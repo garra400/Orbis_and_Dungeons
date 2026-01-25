@@ -37,6 +37,22 @@ EHP = 100 + Health Bonus + (Stamina Bonus × 5)
 
 ---
 
+## Quick Race Reference
+
+| Race | HP | Stam | EHP | Special |
+|------|-----|------|-----|---------|
+| Elf | 0 | +15 | 175 | Mobility |
+| Orc | +75 | 0 | 175 | Tank |
+| Human | +35 | +5 | 160 | Balanced |
+| **Tiefling** | **-15** | **+12** | **145** | **🔥 Fire Immune** |
+
+**Tiefling Resistances:**
+- Fire: 0.0 (Immune)
+- Lava: 0.0 (Immune)
+- Magic: 1.5 (+50% damage)
+
+---
+
 ## Race + Class Examples
 
 ### Elf Assassin (FIXED)
@@ -48,6 +64,11 @@ EHP = 100 + Health Bonus + (Stamina Bonus × 5)
 
 ### Human Swordsman
 - 145 HP, 120 Stamina, 195 EHP, +20% damage → BALANCED
+
+### Tiefling Berserker (FIRE TANK)
+- 60 HP, 130 Stamina, 160 EHP, +30% damage
+- **Fire:** 0.0 (Immune), **Magic:** 1.5 (+50%)
+- Ultra-mobile fire immune glass cannon → BALANCED
 
 ---
 

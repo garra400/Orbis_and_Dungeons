@@ -6,10 +6,11 @@ import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.races.RaceRegistry;
-import com.garra400.racas.storage.ClassConfigLoader;
-import com.garra400.racas.storage.RaceConfigLoader;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
+import com.garra400.racas.storage.loader.RaceConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.garra400.racas.systems.RaceDamageBoostSystem;
+import com.garra400.racas.systems.RaceDamageResistanceSystem;
 import com.garra400.racas.ui.RaceSelectionPage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.event.EventRegistry;
@@ -61,8 +62,9 @@ public class RaceMod extends JavaPlugin {
         // Pass component type to RaceManager so it can access/modify race data
         RaceManager.setRaceDataType(raceDataType);
 
-        // Damage: aplicar multiplicadores por raça (ex.: Berserker com axes/battleaxes)
+        // Register damage systems
         getEntityStoreRegistry().registerSystem(new RaceDamageBoostSystem());
+        getEntityStoreRegistry().registerSystem(new RaceDamageResistanceSystem());
 
         // Register simple player commands (like Basic UIs approach)
         CommandRegistry commands = getCommandRegistry();

@@ -3,10 +3,10 @@ package com.garra400.racas;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
-import com.garra400.racas.storage.ClassConfig;
-import com.garra400.racas.storage.ClassConfigLoader;
-import com.garra400.racas.storage.RaceConfig;
-import com.garra400.racas.storage.RaceConfigLoader;
+import com.garra400.racas.storage.config.ClassConfig;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
+import com.garra400.racas.storage.config.RaceConfig;
+import com.garra400.racas.storage.loader.RaceConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
@@ -462,6 +462,45 @@ public final class RaceManager {
     }
 
     // --- Helpers ---
+
+    /**
+     * Gets the damage resistance multiplier for a specific damage type.
+     * Combines resistances from both race and class - the best (lowest) resistance applies.
+     * 
+     * @param player The player
+     * @param damageType The damage type ID (e.g., "Fire", "Physical", "Magic")
+     * @return Resistance multiplier (0.0 = immune, 0.5 = 50% reduction, 1.0 = normal, 1.5 = 50% weakness)
+     */
+    public static float getDamageResistance(Player player, String damageType) {
+        if (player == null || damageType == null) {
+            return 1.0f; // No resistance
+        }
+
+        String raceId = getPlayerRace(player);
+        String classId = getPlayerClass(player);
+
+        float finalResistance = 1.0f; // Default: no resistance
+
+        // Get race resistance
+        if (raceId != null) {
+            RaceConfig raceConfig = RaceConfigLoader.getConfig(raceId);
+            if (raceConfig != null && raceConfig.damageResistances != null) {
+                float raceResistance = raceConfig.damageResistances.getOrDefault(damageType, 1.0f);
+                finalResistance = Math.min(finalResistance, raceResistance); // Use best resistance
+            }
+        }
+
+        // Get class resistance
+        if (classId != null && !classId.equals("none")) {
+            ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+            if (classConfig != null && classConfig.damageResistances != null) {
+                float classResistance = classConfig.damageResistances.getOrDefault(damageType, 1.0f);
+                finalResistance = Math.min(finalResistance, classResistance); // Use best resistance
+            }
+        }
+
+        return finalResistance;
+    }
 
     private static void applyBonus(EntityStatMap stats, String statId, float amount) {
         var stat = stats.get(statId);

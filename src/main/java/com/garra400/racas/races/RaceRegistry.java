@@ -1,7 +1,7 @@
 package com.garra400.racas.races;
 
-import com.garra400.racas.storage.RaceConfig;
-import com.garra400.racas.storage.RaceConfigLoader;
+import com.garra400.racas.storage.config.RaceConfig;
+import com.garra400.racas.storage.loader.RaceConfigLoader;
 
 import java.util.Collection;
 import java.util.Collections;

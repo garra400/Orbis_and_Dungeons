@@ -1,5 +1,6 @@
-package com.garra400.racas.storage;
+package com.garra400.racas.storage.loader;
 
+import com.garra400.racas.storage.config.RaceConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -73,7 +74,8 @@ public final class RaceConfigLoader {
             15f,
             List.of("100 HP (base)", "25 Stamina (+15)", "Extended mobility"),
             List.of("No health bonus", "Stamina-dependent playstyle"),
-            List.of()
+            List.of(),
+            Map.of() // No resistances
         ));
 
         // Orc - Maximum health, tank
@@ -85,7 +87,8 @@ public final class RaceConfigLoader {
             0f,
             List.of("175 HP (+75)", "Massive health pool", "Tank role"),
             List.of("10 Stamina (base)", "Limited mobility"),
-            List.of()
+            List.of(),
+            Map.of() // No resistances
         ));
 
         // Human - Balanced baseline
@@ -97,7 +100,35 @@ public final class RaceConfigLoader {
             5f,
             List.of("135 HP (+35)", "15 Stamina (+5)", "Well-rounded stats"),
             List.of("No specialization", "Average at everything"),
-            List.of()
+            List.of(),
+            Map.of() // No resistances
+        ));
+
+        // Tiefling - Fire-resistant demon spawn
+        configs.put("tiefling", new RaceConfig(
+            "tiefling",
+            "Tiefling",
+            "Demon-touched bloodline, born of fire.",
+            -15f,
+            8f,
+            List.of(
+                "85 HP (-15)",
+                "18 Stamina (+8)",
+                "Immune to Fire Damage",
+                "Immune to Lava Damage",
+                "Infernal heritage"
+            ),
+            List.of(
+                "Fragile physique",
+                "Vulnerable to Magic damage (+50%)",
+                "Mistrusted by common folk"
+            ),
+            List.of(),
+            Map.of(
+                "Fire", 0.0f,      // 100% fire immunity
+                "Lava", 0.0f,      // 100% lava immunity
+                "Magic", 1.5f      // 50% more magic damage (weakness)
+            )
         ));
     }
 

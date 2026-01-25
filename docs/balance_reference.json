@@ -1,7 +1,7 @@
 {
-  "balance_version": "2026.1.26.1",
+  "balance_version": "2026.1.27",
   "balance_principle": "1 Stamina = 5 Health",
-  "notes": "This file contains balanced class configurations based on community feedback and the 1:5 stamina-to-health ratio. Use these values as reference when editing classes_config.json.",
+  "notes": "This file contains balanced class configurations based on community feedback and the 1:5 stamina-to-health ratio. Use these values as reference when editing classes_config.json. NEW in v2026.1.27: Damage resistances now supported for both races and classes.",
   
   "classes": [
     {
@@ -255,8 +255,95 @@
         "balance_rating": "BALANCED",
         "note": "Unconventional bruiser assassin, tanky hit-n-run fighter."
       }
+    },
+    {
+      "race": "Tiefling",
+      "race_bonuses": {"health": -15, "stamina": 12, "ehp": 145, "resistances": {"Fire": 0.0, "Lava": 0.0, "Magic": 1.5}},
+      "class": "Berserker",
+      "class_bonuses": {"health": -25, "stamina": 8, "ehp": 115},
+      "combined_stats": {
+        "total_hp": 60,
+        "total_stamina": 130,
+        "ehp": 160,
+        "damage_multiplier": 1.30,
+        "fire_damage_taken": 0.0,
+        "magic_damage_taken": 1.5,
+        "balance_rating": "BALANCED",
+        "note": "Fire-immune glass cannon. Dominates fire zones, vulnerable to magic. Ultra-high mobility (130 stamina)."
+      }
+    },
+    {
+      "race": "Tiefling",
+      "race_bonuses": {"health": -15, "stamina": 12, "ehp": 145, "resistances": {"Fire": 0.0, "Lava": 0.0, "Magic": 1.5}},
+      "class": "None",
+      "class_bonuses": {"health": 0, "stamina": 0, "ehp": 100},
+      "combined_stats": {
+        "total_hp": 85,
+        "total_stamina": 122,
+        "ehp": 145,
+        "damage_multiplier": 1.0,
+        "fire_damage_taken": 0.0,
+        "magic_damage_taken": 1.5,
+        "balance_rating": "BALANCED",
+        "note": "Pure fire tank. Balanced EHP with niche utility. Great for lava exploration."
+      }
     }
   ],
+  
+  "damage_resistance_examples": [
+    {
+      "id": "tiefling",
+      "displayName": "Tiefling (Fire-Immune Race)",
+      "type": "race",
+      "healthBonus": -15.0,
+      "staminaBonus": 12.0,
+      "ehp": 145,
+      "damageResistances": {
+        "Fire": 0.0,
+        "Lava": 0.0,
+        "Magic": 1.5
+      },
+      "balance_notes": "Fire immunity balanced by fragility and magic weakness. Dominates fire zones, struggles against mages."
+    },
+    {
+      "id": "paladin",
+      "displayName": "Paladin (Magic-Resistant Class)",
+      "type": "class",
+      "healthModifier": 25.0,
+      "staminaModifier": 3.0,
+      "ehp": 140,
+      "damageResistances": {
+        "Magic": 0.5,
+        "Poison": 0.3,
+        "Void": 1.3
+      },
+      "weapons": [{"types": ["mace", "hammer"], "damageMultiplier": 1.18}],
+      "balance_notes": "Tanky anti-mage class. Strong magic resistance balanced by moderate damage."
+    },
+    {
+      "id": "undead",
+      "displayName": "Undead (Multi-Resistance Race)",
+      "type": "race",
+      "healthBonus": -25.0,
+      "staminaBonus": 8.0,
+      "ehp": 115,
+      "damageResistances": {
+        "Poison": 0.0,
+        "Drowning": 0.0,
+        "Cold": 0.5,
+        "Fire": 2.0
+      },
+      "balance_notes": "Immune to poison and drowning, resistant to cold, but takes double fire damage. Low EHP for multiple immunities."
+    }
+  ],
+  
+  "resistance_balance_guidelines": {
+    "immunity_cost": "Each immunity (0.0) should cost 5-10 HP or add a weakness (1.3-1.5)",
+    "strong_resistance_cost": "50% resistance (0.5) should cost 3-5 HP or reduce damage by 2-5%",
+    "weakness_benefit": "Each 50% weakness (1.5) can add 5-10 HP or 3-5% damage",
+    "combination_rule": "Best (lowest) resistance wins between race and class",
+    "balance_principle": "Fire immunity + Magic weakness = Niche specialist"
+  },
   
   "balance_rules": {
     "minimum_ehp": 140,

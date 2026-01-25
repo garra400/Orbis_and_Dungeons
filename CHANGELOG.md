@@ -2,6 +2,93 @@
 
 ---
 
+## Version 2026.1.27 - Damage Resistance System
+
+### 🔥 New Feature: Damage Resistances
+
+Inspired by **OrbisOrigins**, races and classes can now have resistances, immunities, and weaknesses to specific damage types!
+
+#### How It Works
+
+**Resistance Values:**
+- **0.0** = Immune (100% damage reduction)
+- **0.5** = 50% damage reduction
+- **1.0** = Normal damage
+- **1.5** = 50% extra damage (weakness)
+
+**Combination:**
+- Race and class resistances are independent
+- **Best (lowest) resistance applies**
+- Example: Race 0.5, Class 0.3 → Final 0.3 (80% reduction)
+
+#### Damage Types Available
+
+Fire, Lava, Physical, Magic, Poison, Lightning, Cold, Nature, Fall, Drowning, Void
+
+#### Example Configuration
+
+```json
+{
+  "id": "tiefling",
+  "damageResistances": {
+    "Fire": 0.0,    // Immune to fire
+    "Lava": 0.0,    // Immune to lava
+    "Magic": 1.5    // +50% magic damage
+  }
+}
+```
+
+### 🆕 New Race: Tiefling
+
+**"Demon-touched bloodline, born of fire."**
+
+**Stats:**
+- **Health:** -15 (85 HP)
+- **Stamina:** +12 (22 total)
+- **EHP:** 145 (85 + 60 stamina)
+
+**Resistances:**
+- **Fire:** Immune (0.0)
+- **Lava:** Immune (0.0)
+- **Magic:** +50% damage (1.5)
+
+**Strengths:**
+- Can walk through fire and lava unharmed
+- High stamina for mobility
+- Infernal heritage
+
+**Weaknesses:**
+- Fragile physique (-15 HP)
+- Extremely vulnerable to magic
+- Mistrusted by NPCs
+
+**Playstyle:** High-risk fire tank with mobility focus. Dominates fire-based environments (lava zones, burning buildings) but struggles against magic users.
+
+### 🛠️ Technical Implementation
+
+- **New System:** `RaceDamageResistanceSystem`
+  - Runs in FilterDamageGroup (before armor reduction)
+  - Combines race + class resistances
+  - Uses Math.min() for best resistance
+
+- **New Methods:**
+  - `RaceManager.getDamageResistance(Player, String)`
+  - Returns combined resistance multiplier
+
+- **Config Updates:**
+  - `RaceConfig.damageResistances` (Map<String, Float>)
+  - `ClassConfig.damageResistances` (Map<String, Float>)
+
+### 📚 New Documentation
+
+- **DAMAGE_RESISTANCE_GUIDE.md** - Complete resistance system guide
+  - All damage types explained
+  - Balance guidelines
+  - Configuration examples
+  - Troubleshooting guide
+
+---
+
 ## Version 2026.1.26.1 - Assassin Balance Fix
 
 ### ⚖️ Balance Changes (Community Feedback)

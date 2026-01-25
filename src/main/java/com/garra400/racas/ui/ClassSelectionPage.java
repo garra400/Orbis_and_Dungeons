@@ -1,8 +1,8 @@
 package com.garra400.racas.ui;
 
 import com.garra400.racas.RaceManager;
-import com.garra400.racas.storage.ClassConfig;
-import com.garra400.racas.storage.ClassConfigLoader;
+import com.garra400.racas.storage.config.ClassConfig;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
