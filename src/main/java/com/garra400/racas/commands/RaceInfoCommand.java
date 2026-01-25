@@ -2,6 +2,9 @@ package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.config.ClassConfig;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -71,8 +74,10 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
 
         try {
             String raceId = null;
+            String classId = null;
             if (targetPlayer != null) {
                 raceId = RaceManager.getPlayerRace(targetPlayer);
+                classId = RaceManager.getPlayerClass(targetPlayer);
                 raceData = RaceManager.getPlayerRaceData(targetPlayer);
             }
             if (raceId == null && targetRef != null) {
@@ -87,9 +92,23 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
                 return;
             }
 
-            String info = RaceManager.formatRaceInfo(raceId, raceData);
+            // Format race and class info
+            String raceName = raceId;
+            if (RaceRegistry.exists(raceId)) {
+                raceName = RaceRegistry.get(raceId).displayName();
+            }
+
+            String className = "None";
+            if (classId != null && !classId.equals("none")) {
+                ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+                if (classConfig != null) {
+                    className = classConfig.displayName;
+                }
+            }
+
             ctx.sendMessage(Message.raw("=== Race Info for " + displayName + " ==="));
-            ctx.sendMessage(Message.raw(info));
+            ctx.sendMessage(Message.raw("Race: " + raceName));
+            ctx.sendMessage(Message.raw("Class: " + className));
 
             if (raceData != null && raceData.getSelectionTimestamp() != null && !raceData.getSelectionTimestamp().isEmpty()) {
                 ctx.sendMessage(Message.raw("Selected: " + raceData.getSelectionDateFormatted()));

@@ -18,6 +18,9 @@ import com.hypixel.hytale.server.core.modules.entitystats.modifier.Modifier;
 import com.hypixel.hytale.server.core.modules.entitystats.modifier.StaticModifier;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 
 import java.util.Map;
 import java.util.UUID;
@@ -87,18 +90,31 @@ public final class RaceManager {
 
     /**
      * Aplica raça e classe ao jogador, combinando os bônus de ambos.
+     * Versão que usa Ref e Store para salvar componentes (UI context).
      */
-    public static void applyRaceAndClass(Player player, String raceId, String classId) {
-        if (player == null || raceId == null || classId == null) {
+    public static void applyRaceAndClass(Ref<EntityStore> ref, Store<EntityStore> store, String raceId, String classId) {
+        if (ref == null || store == null || raceId == null || classId == null) {
+            System.err.println("applyRaceAndClass: Null parameter - ref=" + ref + ", store=" + store + ", raceId=" + raceId + ", classId=" + classId);
             return;
         }
+
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            System.err.println("applyRaceAndClass: Player component not found");
+            return;
+        }
+
+        System.out.println("applyRaceAndClass: Applying race=" + raceId + ", class=" + classId);
 
         RaceDefinition race = RaceRegistry.get(raceId);
         ClassConfig classConfig = ClassConfigLoader.getClass(classId);
 
         if (classConfig == null) {
+            System.err.println("applyRaceAndClass: ClassConfig not found for classId=" + classId);
             return;
         }
+
+        System.out.println("applyRaceAndClass: Found race=" + race.displayName() + ", class=" + classConfig.displayName);
 
         // Combina os bônus de raça e classe
         int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
@@ -112,18 +128,78 @@ public final class RaceManager {
             stats.update();
         }
 
-        // Salva a seleção de raça e classe
-        saveRaceAndClassSelection(player.getPlayerRef(), raceId, classId, true);
+        // Salva a seleção de raça e classe usando Store
+        saveRaceAndClassSelection(ref, store, raceId, classId, true);
 
         // Atualiza o cache
         cacheRace(player, raceId);
         String username = null;
         try {
-            PlayerRef ref = player.getPlayerRef();
-            if (ref != null) {
-                username = ref.getUsername();
+            PlayerRef playerRef = player.getPlayerRef();
+            if (playerRef != null) {
+                username = playerRef.getUsername();
             }
         } catch (Exception ignored) {
+        }
+        RaceStorage.putRaceAndClass(player.getUuid(), username, raceId, classId);
+    }
+
+    /**
+     * Aplica raça e classe ao jogador, combinando os bônus de ambos.
+     * Versão legada que usa Player (comandos).
+     */
+    public static void applyRaceAndClass(Player player, String raceId, String classId) {
+        if (player == null || raceId == null || classId == null) {
+            System.err.println("applyRaceAndClass: Null parameter - player=" + player + ", raceId=" + raceId + ", classId=" + classId);
+            return;
+        }
+
+        System.out.println("applyRaceAndClass (command): Applying race=" + raceId + ", class=" + classId);
+
+        RaceDefinition race = RaceRegistry.get(raceId);
+        ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+
+        if (classConfig == null) {
+            System.err.println("applyRaceAndClass: ClassConfig not found for classId=" + classId);
+            return;
+        }
+
+        System.out.println("applyRaceAndClass (command): Found race=" + race.displayName() + ", class=" + classConfig.displayName);
+
+        // Combina os bônus de raça e classe
+        int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
+        int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
+
+        // Aplica os stats combinados
+        EntityStatMap stats = EntityStatsModule.get(player);
+        if (stats != null) {
+            applyBonus(stats, "Health", totalHealthBonus);
+            applyBonus(stats, "Stamina", totalStaminaBonus);
+            stats.update();
+        }
+
+        // Atualiza o cache e storage
+        cacheRace(player, raceId);
+        String username = null;
+        try {
+            PlayerRef playerRefComponent = player.getPlayerRef();
+            if (playerRefComponent != null) {
+                username = playerRefComponent.getUsername();
+                
+                // Tenta salvar em componentes usando o World
+                World world = player.getWorld();
+                if (world != null) {
+                    world.execute(() -> {
+                        var store = world.getEntityStore().getStore();
+                        var ref = playerRefComponent.getReference();
+                        if (ref != null && ref.isValid()) {
+                            saveRaceAndClassSelection(ref, store, raceId, classId, true);
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("applyRaceAndClass (command): Failed to save to component - " + e.getMessage());
         }
         RaceStorage.putRaceAndClass(player.getUuid(), username, raceId, classId);
     }
@@ -150,25 +226,29 @@ public final class RaceManager {
         }
     }
 
-    private static void saveRaceAndClassSelection(PlayerRef playerRef, String raceId, String classId, boolean updateTimestamp) {
-        if (playerRef == null || raceId == null || classId == null || raceDataType == null) {
+    private static void saveRaceAndClassSelection(Ref<EntityStore> ref, Store<EntityStore> store, String raceId, String classId, boolean updateTimestamp) {
+        if (ref == null || store == null || raceId == null || classId == null || raceDataType == null) {
+            System.err.println("saveRaceAndClassSelection: Null parameter - ref=" + ref + ", store=" + store + ", raceId=" + raceId + ", classId=" + classId);
             return;
         }
 
-        try {
-            Holder holder = playerRef.getHolder();
-            if (holder == null) {
-                return;
-            }
+        System.out.println("saveRaceAndClassSelection: Saving race=" + raceId + ", class=" + classId);
 
-            RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
+        try {
+            RaceData raceData = store.getComponent(ref, raceDataType);
+            if (raceData == null) {
+                raceData = new RaceData();
+            }
             raceData.setSelectedRace(raceId);
             raceData.setSelectedClass(classId);
+            System.out.println("saveRaceAndClassSelection: Set race=" + raceData.getSelectedRace() + ", class=" + raceData.getSelectedClass());
             if (updateTimestamp) {
                 raceData.setSelectionTimestampLong(System.currentTimeMillis());
             }
-            holder.putComponent(raceDataType, (RaceData) raceData.clone());
+            store.putComponent(ref, raceDataType, raceData);
+            System.out.println("saveRaceAndClassSelection: Component saved successfully");
         } catch (Exception e) {
+            System.err.println("saveRaceAndClassSelection: Exception - " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -219,25 +299,22 @@ public final class RaceManager {
     }
 
     public static String getPlayerClass(Player player) {
-        if (player == null || raceDataType == null) {
-            return null;
-        }
-
-        PlayerRef playerRef = player.getPlayerRef();
-        if (playerRef == null) {
+        if (player == null) {
+            System.err.println("getPlayerClass: player is null");
             return "none";
         }
 
         try {
-            Holder holder = playerRef.getHolder();
-            if (holder != null) {
-                RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
-                if (raceData != null && raceData.getSelectedClass() != null) {
-                    return raceData.getSelectedClass();
-                }
+            // Usa RaceStorage como fonte primária (foi salvo via store.putComponent)
+            String classId = RaceStorage.getPlayerClass(player.getUuid());
+            if (classId != null && !classId.equals("none")) {
+                System.out.println("getPlayerClass: Retrieved class=" + classId + " from storage");
+                return classId;
             }
             return "none";
         } catch (Exception e) {
+            System.err.println("getPlayerClass: Exception - " + e.getMessage());
+            e.printStackTrace();
             return "none";
         }
     }

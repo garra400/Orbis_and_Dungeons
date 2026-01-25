@@ -83,7 +83,7 @@ public final class ClassConfigLoader {
             "berserker",
             "Berserker",
             "Reckless warrior who trades defense for raw power.",
-            -25f,  // EHP = 100 - 25 + (8×5) = 115
+            -25f,  // EHP = 100 - 25 + (8 x 5) = 115
             8f,
             List.of("+30% axe damage", "18 Stamina (+8)", "High burst damage", "Aggressive playstyle"),
             List.of("75 HP (-25)", "Glass cannon", "High risk gameplay", "Exposed in combat"),
@@ -96,7 +96,7 @@ public final class ClassConfigLoader {
             "swordsman",
             "Swordsman",
             "Balanced warrior with sword mastery.",
-            10f,  // EHP = 100 + 10 + (5×5) = 135
+            10f,  // EHP = 100 + 10 + (5 x 5) = 135
             5f,
             List.of("+20% sword damage", "110 HP (+10)", "15 Stamina (+5)", "Balanced stats"),
             List.of("Requires swords to shine", "No defensive specialization", "Average in all areas"),
@@ -109,7 +109,7 @@ public final class ClassConfigLoader {
             "crusader",
             "Crusader",
             "Armored champion wielding heavy weapons.",
-            30f,  // EHP = 100 + 30 + (0×5) = 130
+            30f,  // EHP = 100 + 30 + (0 x 5) = 130
             0f,
             List.of("+15% mace/hammer damage", "130 HP (+30)", "Frontline tank", "High survivability"),
             List.of("10 Stamina (+0)", "Slow playstyle", "Low mobility", "Moderate damage output"),
@@ -135,7 +135,7 @@ public final class ClassConfigLoader {
             "archer",
             "Archer",
             "Master of ranged combat, deadly from afar.",
-            -35f,  // EHP = 100 - 35 + (8×5) = 105
+            -35f,  // EHP = 100 - 35 + (8 x 5) = 105
             8f,
             List.of("+40% bow/crossbow damage", "18 Stamina (+8)", "Ranged superiority", "Safe distance fighting"),
             List.of("65 HP (-35)", "Extremely fragile", "Positioning critical", "Useless in melee"),

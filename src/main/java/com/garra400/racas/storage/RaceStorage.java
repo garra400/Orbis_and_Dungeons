@@ -98,6 +98,11 @@ public final class RaceStorage {
         return e != null ? e.raceId : null;
     }
 
+    public static String getPlayerClass(UUID uuid) {
+        Entry e = CACHE.get(uuid);
+        return e != null ? e.classId : "none";
+    }
+
     public static String getByName(String username) {
         if (username == null) {
             return null;

@@ -2,9 +2,31 @@
 
 ---
 
-## Version 2026.1.27 - Damage Resistance System
+## Version 2026.1.25.2 - Major Update: Commands, Persistence Fix, Resistances & Balance
 
-### 🔥 New Feature: Damage Resistances
+### 🎉 What's New
+
+#### New Class Management Commands
+Two new commands for managing player classes without reopening the UI:
+
+**`/tradeclass <class> [player]`**
+- **Function:** Change your class or another player's class instantly
+- **Usage:** 
+  - Self: `/tradeclass assassin`
+  - Others: `/tradeclass berserker Steve`
+- **Valid Classes:** NONE, BERSERKER, SWORDSMAN, CRUSADER, ASSASSIN, ARCHER
+- **Requirement:** Must have a race selected first
+- **Permission:** Available to all players
+
+**`/resetclass [player]`**
+- **Function:** Reset your class to NONE (keeping your race)
+- **Usage:**
+  - Self: `/resetclass`
+  - Others: `/resetclass Alex`
+- **Effect:** Removes all class bonuses while preserving race bonuses
+- **Permission:** Available to all players
+
+### 🔥 New Feature: Damage Resistance System
 
 Inspired by **OrbisOrigins**, races and classes can now have resistances, immunities, and weaknesses to specific damage types!
 
@@ -64,38 +86,11 @@ Fire, Lava, Physical, Magic, Poison, Lightning, Cold, Nature, Fall, Drowning, Vo
 
 **Playstyle:** High-risk fire tank with mobility focus. Dominates fire-based environments (lava zones, burning buildings) but struggles against magic users.
 
-### 🛠️ Technical Implementation
+### ⚖️ Balance Changes
 
-- **New System:** `RaceDamageResistanceSystem`
-  - Runs in FilterDamageGroup (before armor reduction)
-  - Combines race + class resistances
-  - Uses Math.min() for best resistance
+#### Assassin Class Rebalanced (Community Feedback)
 
-- **New Methods:**
-  - `RaceManager.getDamageResistance(Player, String)`
-  - Returns combined resistance multiplier
-
-- **Config Updates:**
-  - `RaceConfig.damageResistances` (Map<String, Float>)
-  - `ClassConfig.damageResistances` (Map<String, Float>)
-
-### 📚 New Documentation
-
-- **DAMAGE_RESISTANCE_GUIDE.md** - Complete resistance system guide
-  - All damage types explained
-  - Balance guidelines
-  - Configuration examples
-  - Troubleshooting guide
-
----
-
-## Version 2026.1.26.1 - Assassin Balance Fix
-
-### ⚖️ Balance Changes (Community Feedback)
-
-#### Assassin Class Rebalanced
-
-**The Problem (Community Report):**
+**The Problem:**
 - Dual daggers have built-in "Hit n' Run" charged attack mobility
 - 35% damage boost was amplifying charged attacks excessively  
 - -20 HP penalty was too small for weapon safety level
@@ -106,15 +101,13 @@ Fire, Lava, Physical, Magic, Poison, Lightning, Cold, Nature, Fall, Drowning, Vo
 - Health: **-20 → -35** (increased penalty to match Archer)
 - Damage: **+35% → +22%** (reduced for weapon safety)
 - Stamina: **+10** (unchanged - maintains hit-n-run fantasy)
-- New EHP: **190** (balanced with other glass cannons)
+- New EHP: **115** (balanced with other glass cannons)
 
 **Rationale:**
 - Daggers are safer than axes (charged attack dash)
 - Cannot nerf charged attacks separately (API limitation)
 - Applied 1 Stamina = 5 HP balance ratio
 - Health penalty now reflects weapon safety level
-
-### 📊 New Balance System
 
 #### The Golden Ratio: **1 Stamina = 5 Health**
 
@@ -133,31 +126,160 @@ All classes now follow this balance principle:
 | **Assassin** | **-35** | **+10** | **115** | **+22%** | **🔧 FIXED** |
 | Archer | -35 | +8 | 105 | +40% | ✓ Balanced |
 
-### 📁 New Documentation
+### 🐛 Critical Bug Fix - Class Persistence
 
-#### Balance Guide
-- [BALANCE_GUIDE.md](docs/BALANCE_GUIDE.md) - Complete balancing principles and formulas
-- [balance_reference.json](docs/balance_reference.json) - Reference values and server presets
+#### Fixed: Class Selection Not Saving to Components
 
-**What's Included:**
-- EHP calculation formulas
-- Weapon damage by safety level
-- Custom class creation guide
-- Server admin presets (Hardcore, Casual, PvP)
-- Common balance mistakes to avoid
+**The Problem:**
+- Players could select classes in the UI successfully
+- UI showed "Class: Assassin" during selection
+- **After closing UI:** `/raceinfo` showed "Class: None"
+- Class bonuses (damage, stats) were not being applied
+- Only race bonuses worked, class completely ignored
 
-### 🎮 For Players
+**Root Cause:** 
+```java
+// ❌ OLD CODE (BROKEN)
+Holder holder = playerRef.getHolder(); // Returns null!
+holder.putComponent(raceDataType, raceData); // NullPointerException
+```
 
-**Assassin Changes:**
-- More fragile but still mobile
-- Slightly lower damage but still deadly
-- Requires better positioning and skill
-- Hit-n-run playstyle preserved
+The Hytale API's `getHolder()` method returns `null` in the current version, causing component saves to fail silently.
 
-**How to Update:**
-1. Delete existing `classes_config.json`
-2. Run `/racereload` in-game
-3. New balanced values will generate automatically
+**The Solution:**
+```java
+// ✅ NEW CODE (WORKING)
+Store<EntityStore> store = world.getEntityStore().getStore();
+Ref<EntityStore> ref = playerRefComponent.getReference();
+store.putComponent(ref, raceDataType, raceData); // Works!
+```
+
+Migrated to the **OrbisOrigins pattern** using `Store.putComponent(ref, ...)` instead of `Holder.putComponent()`.
+
+### 🔧 Technical Changes
+
+#### New Systems
+- **`RaceDamageResistanceSystem`** - Damage resistance handler
+  - Runs in FilterDamageGroup (before armor reduction)
+  - Combines race + class resistances
+  - Uses Math.min() for best resistance
+
+#### New Commands & Classes
+- **`TradeClassCommand.java`** - `/tradeclass` command implementation
+- **`ResetClassCommand.java`** - `/resetclass` command implementation
+- Both use `AbstractPlayerCommand` pattern (top-level, not subcommands)
+
+#### Refactored RaceManager
+- **New Method:** `applyRaceAndClass(Ref, Store, raceId, classId)` - For UI calls
+- **Updated Method:** `applyRaceAndClass(Player, raceId, classId)` - For commands, now uses `world.execute()` to access Store safely
+- **Rewritten:** `saveRaceAndClassSelection()` - Changed from Holder pattern to Store pattern
+- **Simplified:** `getPlayerClass()` - Now reads directly from `RaceStorage` file cache
+- **New Method:** `getDamageResistance(Player, String)` - Returns combined resistance multiplier
+
+#### Enhanced Storage System
+- **Added:** `RaceStorage.getPlayerClass(UUID)` method
+- **Updated:** File cache format stores both race and class: `uuid|username|raceId|classId`
+- **Dual Persistence:** Classes now save to both component system AND file cache
+
+#### Config Updates
+- **`RaceConfig.damageResistances`** - Map<String, Float> for race resistances
+- **`ClassConfig.damageResistances`** - Map<String, Float> for class resistances
+
+#### Command Architecture Discovery
+**Important Finding:** Hytale's command system does NOT support nested subcommands reliably.
+
+**What Doesn't Work:**
+```java
+// ❌ Subcommands of /race don't work
+addSubCommand(new TradeClassCommand()); // /race tradeclass - NOT FOUND
+addSubCommand(new ResetClassCommand()); // /race resetclass - NOT FOUND
+```
+
+**What Works:**
+```java
+// ✅ Top-level commands work perfectly
+commands.registerCommand(new TradeClassCommand()); // /tradeclass ✓
+commands.registerCommand(new ResetClassCommand()); // /resetclass ✓
+```
+
+**Solution:** Created independent top-level commands instead of `/race` subcommands.
+
+### 📝 Updated Command List
+
+| Command | Function | Example |
+|---------|----------|---------|
+| `/racetrade <race>` | Change race | `/racetrade orc` |
+| `/racereset` | Reset race | `/racereset` |
+| `/raceinfo [player]` | View race & class | `/raceinfo Steve` |
+| `/racereload` | Reload configs | `/racereload` |
+| **`/tradeclass <class>`** | **Change class** | **`/tradeclass assassin`** |
+| **`/resetclass`** | **Reset class** | **`/resetclass`** |
+
+### 📚 New Documentation
+
+- **DAMAGE_RESISTANCE_GUIDE.md** - Complete resistance system guide
+  - All damage types explained
+  - Balance guidelines
+  - Configuration examples
+  - Troubleshooting guide
+
+- **BALANCE_GUIDE.md** - Complete balancing principles and formulas
+- **balance_reference.json** - Reference values and server presets
+
+### 🎯 What This Means For Players
+
+#### Before This Update:
+- ❌ Class selection appeared to work but didn't save
+- ❌ Had to reopen UI every session to "reselect" class
+- ❌ Class bonuses never applied
+- ❌ No way to change class without reopening full race UI
+- ❌ No damage resistance/immunity system
+- ❌ Assassin was overpowered in Elf combo
+
+#### After This Update:
+- ✅ Class selection persists correctly across sessions
+- ✅ Class bonuses (damage, stats) apply immediately
+- ✅ Can change class with simple command: `/tradeclass berserker`
+- ✅ Can experiment with different classes easily
+- ✅ Both race AND class data saved to components + file cache
+- ✅ Damage resistances add new tactical depth
+- ✅ New Tiefling race with fire immunity
+- ✅ Assassin rebalanced for fairness
+
+### 🔬 Debug Improvements
+
+Added comprehensive logging throughout the save process:
+- `applyRaceAndClass: Applying race=X, class=Y`
+- `saveRaceAndClassSelection: Saving race=X, class=Y`
+- `saveRaceAndClassSelection: Set race=X, class=Y`
+- `saveRaceAndClassSelection: Component saved successfully`
+- `getPlayerClass: Retrieved class=X from storage`
+
+These logs help diagnose any future persistence issues.
+
+### 🚀 For Server Admins
+
+**No Breaking Changes:**
+- Existing race selections remain intact
+- File cache automatically migrates to new format
+- No config wipes needed (except for Assassin balance - see below)
+- Old JARs can be replaced directly
+
+**Recommended Update Steps:**
+1. Delete existing `classes_config.json` (to get Assassin balance fix)
+2. Replace JAR file
+3. Restart server
+4. Run `/racereload` in-game
+5. New balanced values will generate automatically
+
+**Testing Checklist:**
+1. Verify `/tradeclass assassin` works
+2. Confirm `/resetclass` resets to NONE
+3. Check `/raceinfo` shows both race and class
+4. Test class bonuses apply (damage multipliers work)
+5. Test Tiefling fire/lava immunity
+6. Verify Assassin has correct stats (-35 HP, +22% damage)
+7. Restart server and verify class persists
 
 ---
 
@@ -248,6 +370,146 @@ Now displays both race and class:
 ```
 Race: Orc - Berserker (selected today at 18:24:35)
 ```
+
+---
+
+## Version 2026.1.25.2 - Class Management Commands & Critical Persistence Fix
+
+### 🎉 What's New
+
+#### New Class Management Commands
+Two new commands for managing player classes without reopening the UI:
+
+**`/tradeclass <class> [player]`**
+- **Function:** Change your class or another player's class instantly
+- **Usage:** 
+  - Self: `/tradeclass assassin`
+  - Others: `/tradeclass berserker Steve`
+- **Valid Classes:** NONE, BERSERKER, SWORDSMAN, CRUSADER, ASSASSIN, ARCHER
+- **Requirement:** Must have a race selected first
+- **Permission:** Available to all players
+
+**`/resetclass [player]`**
+- **Function:** Reset your class to NONE (keeping your race)
+- **Usage:**
+  - Self: `/resetclass`
+  - Others: `/resetclass Alex`
+- **Effect:** Removes all class bonuses while preserving race bonuses
+- **Permission:** Available to all players
+
+### 🐛 Critical Bug Fix - Class Persistence
+
+#### Fixed: Class Selection Not Saving to Components
+
+**The Problem:**
+- Players could select classes in the UI successfully
+- UI showed "Class: Assassin" during selection
+- **After closing UI:** `/raceinfo` showed "Class: None"
+- Class bonuses (damage, stats) were not being applied
+- Only race bonuses worked, class completely ignored
+
+**Root Cause:** 
+```java
+// ❌ OLD CODE (BROKEN)
+Holder holder = playerRef.getHolder(); // Returns null!
+holder.putComponent(raceDataType, raceData); // NullPointerException
+```
+
+The Hytale API's `getHolder()` method returns `null` in the current version, causing component saves to fail silently.
+
+**The Solution:**
+```java
+// ✅ NEW CODE (WORKING)
+Store<EntityStore> store = world.getEntityStore().getStore();
+Ref<EntityStore> ref = playerRefComponent.getReference();
+store.putComponent(ref, raceDataType, raceData); // Works!
+```
+
+Migrated to the **OrbisOrigins pattern** using `Store.putComponent(ref, ...)` instead of `Holder.putComponent()`.
+
+### 🔧 Technical Changes
+
+#### Refactored RaceManager
+- **New Method:** `applyRaceAndClass(Ref, Store, raceId, classId)` - For UI calls
+- **Updated Method:** `applyRaceAndClass(Player, raceId, classId)` - For commands, now uses `world.execute()` to access Store safely
+- **Rewritten:** `saveRaceAndClassSelection()` - Changed from Holder pattern to Store pattern
+- **Simplified:** `getPlayerClass()` - Now reads directly from `RaceStorage` file cache
+
+#### Enhanced Storage System
+- **Added:** `RaceStorage.getPlayerClass(UUID)` method
+- **Updated:** File cache format now stores both race and class: `uuid|username|raceId|classId`
+- **Dual Persistence:** Classes now save to both component system AND file cache
+
+#### Command Architecture Discovery
+**Important Finding:** Hytale's command system does NOT support nested subcommands reliably.
+
+**What Doesn't Work:**
+```java
+// ❌ Subcommands of /race don't work
+addSubCommand(new TradeClassCommand()); // /race tradeclass - NOT FOUND
+addSubCommand(new ResetClassCommand()); // /race resetclass - NOT FOUND
+```
+
+**What Works:**
+```java
+// ✅ Top-level commands work perfectly
+commands.registerCommand(new TradeClassCommand()); // /tradeclass ✓
+commands.registerCommand(new ResetClassCommand()); // /resetclass ✓
+```
+
+**Solution:** Created independent top-level commands instead of `/race` subcommands.
+
+### 📝 Updated Command List
+
+| Command | Function | Example |
+|---------|----------|---------|
+| `/racetrade <race>` | Change race | `/racetrade orc` |
+| `/racereset` | Reset race | `/racereset` |
+| `/raceinfo [player]` | View race & class | `/raceinfo Steve` |
+| `/racereload` | Reload configs | `/racereload` |
+| **`/tradeclass <class>`** | **Change class** | **`/tradeclass assassin`** |
+| **`/resetclass`** | **Reset class** | **`/resetclass`** |
+
+### 🎯 What This Means For Players
+
+#### Before This Update:
+- ❌ Class selection appeared to work but didn't save
+- ❌ Had to reopen UI every session to "reselect" class
+- ❌ Class bonuses never applied
+- ❌ No way to change class without reopening full race UI
+
+#### After This Update:
+- ✅ Class selection persists correctly across sessions
+- ✅ Class bonuses (damage, stats) apply immediately
+- ✅ Can change class with simple command: `/tradeclass berserker`
+- ✅ Can experiment with different classes easily
+- ✅ Both race AND class data saved to components + file cache
+
+### 🔬 Debug Improvements
+
+Added comprehensive logging throughout the save process:
+- `applyRaceAndClass: Applying race=X, class=Y`
+- `saveRaceAndClassSelection: Saving race=X, class=Y`
+- `saveRaceAndClassSelection: Set race=X, class=Y`
+- `saveRaceAndClassSelection: Component saved successfully`
+- `getPlayerClass: Retrieved class=X from storage`
+
+These logs help diagnose any future persistence issues.
+
+### 🚀 For Server Admins
+
+**No Breaking Changes:**
+- Existing race selections remain intact
+- File cache automatically migrates to new format
+- No config wipes needed
+- Old JARs can be replaced directly
+
+**Testing Checklist:**
+1. Verify `/tradeclass assassin` works
+2. Confirm `/resetclass` resets to NONE
+3. Check `/raceinfo` shows both race and class
+4. Test class bonuses apply (damage multipliers work)
+5. Restart server and verify class persists
 
 ---
 

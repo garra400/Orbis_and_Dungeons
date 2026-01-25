@@ -154,14 +154,14 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
         // Set strengths
         List<String> strengths = config.strengths != null ? config.strengths : List.of();
         for (int i = 0; i < 5; i++) {
-            String text = i < strengths.size() ? "• " + strengths.get(i) : "";
+            String text = i < strengths.size() ? "- " + strengths.get(i) : "";
             cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
         }
 
         // Set weaknesses
         List<String> weaknesses = config.weaknesses != null ? config.weaknesses : List.of();
         for (int i = 0; i < 5; i++) {
-            String text = i < weaknesses.size() ? "• " + weaknesses.get(i) : "";
+            String text = i < weaknesses.size() ? "- " + weaknesses.get(i) : "";
             cmd.set("#NegativeLine" + (i + 1) + ".Text", text);
         }
     }
@@ -192,8 +192,10 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
             player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef));
         } else if ("confirm".equals(data.action)) {
             // Apply race + class combination
-            RaceManager.applyRaceAndClass(player, selectedRace, selectedClass);
-            // Page will close automatically after applying
+            System.out.println("ClassSelectionPage.confirm: selectedRace=" + selectedRace + ", selectedClass=" + selectedClass);
+            RaceManager.applyRaceAndClass(ref, store, selectedRace, selectedClass);
+            // Close the page
+            this.close();
         }
     }
 }
