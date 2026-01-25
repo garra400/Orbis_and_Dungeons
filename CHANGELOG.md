@@ -2,6 +2,168 @@
 
 ---
 
+## Version 2026.1.26.1 - Assassin Balance Fix
+
+### ⚖️ Balance Changes (Community Feedback)
+
+#### Assassin Class Rebalanced
+
+**The Problem (Community Report):**
+- Dual daggers have built-in "Hit n' Run" charged attack mobility
+- 35% damage boost was amplifying charged attacks excessively  
+- -20 HP penalty was too small for weapon safety level
+- High stamina allowed constant charged attack spam
+- Elf Assassin combo reached 205 EHP (overpowered)
+
+**The Solution:**
+- Health: **-20 → -35** (increased penalty to match Archer)
+- Damage: **+35% → +22%** (reduced for weapon safety)
+- Stamina: **+10** (unchanged - maintains hit-n-run fantasy)
+- New EHP: **190** (balanced with other glass cannons)
+
+**Rationale:**
+- Daggers are safer than axes (charged attack dash)
+- Cannot nerf charged attacks separately (API limitation)
+- Applied 1 Stamina = 5 HP balance ratio
+- Health penalty now reflects weapon safety level
+
+### 📊 New Balance System
+
+#### The Golden Ratio: **1 Stamina = 5 Health**
+
+All classes now follow this balance principle:
+- **Effective HP (EHP)** = Base HP + Health Bonus + (Stamina Bonus × 5)
+- Example: Berserker = 100 - 25 + (8 × 5) = **115 EHP**
+
+#### Updated Class Stats
+
+| Class | HP | Stamina | EHP | Damage | Change |
+|-------|-----|---------|-----|--------|--------|
+| None | 0 | 0 | 100 | 0% | - |
+| Berserker | -25 | +8 | 115 | +30% | ✓ Balanced |
+| Swordsman | +10 | +5 | 135 | +20% | ✓ Balanced |
+| Crusader | +30 | +0 | 130 | +15% | ✓ Balanced |
+| **Assassin** | **-35** | **+10** | **115** | **+22%** | **🔧 FIXED** |
+| Archer | -35 | +8 | 105 | +40% | ✓ Balanced |
+
+### 📁 New Documentation
+
+#### Balance Guide
+- [BALANCE_GUIDE.md](docs/BALANCE_GUIDE.md) - Complete balancing principles and formulas
+- [balance_reference.json](docs/balance_reference.json) - Reference values and server presets
+
+**What's Included:**
+- EHP calculation formulas
+- Weapon damage by safety level
+- Custom class creation guide
+- Server admin presets (Hardcore, Casual, PvP)
+- Common balance mistakes to avoid
+
+### 🎮 For Players
+
+**Assassin Changes:**
+- More fragile but still mobile
+- Slightly lower damage but still deadly
+- Requires better positioning and skill
+- Hit-n-run playstyle preserved
+
+**How to Update:**
+1. Delete existing `classes_config.json`
+2. Run `/racereload` in-game
+3. New balanced values will generate automatically
+
+---
+
+## Version 2026.1.26 - Two-Step Selection System
+
+### 🎯 Major System Overhaul
+
+#### Separated Race and Class Selection
+The mod now features a **two-step selection process** that separates innate racial traits from combat specializations:
+
+**Step 1: Choose Your Race** (Innate Traits)
+- **Elf**: Agile and energetic (+15 Stamina)
+- **Orc**: Powerful and robust (+75 Health)  
+- **Human**: Balanced and versatile (+35 Health, +5 Stamina)
+
+**Step 2: Choose Your Class** (Combat Specialization)
+- **None**: Pure racial traits, no specialization
+- **Berserker**: High-risk warrior (-25 HP, +8 Stamina, +30% axe damage)
+- **Swordsman**: Balanced fighter (+10 HP, +5 Stamina, +20% sword damage)
+- **Crusader**: Tank specialist (+30 HP, +15% mace/hammer damage)
+- **Assassin**: Agile striker (-20 HP, +10 Stamina, +35% dagger damage)
+- **Archer**: Ranged specialist (-35 HP, +8 Stamina, +40% bow/crossbow damage)
+
+### 📁 Configuration Files
+
+#### Two Separate JSON Files
+Now you can edit races and classes independently:
+
+**races_config.json** - Base racial traits
+```json
+{
+  "id": "orc",
+  "displayName": "Orc",
+  "healthBonus": 75.0,
+  "staminaBonus": 0.0,
+  "strengths": ["175 HP (+75)", "Powerful physique", "Melee combat specialist"],
+  "weaknesses": ["110 Stamina (+0)", "Slow stamina regeneration"]
+}
+```
+
+**classes_config.json** - Combat specializations
+```json
+{
+  "id": "berserker",
+  "displayName": "Berserker",
+  "healthModifier": -25.0,
+  "staminaModifier": 8.0,
+  "weapons": [{
+    "types": ["axe", "battleaxe"],
+    "damageMultiplier": 1.3
+  }],
+  "strengths": ["Devastating axe attacks (+30% damage)", "+8 Stamina bonus"],
+  "weaknesses": ["-25 Health penalty", "High-risk playstyle"]
+}
+```
+
+### 🎮 How It Works
+
+1. **First Selection**: Player chooses their race (Elf, Orc, or Human)
+2. **Second Selection**: Player chooses their class (None, Berserker, Swordsman, etc.)
+3. **Combined Stats**: The system adds race bonuses + class modifiers together
+   - Example: Orc (+75 HP) + Berserker (-25 HP) = **+50 total HP bonus**
+
+### 🔧 Technical Changes
+
+#### New Components
+- `ClassConfig.java` - JSON model for class definitions
+- `ClassConfigLoader.java` - Manages classes_config.json loading/saving
+- `ClassSelectionPage.java` - Second-step UI for class selection
+- `class_selection.ui` - UI layout for class selection screen
+
+#### Modified Systems
+- `RaceData` - Now stores both `selectedRace` and `selectedClass`
+- `RaceManager.applyRaceAndClass()` - Combines race + class bonuses
+- `RaceStorage` - Updated format to `uuid|username|raceId|classId`
+- `RaceConfigLoader` - Simplified to 3 base races (removed weapon specializations)
+- `RaceDamageBoostSystem` - Now applies class weapon bonuses instead of race weapons
+
+#### UI Flow
+- Race selection → Class selection → Combined application
+- Back button in class selection returns to race selection
+- Pagination supported in both screens (4 items per page)
+
+### 🚀 Command Updates
+
+#### `/raceinfo`
+Now displays both race and class:
+```
+Race: Orc - Berserker (selected today at 18:24:35)
+```
+
+---
+
 ## Version 2026.1.25 - JSON Update (The Most Requested Feature!)
 
 ### 🎉 What's New - Community-Requested Feature!

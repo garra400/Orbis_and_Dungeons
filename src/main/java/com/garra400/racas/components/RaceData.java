@@ -7,13 +7,13 @@ import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * Persistent component that stores a player's selected race.
+ * Persistent component that stores a player's selected race AND class.
  * This data is automatically saved and loaded by Hytale's persistence system.
  * 
  * Benefits:
  * - Persists across player reconnections
  * - Persists across server restarts
- * - Explicitly tracks which race was chosen (not inferred from stats)
+ * - Explicitly tracks which race + class was chosen
  * - Compatible with other mods that modify stats
  */
 public class RaceData implements Component<EntityStore> {
@@ -25,13 +25,17 @@ public class RaceData implements Component<EntityStore> {
     public static final BuilderCodec<RaceData> CODEC;
 
     /**
-     * The selected race: "ELF", "ORC", "HUMAN", or null if not yet selected.
+     * The selected race: "elf", "orc", "human", etc.
      */
     private String selectedRace;
 
     /**
+     * The selected class: "berserker", "swordsman", "none", etc.
+     */
+    private String selectedClass;
+
+    /**
      * Timestamp (as string) when the race was selected.
-     * Useful for tracking/debugging.
      */
     private String selectionTimestamp;
 
@@ -40,13 +44,14 @@ public class RaceData implements Component<EntityStore> {
      */
     public RaceData() {
         this.selectedRace = null;
+        this.selectedClass = "none"; // Default to no class
         this.selectionTimestamp = "0";
     }
 
     /**
      * Gets the selected race.
      * 
-     * @return Race name ("ELF", "ORC", "HUMAN") or null if not selected
+     * @return Race ID or null if not selected
      */
     public String getSelectedRace() {
         return selectedRace;
@@ -55,10 +60,28 @@ public class RaceData implements Component<EntityStore> {
     /**
      * Sets the selected race.
      * 
-     * @param race Race name ("ELF", "ORC", "HUMAN") or null
+     * @param race Race ID
      */
     public void setSelectedRace(String race) {
         this.selectedRace = race;
+    }
+
+    /**
+     * Gets the selected class.
+     * 
+     * @return Class ID (defaults to "none")
+     */
+    public String getSelectedClass() {
+        return selectedClass != null ? selectedClass : "none";
+    }
+
+    /**
+     * Sets the selected class.
+     * 
+     * @param classId Class ID
+     */
+    public void setSelectedClass(String classId) {
+        this.selectedClass = classId;
     }
 
     /**
@@ -148,6 +171,7 @@ public class RaceData implements Component<EntityStore> {
     public Component<EntityStore> clone() {
         RaceData cloned = new RaceData();
         cloned.selectedRace = this.selectedRace;
+        cloned.selectedClass = this.selectedClass;
         cloned.selectionTimestamp = this.selectionTimestamp;
         return cloned;
     }
@@ -168,6 +192,12 @@ public class RaceData implements Component<EntityStore> {
                 RaceData::setSelectedRace,    // Setter method reference
                 RaceData::getSelectedRace     // Getter method reference
             ).add()
+            // Serialize selectedClass field
+            .append(
+                new KeyedCodec<>("SelectedClass", Codec.STRING),
+                RaceData::setSelectedClass,
+                RaceData::getSelectedClass
+            ).add()
             // Serialize selectionTimestamp as string
             .append(
                 new KeyedCodec<>("SelectionTimestamp", Codec.STRING),
@@ -181,6 +211,7 @@ public class RaceData implements Component<EntityStore> {
     public String toString() {
         return "RaceData{" +
                 "selectedRace='" + selectedRace + '\'' +
+                ", selectedClass='" + selectedClass + '\'' +
                 ", selectionTimestamp=" + selectionTimestamp +
                 '}';
     }

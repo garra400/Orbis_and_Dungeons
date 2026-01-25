@@ -1,0 +1,355 @@
+{
+  "balance_version": "2026.1.26.1",
+  "balance_principle": "1 Stamina = 5 Health",
+  "notes": "This file contains balanced class configurations based on community feedback and the 1:5 stamina-to-health ratio. Use these values as reference when editing classes_config.json.",
+  
+  "classes": [
+    {
+      "id": "none",
+      "displayName": "None",
+      "tagline": "Pure racial traits with no specialization.",
+      "healthModifier": 0.0,
+      "staminaModifier": 0.0,
+      "ehp_base": 100,
+      "ehp_formula": "100 + 0 + (0 × 5) = 100",
+      "strengths": [
+        "No class restrictions",
+        "Pure racial bonuses",
+        "Versatile"
+      ],
+      "weaknesses": [
+        "No weapon specialization",
+        "No additional bonuses"
+      ],
+      "weapons": []
+    },
+    {
+      "id": "berserker",
+      "displayName": "Berserker",
+      "tagline": "Reckless warrior who trades defense for raw power.",
+      "healthModifier": -25.0,
+      "staminaModifier": 8.0,
+      "ehp_base": 115,
+      "ehp_formula": "100 - 25 + (8 × 5) = 115",
+      "damage_justification": "30% damage justified by slow axe attacks and exposure in melee combat",
+      "strengths": [
+        "+30% axe damage",
+        "118 Stamina (+8)",
+        "High burst damage",
+        "Aggressive playstyle"
+      ],
+      "weaknesses": [
+        "75 HP (-25)",
+        "Glass cannon",
+        "High risk gameplay",
+        "Exposed in combat"
+      ],
+      "weapons": [
+        {
+          "types": ["axe", "battleaxe"],
+          "damageMultiplier": 1.30
+        }
+      ]
+    },
+    {
+      "id": "swordsman",
+      "displayName": "Swordsman",
+      "tagline": "Balanced warrior with sword mastery.",
+      "healthModifier": 10.0,
+      "staminaModifier": 5.0,
+      "ehp_base": 135,
+      "ehp_formula": "100 + 10 + (5 × 5) = 135",
+      "damage_justification": "20% damage for balanced, medium-risk weapon",
+      "strengths": [
+        "+20% sword damage",
+        "110 HP (+10)",
+        "115 Stamina (+5)",
+        "Balanced stats"
+      ],
+      "weaknesses": [
+        "Requires swords to shine",
+        "No defensive specialization",
+        "Average in all areas"
+      ],
+      "weapons": [
+        {
+          "types": ["sword", "longsword", "greatsword"],
+          "damageMultiplier": 1.20
+        }
+      ]
+    },
+    {
+      "id": "crusader",
+      "displayName": "Crusader",
+      "tagline": "Armored champion wielding heavy weapons.",
+      "healthModifier": 30.0,
+      "staminaModifier": 0.0,
+      "ehp_base": 130,
+      "ehp_formula": "100 + 30 + (0 × 5) = 130",
+      "damage_justification": "15% damage for tank class with high survivability",
+      "strengths": [
+        "+15% mace/hammer damage",
+        "130 HP (+30)",
+        "Frontline tank",
+        "High survivability"
+      ],
+      "weaknesses": [
+        "110 Stamina (+0)",
+        "Slow playstyle",
+        "Low mobility",
+        "Moderate damage output"
+      ],
+      "weapons": [
+        {
+          "types": ["mace", "hammer", "warhammer"],
+          "damageMultiplier": 1.15
+        }
+      ]
+    },
+    {
+      "id": "assassin",
+      "displayName": "Assassin",
+      "tagline": "Silent killer who strikes from the shadows.",
+      "healthModifier": -35.0,
+      "staminaModifier": 10.0,
+      "ehp_base": 115,
+      "ehp_formula": "100 - 35 + (10 × 5) = 115",
+      "balance_changes": {
+        "old_health": -20.0,
+        "new_health": -35.0,
+        "old_damage": 1.35,
+        "new_damage": 1.22,
+        "reason": "Community feedback: Daggers have built-in safety (charged attack mobility). Reduced damage and increased penalty to match risk level."
+      },
+      "damage_justification": "22% damage because daggers have built-in Hit-n-Run safety. Lower than 30% despite being melee due to charged attack mobility.",
+      "strengths": [
+        "+22% dagger damage",
+        "120 Stamina (+10)",
+        "High mobility",
+        "Hit-n-run specialist"
+      ],
+      "weaknesses": [
+        "65 HP (-35)",
+        "Very fragile",
+        "High skill floor",
+        "Melee glass cannon"
+      ],
+      "weapons": [
+        {
+          "types": ["dagger"],
+          "damageMultiplier": 1.22
+        }
+      ]
+    },
+    {
+      "id": "archer",
+      "displayName": "Archer",
+      "tagline": "Master of ranged combat, deadly from afar.",
+      "healthModifier": -35.0,
+      "staminaModifier": 8.0,
+      "ehp_base": 105,
+      "ehp_formula": "100 - 35 + (8 × 5) = 105",
+      "damage_justification": "40% damage justified by extreme fragility and ranged safety",
+      "strengths": [
+        "+40% bow/crossbow damage",
+        "118 Stamina (+8)",
+        "Ranged superiority",
+        "Safe distance fighting"
+      ],
+      "weaknesses": [
+        "65 HP (-35)",
+        "Extremely fragile",
+        "Positioning critical",
+        "Useless in melee"
+      ],
+      "weapons": [
+        {
+          "types": ["bow", "crossbow", "longbow"],
+          "damageMultiplier": 1.40
+        }
+      ]
+    }
+  ],
+  
+  "race_class_combinations": [
+    {
+      "race": "Elf",
+      "race_bonuses": {"health": 0, "stamina": 15, "ehp": 175},
+      "class": "Assassin",
+      "class_bonuses": {"health": -35, "stamina": 10, "ehp": 115},
+      "combined_stats": {
+        "total_hp": 65,
+        "total_stamina": 135,
+        "ehp": 190,
+        "damage_multiplier": 1.22,
+        "balance_rating": "BALANCED",
+        "note": "High mobility, fragile, moderate damage. Fixed from previous 205 EHP overpowered state."
+      }
+    },
+    {
+      "race": "Orc",
+      "race_bonuses": {"health": 75, "stamina": 0, "ehp": 175},
+      "class": "Berserker",
+      "class_bonuses": {"health": -25, "stamina": 8, "ehp": 115},
+      "combined_stats": {
+        "total_hp": 150,
+        "total_stamina": 118,
+        "ehp": 190,
+        "damage_multiplier": 1.30,
+        "balance_rating": "BALANCED",
+        "note": "Bruiser with high burst damage, exposed in combat."
+      }
+    },
+    {
+      "race": "Human",
+      "race_bonuses": {"health": 35, "stamina": 5, "ehp": 160},
+      "class": "Swordsman",
+      "class_bonuses": {"health": 10, "stamina": 5, "ehp": 135},
+      "combined_stats": {
+        "total_hp": 145,
+        "total_stamina": 120,
+        "ehp": 195,
+        "damage_multiplier": 1.20,
+        "balance_rating": "BALANCED",
+        "note": "Well-rounded fighter, jack-of-all-trades."
+      }
+    },
+    {
+      "race": "Elf",
+      "race_bonuses": {"health": 0, "stamina": 15, "ehp": 175},
+      "class": "Archer",
+      "class_bonuses": {"health": -35, "stamina": 8, "ehp": 105},
+      "combined_stats": {
+        "total_hp": 65,
+        "total_stamina": 133,
+        "ehp": 180,
+        "damage_multiplier": 1.40,
+        "balance_rating": "BALANCED",
+        "note": "Ultimate ranged glass cannon, extreme damage from safety."
+      }
+    },
+    {
+      "race": "Orc",
+      "race_bonuses": {"health": 75, "stamina": 0, "ehp": 175},
+      "class": "Crusader",
+      "class_bonuses": {"health": 30, "stamina": 0, "ehp": 130},
+      "combined_stats": {
+        "total_hp": 205,
+        "total_stamina": 110,
+        "ehp": 205,
+        "damage_multiplier": 1.15,
+        "balance_rating": "BALANCED",
+        "note": "Maximum tank with moderate damage, slow but unkillable."
+      }
+    },
+    {
+      "race": "Orc",
+      "race_bonuses": {"health": 75, "stamina": 0, "ehp": 175},
+      "class": "Assassin",
+      "class_bonuses": {"health": -35, "stamina": 10, "ehp": 115},
+      "combined_stats": {
+        "total_hp": 140,
+        "total_stamina": 120,
+        "ehp": 190,
+        "damage_multiplier": 1.22,
+        "balance_rating": "BALANCED",
+        "note": "Unconventional bruiser assassin, tanky hit-n-run fighter."
+      }
+    }
+  ],
+  
+  "balance_rules": {
+    "minimum_ehp": 140,
+    "maximum_ehp": 220,
+    "minimum_damage_multiplier": 1.0,
+    "maximum_damage_multiplier": 1.5,
+    "stamina_to_health_ratio": 5.0,
+    
+    "damage_by_safety": {
+      "bow_crossbow": {"safety": "very_high", "multiplier_range": "1.35 - 1.45"},
+      "dagger": {"safety": "high", "multiplier_range": "1.20 - 1.25"},
+      "sword": {"safety": "medium", "multiplier_range": "1.18 - 1.25"},
+      "axe": {"safety": "low", "multiplier_range": "1.28 - 1.35"},
+      "mace_hammer": {"safety": "very_low", "multiplier_range": "1.12 - 1.18"}
+    },
+    
+    "class_archetype_targets": {
+      "glass_cannon": {"ehp": "100-120", "damage": "1.30-1.45"},
+      "balanced": {"ehp": "120-140", "damage": "1.15-1.25"},
+      "tank": {"ehp": "130-150", "damage": "1.08-1.20"},
+      "support": {"ehp": "110-130", "damage": "1.05-1.15"}
+    }
+  },
+  
+  "testing_checklist": [
+    "Calculate EHP for base class (without race)",
+    "Test with Elf (stamina specialist) - should not exceed 210 EHP",
+    "Test with Orc (health specialist) - should not exceed 220 EHP",
+    "Test with Human (balanced) - should be around 180-200 EHP",
+    "Verify damage multiplier matches weapon safety level",
+    "Ensure glass cannons have <120 base EHP",
+    "Ensure tanks have >130 base EHP",
+    "Check that no combo has high EHP AND high damage together"
+  ],
+  
+  "common_balance_mistakes": [
+    {
+      "mistake": "Giving stamina classes too much damage",
+      "example": "Assassin with -20 HP, +10 Stamina, +35% damage",
+      "why_wrong": "Stamina = mobility = safety. High safety + high damage = overpowered.",
+      "fix": "Reduce damage to 20-25% or increase health penalty to -35"
+    },
+    {
+      "mistake": "Not accounting for weapon safety",
+      "example": "Giving daggers same damage as axes",
+      "why_wrong": "Daggers have built-in Hit-n-Run. Axes are slow and expose you.",
+      "fix": "Daggers should have 5-10% less damage than axes despite both being melee"
+    },
+    {
+      "mistake": "Ignoring charged attacks",
+      "example": "High damage multiplier on weapons with powerful charged attacks",
+      "why_wrong": "Multiplier applies to charged damage too, creating burst damage spikes.",
+      "fix": "Reduce multiplier for weapons with strong charged attacks (daggers, bows)"
+    },
+    {
+      "mistake": "Creating low-risk high-reward classes",
+      "example": "Tank with high damage bonus",
+      "why_wrong": "No trade-off = boring gameplay and overpowered.",
+      "fix": "Tanks get low damage, glass cannons get high damage"
+    }
+  ],
+  
+  "server_admin_presets": {
+    "hardcore_mode": {
+      "description": "Extreme penalties, high rewards",
+      "assassin": {"healthModifier": -50, "staminaModifier": 12, "damageMultiplier": 1.30},
+      "berserker": {"healthModifier": -40, "staminaModifier": 10, "damageMultiplier": 1.40},
+      "archer": {"healthModifier": -50, "staminaModifier": 10, "damageMultiplier": 1.50}
+    },
+    
+    "casual_mode": {
+      "description": "Lower penalties, more forgiving",
+      "assassin": {"healthModifier": -25, "staminaModifier": 8, "damageMultiplier": 1.20},
+      "berserker": {"healthModifier": -15, "staminaModifier": 6, "damageMultiplier": 1.25},
+      "archer": {"healthModifier": -25, "staminaModifier": 6, "damageMultiplier": 1.35}
+    },
+    
+    "pvp_focused": {
+      "description": "Balanced for player vs player combat",
+      "assassin": {"healthModifier": -40, "staminaModifier": 12, "damageMultiplier": 1.18},
+      "berserker": {"healthModifier": -30, "staminaModifier": 10, "damageMultiplier": 1.22},
+      "archer": {"healthModifier": -40, "staminaModifier": 10, "damageMultiplier": 1.30},
+      "note": "Lower damage multipliers for PvP to prevent one-shots"
+    },
+    
+    "high_stamina_server": {
+      "description": "Emphasize mobility and skill",
+      "all_classes": {
+        "note": "Reduce health bonuses, increase stamina bonuses",
+        "conversion_rule": "For every 5 HP reduced, add 1 Stamina"
+      },
+      "assassin": {"healthModifier": -40, "staminaModifier": 15, "damageMultiplier": 1.22},
+      "berserker": {"healthModifier": -30, "staminaModifier": 12, "damageMultiplier": 1.30}
+    }
+  }
+}

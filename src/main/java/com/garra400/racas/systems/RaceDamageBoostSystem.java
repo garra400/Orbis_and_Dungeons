@@ -85,7 +85,7 @@ public class RaceDamageBoostSystem extends DamageEventSystem {
             return;
         }
 
-        float multiplier = RaceManager.getWeaponDamageMultiplier(raceId, weapon);
+        float multiplier = RaceManager.getWeaponDamageMultiplier(player, weapon);
         if (multiplier > 1.0f) {
             damage.setAmount(damage.getAmount() * multiplier);
         }

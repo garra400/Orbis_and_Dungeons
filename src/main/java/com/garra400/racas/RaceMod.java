@@ -6,6 +6,7 @@ import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.ClassConfigLoader;
 import com.garra400.racas.storage.RaceConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.garra400.racas.systems.RaceDamageBoostSystem;
@@ -42,6 +43,7 @@ public class RaceMod extends JavaPlugin {
     protected void start() {
         // Init configuration system - must be first
         RaceConfigLoader.init(getDataDirectory());
+        ClassConfigLoader.init(getDataDirectory());
         
         // Load races from JSON config
         RaceRegistry.loadFromConfig();

@@ -3,6 +3,10 @@ package com.garra400.racas;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.ClassConfig;
+import com.garra400.racas.storage.ClassConfigLoader;
+import com.garra400.racas.storage.RaceConfig;
+import com.garra400.racas.storage.RaceConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
@@ -81,6 +85,49 @@ public final class RaceManager {
         }
     }
 
+    /**
+     * Aplica raça e classe ao jogador, combinando os bônus de ambos.
+     */
+    public static void applyRaceAndClass(Player player, String raceId, String classId) {
+        if (player == null || raceId == null || classId == null) {
+            return;
+        }
+
+        RaceDefinition race = RaceRegistry.get(raceId);
+        ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+
+        if (classConfig == null) {
+            return;
+        }
+
+        // Combina os bônus de raça e classe
+        int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
+        int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
+
+        // Aplica os stats combinados
+        EntityStatMap stats = EntityStatsModule.get(player);
+        if (stats != null) {
+            applyBonus(stats, "Health", totalHealthBonus);
+            applyBonus(stats, "Stamina", totalStaminaBonus);
+            stats.update();
+        }
+
+        // Salva a seleção de raça e classe
+        saveRaceAndClassSelection(player.getPlayerRef(), raceId, classId, true);
+
+        // Atualiza o cache
+        cacheRace(player, raceId);
+        String username = null;
+        try {
+            PlayerRef ref = player.getPlayerRef();
+            if (ref != null) {
+                username = ref.getUsername();
+            }
+        } catch (Exception ignored) {
+        }
+        RaceStorage.putRaceAndClass(player.getUuid(), username, raceId, classId);
+    }
+
     private static void saveRaceSelection(PlayerRef playerRef, String raceId, boolean updateTimestamp) {
         if (playerRef == null || raceId == null || raceDataType == null) {
             return;
@@ -94,6 +141,29 @@ public final class RaceManager {
 
             RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
             raceData.setSelectedRace(raceId);
+            if (updateTimestamp) {
+                raceData.setSelectionTimestampLong(System.currentTimeMillis());
+            }
+            holder.putComponent(raceDataType, (RaceData) raceData.clone());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void saveRaceAndClassSelection(PlayerRef playerRef, String raceId, String classId, boolean updateTimestamp) {
+        if (playerRef == null || raceId == null || classId == null || raceDataType == null) {
+            return;
+        }
+
+        try {
+            Holder holder = playerRef.getHolder();
+            if (holder == null) {
+                return;
+            }
+
+            RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
+            raceData.setSelectedRace(raceId);
+            raceData.setSelectedClass(classId);
             if (updateTimestamp) {
                 raceData.setSelectionTimestampLong(System.currentTimeMillis());
             }
@@ -148,6 +218,30 @@ public final class RaceManager {
         }
     }
 
+    public static String getPlayerClass(Player player) {
+        if (player == null || raceDataType == null) {
+            return null;
+        }
+
+        PlayerRef playerRef = player.getPlayerRef();
+        if (playerRef == null) {
+            return "none";
+        }
+
+        try {
+            Holder holder = playerRef.getHolder();
+            if (holder != null) {
+                RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
+                if (raceData != null && raceData.getSelectedClass() != null) {
+                    return raceData.getSelectedClass();
+                }
+            }
+            return "none";
+        } catch (Exception e) {
+            return "none";
+        }
+    }
+
     public static RaceData getPlayerRaceData(Player player) {
         if (player == null || raceDataType == null) {
             return null;
@@ -172,33 +266,49 @@ public final class RaceManager {
 
     public static String getPlayerRaceInfo(Player player) {
         String raceId = getPlayerRace(player);
+        String classId = getPlayerClass(player);
         RaceData data = getPlayerRaceData(player);
-        return formatRaceInfo(raceId, data);
+        return formatRaceInfo(raceId, classId, data);
     }
 
     public static String formatRaceInfo(String raceId, RaceData data) {
+        String classId = (data != null) ? data.getSelectedClass() : null;
+        return formatRaceInfo(raceId, classId, data);
+    }
+
+    public static String formatRaceInfo(String raceId, String classId, RaceData data) {
         if (raceId == null) {
             return "No race selected";
         }
 
         RaceDefinition def = RaceRegistry.get(raceId);
         String raceName = def.displayName();
+        
+        String className = "None";
+        if (classId != null && !classId.equals("none")) {
+            ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+            if (classConfig != null) {
+                className = classConfig.displayName;
+            }
+        }
+
+        String raceAndClass = raceName + " - " + className;
 
         if (data == null || !data.hasSelectedRace() || data.getSelectionTimestampLong() == 0L) {
-            return raceName;
+            return raceAndClass;
         }
 
         String date = data.getSelectionDateFormatted();
         long days = data.getDaysSinceSelection();
 
         if (days == 0) {
-            return raceName + " (selected today at " + date + ")";
+            return raceAndClass + " (selected today at " + date + ")";
         } else if (days == 1) {
-            return raceName + " (selected yesterday at " + date + ")";
+            return raceAndClass + " (selected yesterday at " + date + ")";
         } else if (days > 0) {
-            return raceName + " (selected " + days + " days ago on " + date + ")";
+            return raceAndClass + " (selected " + days + " days ago on " + date + ")";
         } else {
-            return raceName + " (selected on " + date + ")";
+            return raceAndClass + " (selected on " + date + ")";
         }
     }
 
@@ -270,14 +380,31 @@ public final class RaceManager {
     }
 
     public static float getWeaponDamageMultiplier(Player player, ItemStack weapon) {
-        if (player == null) {
+        String classId = getPlayerClass(player);
+        if (classId == null || classId.equals("none")) {
             return 1.0f;
         }
-        String raceId = getPlayerRace(player);
-        return getWeaponDamageMultiplier(raceId, weapon);
+        
+        ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+        if (classConfig == null || classConfig.weapons == null) {
+            return 1.0f;
+        }
+
+        String weaponId = weapon.getItem().getId().toString().toLowerCase();
+        for (ClassConfig.WeaponConfig weaponConfig : classConfig.weapons) {
+            if (weaponConfig.types != null) {
+                for (String type : weaponConfig.types) {
+                    if (weaponId.contains(type.toLowerCase())) {
+                        return weaponConfig.damageMultiplier;
+                    }
+                }
+            }
+        }
+        return 1.0f;
     }
 
     public static float getWeaponDamageMultiplier(String raceId, ItemStack weapon) {
+        // Deprecated: Use getWeaponDamageMultiplier(Player, ItemStack) instead
         RaceDefinition race = RaceRegistry.get(raceId);
         return race.resolveWeaponMultiplier(weapon);
     }

@@ -1,0 +1,288 @@
+Group {
+  Anchor: (Width: 900, Height: 600);
+  Background: #1a1a1a(0.95);
+  LayoutMode: Top;
+  Padding: (Full: 20);
+
+  Label #Title {
+    Text: "Select Your Class";
+    Anchor: (Height: 40);
+    Style: (
+      FontSize: 24,
+      RenderBold: true,
+      TextColor: #ffffff
+    );
+  }
+
+  Label #Subtitle {
+    Text: "Choose a combat specialization.";
+    Anchor: (Height: 25);
+    Style: (
+      FontSize: 14,
+      TextColor: #c0c0c0
+    );
+  }
+
+  Group {
+    Anchor: (Height: 10);
+  }
+
+  Group #Content {
+    LayoutMode: Left;
+    FlexWeight: 1;
+
+    Group #ClassListPanel {
+      Anchor: (Width: 280);
+      LayoutMode: Top;
+      Padding: (Right: 10);
+    }
+
+    Group #ClassDetailPanel {
+      FlexWeight: 1;
+      LayoutMode: Top;
+      Padding: (Full: 16);
+      Background: #0f0f0f(0.85);
+
+      Label #SelectedClassName {
+        Text: "None";
+        Anchor: (Height: 30);
+        Style: (
+          FontSize: 20,
+          RenderBold: true,
+          TextColor: #ffffff
+        );
+      }
+
+      Label #SelectedClassTagline {
+        Text: "Pure racial traits with no specialization.";
+        Anchor: (Height: 22);
+        Style: (
+          FontSize: 13,
+          TextColor: #c0c0c0
+        );
+      }
+
+      Group {
+        Anchor: (Height: 15);
+      }
+
+      Label {
+        Text: "STRENGTHS";
+        Anchor: (Height: 22);
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #5cc45c
+        );
+      }
+
+      Label #PositiveLine1 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #aaffaa
+        );
+      }
+
+      Label #PositiveLine2 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #aaffaa
+        );
+      }
+
+      Label #PositiveLine3 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #aaffaa
+        );
+      }
+
+      Label #PositiveLine4 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #aaffaa
+        );
+      }
+
+      Label #PositiveLine5 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #aaffaa
+        );
+      }
+
+      Group {
+        Anchor: (Height: 15);
+      }
+
+      Label {
+        Text: "WEAKNESSES";
+        Anchor: (Height: 22);
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #cc5555
+        );
+      }
+
+      Label #NegativeLine1 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffaaaa
+        );
+      }
+
+      Label #NegativeLine2 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffaaaa
+        );
+      }
+
+      Label #NegativeLine3 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffaaaa
+        );
+      }
+
+      Label #NegativeLine4 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffaaaa
+        );
+      }
+
+      Label #NegativeLine5 {
+        Text: "";
+        Anchor: (Height: 20);
+        Style: (
+          FontSize: 12,
+          TextColor: #ffaaaa
+        );
+      }
+    }
+  }
+
+  Group {
+    Anchor: (Height: 15);
+  }
+
+  Group {
+    LayoutMode: Left;
+    Anchor: (Height: 50);
+
+    Button #BackToRace {
+      Anchor: (Width: 120, Height: 50);
+      Padding: (Full: 10);
+      Background: #3a3a3a;
+
+      Label {
+        Text: "< Back";
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+
+    Group {
+      Anchor: (Width: 10);
+    }
+
+    Button #PrevPageButton {
+      Anchor: (Width: 120, Height: 50);
+      Padding: (Full: 10);
+      Background: #3a3a3a;
+
+      Label {
+        Text: "< Previous";
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+
+    Group {
+      Anchor: (Width: 10);
+    }
+
+    Label #PageInfo {
+      Text: "Page 1 / 2";
+      Anchor: (Width: 100);
+      Style: (
+        FontSize: 14,
+        TextColor: #ffffff,
+        HorizontalAlignment: Center,
+        VerticalAlignment: Center
+      );
+    }
+
+    Group {
+      Anchor: (Width: 10);
+    }
+
+    Button #NextPageButton {
+      Anchor: (Width: 120, Height: 50);
+      Padding: (Full: 10);
+      Background: #3a3a3a;
+
+      Label {
+        Text: "Next >";
+        Style: (
+          FontSize: 14,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+
+    Group {
+      Anchor: (Width: 20);
+    }
+
+    Button #ConfirmSelection {
+      Anchor: (Width: 200, Height: 50);
+      Padding: (Full: 12);
+      Background: #2d7b4c;
+
+      Label {
+        Text: "Confirm Selection";
+        Style: (
+          FontSize: 16,
+          RenderBold: true,
+          TextColor: #ffffff,
+          HorizontalAlignment: Center,
+          VerticalAlignment: Center
+        );
+      }
+    }
+  }
+}

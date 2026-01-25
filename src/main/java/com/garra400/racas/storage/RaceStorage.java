@@ -9,8 +9,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * File-backed cache of player races.
- * Format: one entry per line -> uuid|username|raceId
+ * File-backed cache of player races and classes.
+ * Format: one entry per line -> uuid|username|raceId|classId
  */
 public final class RaceStorage {
 
@@ -38,14 +38,15 @@ public final class RaceStorage {
         }
         try {
             for (String line : Files.readAllLines(storageFile, StandardCharsets.UTF_8)) {
-                String[] parts = line.split("\\|", 3);
+                String[] parts = line.split("\\|", 4);
                 if (parts.length < 3) {
                     continue;
                 }
                 UUID uuid = UUID.fromString(parts[0]);
                 String name = parts[1];
                 String race = parts[2];
-                CACHE.put(uuid, new Entry(uuid, name, race));
+                String classId = parts.length >= 4 ? parts[3] : "none";
+                CACHE.put(uuid, new Entry(uuid, name, race, classId));
             }
         } catch (Exception e) {
             // ignore corrupt file
@@ -65,6 +66,7 @@ public final class RaceStorage {
                 sb.append(entry.uuid.toString())
                   .append("|").append(entry.username == null ? "" : entry.username)
                   .append("|").append(entry.raceId)
+                  .append("|").append(entry.classId == null ? "none" : entry.classId)
                   .append("\n");
             }
             Files.writeString(storageFile, sb.toString(), StandardCharsets.UTF_8);
@@ -77,7 +79,17 @@ public final class RaceStorage {
         if (uuid == null || raceId == null) {
             return;
         }
-        CACHE.put(uuid, new Entry(uuid, username, raceId));
+        Entry existing = CACHE.get(uuid);
+        String classId = (existing != null && existing.classId != null) ? existing.classId : "none";
+        CACHE.put(uuid, new Entry(uuid, username, raceId, classId));
+        save();
+    }
+
+    public static void putRaceAndClass(UUID uuid, String username, String raceId, String classId) {
+        if (uuid == null || raceId == null || classId == null) {
+            return;
+        }
+        CACHE.put(uuid, new Entry(uuid, username, raceId, classId));
         save();
     }
 
@@ -106,5 +118,5 @@ public final class RaceStorage {
         save();
     }
 
-    public record Entry(UUID uuid, String username, String raceId) {}
+    public record Entry(UUID uuid, String username, String raceId, String classId) {}
 }

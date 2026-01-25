@@ -64,7 +64,7 @@ public final class RaceConfigLoader {
     private static void generateDefaultConfig() {
         configs.clear();
         
-        // Elf - Base: 100 HP, 10 Stamina
+        // Elf - High stamina, mobility focus
         configs.put("elf", new RaceConfig(
             "elf",
             "Elf",
@@ -76,7 +76,7 @@ public final class RaceConfigLoader {
             List.of()
         ));
 
-        // Orc
+        // Orc - Maximum health, tank
         configs.put("orc", new RaceConfig(
             "orc",
             "Orc",
@@ -88,7 +88,7 @@ public final class RaceConfigLoader {
             List.of()
         ));
 
-        // Human
+        // Human - Balanced baseline
         configs.put("human", new RaceConfig(
             "human",
             "Human",
@@ -98,66 +98,6 @@ public final class RaceConfigLoader {
             List.of("135 HP (+35)", "15 Stamina (+5)", "Well-rounded stats"),
             List.of("No specialization", "Average at everything"),
             List.of()
-        ));
-
-        // Berserker
-        configs.put("berserker", new RaceConfig(
-            "berserker",
-            "Berserker",
-            "Reckless warrior who trades defense for raw power.",
-            -25f,
-            8f,
-            List.of("+30% axe damage", "18 Stamina (+8)", "High burst damage"),
-            List.of("75 HP (-25)", "Glass cannon", "High risk gameplay"),
-            List.of(new RaceConfig.WeaponConfig(List.of("axe"), 1.30f))
-        ));
-
-        // Swordsman
-        configs.put("swordsman", new RaceConfig(
-            "swordsman",
-            "Swordsman",
-            "Balanced warrior with sword mastery.",
-            10f,
-            5f,
-            List.of("+20% sword damage", "110 HP (+10)", "15 Stamina (+5)"),
-            List.of("Requires swords to shine", "No defensive bonuses"),
-            List.of(new RaceConfig.WeaponConfig(List.of("sword"), 1.20f))
-        ));
-
-        // Crusader
-        configs.put("crusader", new RaceConfig(
-            "crusader",
-            "Crusader",
-            "Armored champion wielding heavy weapons.",
-            30f,
-            0f,
-            List.of("+15% mace/hammer damage", "130 HP (+30)", "Frontline fighter"),
-            List.of("10 Stamina (base)", "Slow playstyle"),
-            List.of(new RaceConfig.WeaponConfig(List.of("mace", "hammer"), 1.15f))
-        ));
-
-        // Assassin
-        configs.put("assassin", new RaceConfig(
-            "assassin",
-            "Assassin",
-            "Silent killer who strikes from the shadows.",
-            -20f,
-            10f,
-            List.of("+35% dagger damage", "20 Stamina (+10)", "High mobility"),
-            List.of("80 HP (-20)", "Very fragile", "High skill floor"),
-            List.of(new RaceConfig.WeaponConfig(List.of("dagger"), 1.35f))
-        ));
-
-        // Archer
-        configs.put("archer", new RaceConfig(
-            "archer",
-            "Archer",
-            "Master of ranged combat, deadly from afar.",
-            -35f,
-            8f,
-            List.of("+40% bow/crossbow damage", "18 Stamina (+8)", "Ranged superiority"),
-            List.of("65 HP (-35)", "Extremely fragile", "Positioning critical"),
-            List.of(new RaceConfig.WeaponConfig(List.of("bow", "crossbow"), 1.40f))
         ));
     }
 

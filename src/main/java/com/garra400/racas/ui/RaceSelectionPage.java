@@ -170,12 +170,8 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         }
 
         if ("confirm".equals(data.action)) {
-            try {
-                RaceManager.applyRace(player, selectedRace, playerRef);
-            } catch (Exception e) {
-                // Silently fail
-            }
-            player.getPageManager().setPage(ref, store, Page.None);
+            // Move to class selection instead of applying immediately
+            player.getPageManager().openCustomPage(ref, store, new ClassSelectionPage(playerRef, selectedRace));
         }
     }
 
