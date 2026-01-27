@@ -2,6 +2,78 @@
 
 ---
 
+## Version 2026.1.27 (Build 48905) - Mana System, New Race & Class, JoinScreen Fix
+
+### 🎉 What's New
+
+#### Separate Mana System Implementation
+- **Mana is now a separate stat** from Stamina (previously conflated)
+- Uses Hytale's native `DefaultEntityStatTypes.MANA` stat
+- Classes can now modify Health, Stamina, AND Mana independently
+- Base mana value: 100
+
+#### New Race: Dwarf
+- **Stats:** +50 Health (150 total), +0 Stamina (10 base)
+- **Resistances:** 30% Physical damage resistance, 50% Fall damage resistance
+- **Theme:** Extreme tank with unbreakable resilience
+- **Strengths:** Stone Skin (Physical resistance), Sure-footed (Fall resistance), Extreme survivability
+- **Weaknesses:** Very low mobility (10 stamina), Slow movement, Short stature
+- **Design:** Pure tank race with highest HP and strong defensive resistances, trades all mobility for survivability
+
+#### New Class: Mage
+- **Stats:** -40 Health (60 HP), +12 Stamina (22 total), +100 Mana (100 total)
+- **EHP:** 120 (calculated: 60 + 12×5)
+- **Damage Bonus:** +25% with staff/wand/scepter
+- **Theme:** Glass cannon spellcaster with high magical energy
+- **Strengths:** Extended mana pool, High stamina, Spell casting specialist
+- **Weaknesses:** Extremely fragile (60 HP), Vulnerable in melee, Mana dependent
+
+#### JoinScreen Mod Compatibility Fix
+- **Problem:** Race selection UI doesn't appear with JoinScreen mod installed
+- **Solution:** New `/raceselect` command to manually open race/class selection UI
+- **Benefits:** 
+  - Resolves event interception conflict
+  - Gives players control over when to select race/class
+  - No permissions required (available to all)
+
+### 🔧 Changes & Improvements
+
+#### Class System Refactoring
+- Added `manaModifier` field to `ClassConfig`
+- Updated all 7 classes with mana parameter:
+  - None, Berserker, Swordsman, Crusader, Assassin, Archer: 0 mana modifier
+  - Mage: +100 mana modifier
+- `RaceManager.applyRaceAndClass()` now applies mana bonuses via `applyBonus(stats, "Mana", totalManaBonus)`
+
+#### Updated Balance Reference
+- Mage class follows 1 Stamina = 5 Health EHP formula (120 EHP)
+- Dwarf race provides strong tank baseline for all classes
+- Mage + Dwarf combination: 90 HP, 27 Stamina, 150 Mana (very tanky mage)
+
+### 📝 Technical Details
+
+**Files Modified:**
+- `storage/config/ClassConfig.java` - Added manaModifier field
+- `storage/loader/ClassConfigLoader.java` - Updated all class configs with mana
+- `RaceManager.java` - Added mana stat application logic
+- `RaceMod.java` - Registered RaceSelectCommand
+- `races/RaceRegistry.java` - Registered DwarfRace
+
+**Files Created:**
+- `commands/RaceSelectCommand.java` - Manual UI opener command
+- `races/DwarfRace.java` - Dwarf race implementation
+
+**Build Information:**
+- Build Number: 48905
+- Date: January 27, 2026
+- Java Warnings: 18 deprecation warnings (API compatibility maintained)
+
+### 🐛 Bug Fixes
+- Fixed mana stat not being modified by class selection
+- Resolved JoinScreen mod event conflict with manual command fallback
+
+---
+
 ## Version 2026.1.25.2 - Major Update: Commands, Persistence Fix, Resistances & Balance
 
 ### 🎉 What's New

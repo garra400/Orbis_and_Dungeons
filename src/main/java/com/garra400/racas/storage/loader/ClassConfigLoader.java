@@ -72,6 +72,7 @@ public final class ClassConfigLoader {
             "Pure racial traits with no specialization.",
             0f,
             0f,
+            0f,  // No mana modifier
             List.of("No class restrictions", "Pure racial bonuses", "Versatile"),
             List.of("No weapon specialization", "No additional bonuses"),
             List.of(),
@@ -85,6 +86,7 @@ public final class ClassConfigLoader {
             "Reckless warrior who trades defense for raw power.",
             -25f,  // EHP = 100 - 25 + (8 x 5) = 115
             8f,
+            0f,  // No mana modifier
             List.of("+30% axe damage", "18 Stamina (+8)", "High burst damage", "Aggressive playstyle"),
             List.of("75 HP (-25)", "Glass cannon", "High risk gameplay", "Exposed in combat"),
             List.of(new ClassConfig.WeaponConfig(List.of("axe", "battleaxe"), 1.30f)),
@@ -98,6 +100,7 @@ public final class ClassConfigLoader {
             "Balanced warrior with sword mastery.",
             10f,  // EHP = 100 + 10 + (5 x 5) = 135
             5f,
+            0f,  // No mana modifier
             List.of("+20% sword damage", "110 HP (+10)", "15 Stamina (+5)", "Balanced stats"),
             List.of("Requires swords to shine", "No defensive specialization", "Average in all areas"),
             List.of(new ClassConfig.WeaponConfig(List.of("sword", "longsword", "greatsword"), 1.20f)),
@@ -111,6 +114,7 @@ public final class ClassConfigLoader {
             "Armored champion wielding heavy weapons.",
             30f,  // EHP = 100 + 30 + (0 x 5) = 130
             0f,
+            0f,  // No mana modifier
             List.of("+15% mace/hammer damage", "130 HP (+30)", "Frontline tank", "High survivability"),
             List.of("10 Stamina (+0)", "Slow playstyle", "Low mobility", "Moderate damage output"),
             List.of(new ClassConfig.WeaponConfig(List.of("mace", "hammer", "warhammer"), 1.15f)),
@@ -124,6 +128,7 @@ public final class ClassConfigLoader {
             "Silent killer who strikes from the shadows.",
             -35f,  // Increased penalty from -20 to -35 (same as Archer for safety)
             10f,
+            0f,  // No mana modifier
             List.of("+22% dagger damage", "20 Stamina (+10)", "High mobility", "Hit-n-run specialist"),
             List.of("65 HP (-35)", "Very fragile", "High skill floor", "Melee glass cannon"),
             List.of(new ClassConfig.WeaponConfig(List.of("dagger"), 1.22f)),  // Reduced from 1.35 to 1.22
@@ -137,9 +142,24 @@ public final class ClassConfigLoader {
             "Master of ranged combat, deadly from afar.",
             -35f,  // EHP = 100 - 35 + (8 x 5) = 105
             8f,
+            0f,  // No mana modifier
             List.of("+40% bow/crossbow damage", "18 Stamina (+8)", "Ranged superiority", "Safe distance fighting"),
             List.of("65 HP (-35)", "Extremely fragile", "Positioning critical", "Useless in melee"),
             List.of(new ClassConfig.WeaponConfig(List.of("bow", "crossbow", "longbow"), 1.40f)),
+            Map.of() // No resistances
+        ));
+
+        // Mage - Magic specialist with high stamina/mana but reduced health
+        configs.put("mage", new ClassConfig(
+            "mage",
+            "Mage",
+            "Master of arcane arts, channels mystical energy.",
+            -40f,  // EHP = 100 - 40 + (12 x 5) = 120
+            12f,   // High stamina bonus
+            100f,   // High mana bonus for spell casting
+            List.of("+25% staff/wand damage", "22 Stamina (+12)", "100 Mana (+100)", "Spell casting specialist", "Extended magical energy"),
+            List.of("60 HP (-40)", "Extremely fragile", "Vulnerable in close combat", "Mana dependent"),
+            List.of(new ClassConfig.WeaponConfig(List.of("staff", "wand", "scepter"), 1.25f)),
             Map.of() // No resistances
         ));
     }

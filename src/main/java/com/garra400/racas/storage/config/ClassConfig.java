@@ -14,6 +14,7 @@ public class ClassConfig {
     public String tagline;
     public float healthModifier;  // Additional HP modifier from class
     public float staminaModifier; // Additional stamina modifier from class
+    public float manaModifier;    // Additional mana modifier from class
     public List<String> strengths;
     public List<String> weaknesses;
     public List<WeaponConfig> weapons;
@@ -36,7 +37,7 @@ public class ClassConfig {
     }
 
     public ClassConfig(String id, String displayName, String tagline, 
-                       float health, float stamina,
+                       float health, float stamina, float mana,
                        List<String> strengths, List<String> weaknesses,
                        List<WeaponConfig> weapons,
                        Map<String, Float> damageResistances) {
@@ -45,6 +46,7 @@ public class ClassConfig {
         this.tagline = tagline;
         this.healthModifier = health;
         this.staminaModifier = stamina;
+        this.manaModifier = mana;
         this.strengths = strengths;
         this.weaknesses = weaknesses;
         this.weapons = weapons;

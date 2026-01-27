@@ -130,6 +130,22 @@ public final class RaceConfigLoader {
                 "Magic", 1.5f      // 50% more magic damage (weakness)
             )
         ));
+
+        // Dwarf - Extreme tank with damage resistances
+        configs.put("dwarf", new RaceConfig(
+            "dwarf",
+            "Dwarf",
+            "Sturdy craftsmen with unbreakable resilience.",
+            50f,
+            0f,
+            List.of("150 HP (+50)", "10 Stamina (base)", "30% Physical resistance", "50% Fall resistance", "Tank Specialist"),
+            List.of("Short Stature (reduced reach)", "Very Low Mobility", "Slow Movement"),
+            List.of(),
+            Map.of(
+                "Physical", 0.7f,  // 30% physical damage reduction
+                "Fall", 0.5f       // 50% fall damage reduction
+            )
+        ));
     }
 
     public static RaceConfig getConfig(String raceId) {

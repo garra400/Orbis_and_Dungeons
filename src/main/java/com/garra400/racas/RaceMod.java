@@ -3,6 +3,7 @@ package com.garra400.racas;
 import com.garra400.racas.commands.RaceInfoCommand;
 import com.garra400.racas.commands.RaceReloadCommand;
 import com.garra400.racas.commands.RaceResetCommand;
+import com.garra400.racas.commands.RaceSelectCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.commands.ResetClassCommand;
 import com.garra400.racas.commands.TradeClassCommand;
@@ -76,6 +77,7 @@ public class RaceMod extends JavaPlugin {
         commands.registerCommand(new RaceReloadCommand());
         commands.registerCommand(new TradeClassCommand());
         commands.registerCommand(new ResetClassCommand());
+        commands.registerCommand(new RaceSelectCommand());
 
         // Register event listener
         EventRegistry events = getEventRegistry();

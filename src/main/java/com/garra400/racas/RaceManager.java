@@ -119,12 +119,14 @@ public final class RaceManager {
         // Combina os bônus de raça e classe
         int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
         int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
+        int totalManaBonus = Math.round(classConfig.manaModifier); // Mana é apenas da classe
 
         // Aplica os stats combinados
         EntityStatMap stats = EntityStatsModule.get(player);
         if (stats != null) {
             applyBonus(stats, "Health", totalHealthBonus);
             applyBonus(stats, "Stamina", totalStaminaBonus);
+            applyBonus(stats, "Mana", totalManaBonus); // Aplica modificador de mana
             stats.update();
         }
 

@@ -31,6 +31,7 @@ public final class RaceRegistry {
             register(new ElfRace());
             register(new OrcRace());
             register(new HumanRace());
+            register(new DwarfRace());
             register(new BerserkerRace());
             register(new SwordsmanRace());
             register(new CrusaderRace());
