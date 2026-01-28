@@ -1,7 +1,9 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.color.ColorConverter;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
 import com.garra400.racas.storage.config.ClassConfig;
 import com.garra400.racas.storage.loader.ClassConfigLoader;
@@ -88,7 +90,8 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
             }
 
             if (raceId == null) {
-                ctx.sendMessage(Message.raw("No race recorded for " + displayName + "."));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.raceinfo.no_race", displayName)));
                 return;
             }
 
@@ -106,21 +109,25 @@ public class RaceInfoCommand extends AbstractPlayerCommand {
                 }
             }
 
-            ctx.sendMessage(Message.raw("=== Race Info for " + displayName + " ==="));
-            ctx.sendMessage(Message.raw("Race: " + raceName));
-            ctx.sendMessage(Message.raw("Class: " + className));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceinfo.title", displayName)));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceinfo.race", raceName)));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceinfo.class", className)));
 
             if (raceData != null && raceData.getSelectionTimestamp() != null && !raceData.getSelectionTimestamp().isEmpty()) {
-                ctx.sendMessage(Message.raw("Selected: " + raceData.getSelectionDateFormatted()));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.raceinfo.selected", raceData.getSelectionDateFormatted())));
                 long days = raceData.getDaysSinceSelection();
                 if (days >= 0) {
-                    ctx.sendMessage(Message.raw("Days ago: " + days));
+                    ctx.sendMessage(ColorConverter.message(
+                        TranslationManager.translate("command.raceinfo.days_ago", days)));
                 }
             }
-
-            ctx.sendMessage(Message.raw("=============================="));
         } catch (Exception e) {
-            ctx.sendMessage(Message.raw("Error getting race info: " + e.getMessage()));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceinfo.error", e.getMessage())));
         }
     }
 }

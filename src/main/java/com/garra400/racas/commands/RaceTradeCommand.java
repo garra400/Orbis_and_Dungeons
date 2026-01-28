@@ -1,6 +1,8 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.color.ColorConverter;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.component.Ref;
@@ -50,8 +52,10 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
         String raceName = raceArg.get(ctx);
         String raceId = raceName != null ? raceName.toLowerCase() : null;
         if (!RaceRegistry.exists(raceId)) {
-            ctx.sendMessage(Message.raw("Invalid race: " + raceName));
-            ctx.sendMessage(Message.raw("Valid races: " + listValid()));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.racetrade.invalid_race", raceName)));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.racetrade.valid_races", listValid())));
             return;
         }
         
@@ -65,28 +69,32 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
             targetRef = playerRef;
             targetPlayer = store.getComponent(ref, Player.getComponentType());
             if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Error: Could not get player data"));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.error_player_data")));
                 return;
             }
         } else {
             // Target another player
             targetRef = Universe.get().getPlayerByUsername(targetPlayerName, NameMatching.EXACT_IGNORE_CASE);
             if (targetRef == null) {
-                ctx.sendMessage(Message.raw("Player not found: " + targetPlayerName));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.player_not_found", targetPlayerName)));
                 return;
             }
             
             // Get target player entity
             UUID worldUuid = targetRef.getWorldUuid();
             if (worldUuid == null) {
-                ctx.sendMessage(Message.raw("Target player is not in a world"));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.not_in_world")));
                 return;
             }
             
             UUID uuid = targetRef.getUuid();
             targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(uuid);
             if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Target player is not online"));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.not_online")));
                 return;
             }
         }
@@ -96,13 +104,17 @@ public class RaceTradeCommand extends AbstractPlayerCommand {
             RaceManager.applyRace(targetPlayer, raceId, targetRef);
             
             if (targetPlayerName == null || targetPlayerName.isEmpty()) {
-                ctx.sendMessage(Message.raw("Your race has been changed to " + raceId + "!"));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.changed_self", raceId)));
             } else {
-                ctx.sendMessage(Message.raw("Changed " + targetRef.getUsername() + "'s race to " + raceId + "!"));
-                targetPlayer.sendMessage(Message.raw("Your race has been changed to " + raceId + " by an administrator."));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.changed_other", targetRef.getUsername(), raceId)));
+                targetPlayer.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.racetrade.changed_by_admin", raceId)));
             }
         } catch (Exception e) {
-            ctx.sendMessage(Message.raw("Error changing race: " + e.getMessage()));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.racetrade.error", e.getMessage())));
         }
     }
 

@@ -1,5 +1,8 @@
 package com.garra400.racas.commands;
 
+import com.garra400.racas.color.ColorConverter;
+import com.garra400.racas.i18n.T;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -33,10 +36,11 @@ public class RaceReloadCommand extends AbstractPlayerCommand {
     ) {
         try {
             RaceRegistry.reload();
-            context.sendMessage(Message.raw("[Races] Configuration reloaded successfully!"));
-            context.sendMessage(Message.raw("All race stats and bonuses have been updated from races_config.json"));
+            TranslationManager.reload();
+            context.sendMessage(T.t("command.racereload.success"));
+            context.sendMessage(T.t("command.racereload.updated"));
         } catch (Exception e) {
-            context.sendMessage(Message.raw("[Races] Failed to reload configuration: " + e.getMessage()));
+            context.sendMessage(T.t("command.racereload.failed", e.getMessage()));
             e.printStackTrace();
         }
     }

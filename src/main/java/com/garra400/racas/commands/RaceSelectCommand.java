@@ -1,6 +1,8 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.color.ColorConverter;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.ui.RaceSelectionPage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -42,7 +44,8 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
     ) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
-            ctx.sendMessage(Message.raw("Player not found"));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.player_not_found")));
             return;
         }
 
@@ -54,9 +57,12 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
             String raceName = raceId != null ? raceId : "Unknown";
             String className = classId != null && !classId.equals("none") ? classId : "None";
             
-            ctx.sendMessage(Message.raw("You have already selected a race and class!"));
-            ctx.sendMessage(Message.raw("Current: " + raceName + " - " + className));
-            ctx.sendMessage(Message.raw("Use /racetrade or /tradeclass to change your selection"));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.already_selected")));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.current", raceName, className)));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.use_trade")));
             return;
         }
 
@@ -65,15 +71,18 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
         
         // Check if UI is already open
         if (pages.getCustomPage() instanceof RaceSelectionPage) {
-            ctx.sendMessage(Message.raw("Race selection UI is already open!"));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.already_open")));
             return;
         }
 
         try {
             pages.openCustomPage(ref, store, new RaceSelectionPage(playerRef));
-            ctx.sendMessage(Message.raw("Opening race selection UI..."));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.opening")));
         } catch (Exception e) {
-            ctx.sendMessage(Message.raw("Failed to open race selection UI: " + e.getMessage()));
+            ctx.sendMessage(ColorConverter.message(
+                TranslationManager.translate("command.raceselect.failed", e.getMessage())));
             e.printStackTrace();
         }
     }

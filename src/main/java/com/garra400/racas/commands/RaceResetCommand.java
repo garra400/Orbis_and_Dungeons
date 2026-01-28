@@ -1,6 +1,8 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.color.ColorConverter;
+import com.garra400.racas.i18n.T;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -31,6 +33,12 @@ public class RaceResetCommand extends AbstractPlayerCommand {
         super("racereset", "Reset race selection", false);
         this.playerArg = withOptionalArg("player", "Target player (self if omitted)", ArgTypes.STRING);
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        // Libera o comando para todos (sem perm node/OP)
+        return false;
+    }
     
     @Override
     protected void execute(
@@ -50,28 +58,28 @@ public class RaceResetCommand extends AbstractPlayerCommand {
             targetRef = playerRef;
             targetPlayer = store.getComponent(ref, Player.getComponentType());
             if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Error: Could not get player data"));
+                ctx.sendMessage(T.t("command.racereset.error_player_data"));
                 return;
             }
         } else {
             // Target another player
             targetRef = Universe.get().getPlayerByUsername(targetPlayerName, NameMatching.EXACT_IGNORE_CASE);
             if (targetRef == null) {
-                ctx.sendMessage(Message.raw("Player not found: " + targetPlayerName));
+                ctx.sendMessage(T.t("command.racereset.player_not_found", targetPlayerName));
                 return;
             }
             
             // Get target player entity
             UUID worldUuid = targetRef.getWorldUuid();
             if (worldUuid == null) {
-                ctx.sendMessage(Message.raw("Target player is not in a world"));
+                ctx.sendMessage(T.t("command.racereset.not_in_world"));
                 return;
             }
             
             UUID uuid = targetRef.getUuid();
             targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(uuid);
             if (targetPlayer == null) {
-                ctx.sendMessage(Message.raw("Target player is not online"));
+                ctx.sendMessage(T.t("command.racereset.not_online"));
                 return;
             }
         }
@@ -81,17 +89,17 @@ public class RaceResetCommand extends AbstractPlayerCommand {
             boolean success = RaceManager.resetRace(targetPlayer, targetRef);
             if (success) {
                 if (targetPlayerName == null || targetPlayerName.isEmpty()) {
-                    ctx.sendMessage(Message.raw("Your race has been reset!"));
-                    ctx.sendMessage(Message.raw("Reconnect to select a new race."));
+                    ctx.sendMessage(T.t("command.racereset.success_self"));
+                    ctx.sendMessage(T.t("command.racereset.reconnect"));
                 } else {
-                    ctx.sendMessage(Message.raw("Reset " + targetRef.getUsername() + "'s race!"));
-                    targetPlayer.sendMessage(Message.raw("Your race has been reset by an administrator. Reconnect to select a new race."));
+                    ctx.sendMessage(T.t("command.racereset.success_other", targetRef.getUsername()));
+                    targetPlayer.sendMessage(T.t("command.racereset.reset_by_admin"));
                 }
             } else {
-                ctx.sendMessage(Message.raw("Failed to reset race data."));
+                ctx.sendMessage(T.t("command.racereset.failed"));
             }
         } catch (Exception e) {
-            ctx.sendMessage(Message.raw("Error resetting race: " + e.getMessage()));
+            ctx.sendMessage(T.t("command.racereset.error", e.getMessage()));
         }
     }
 }

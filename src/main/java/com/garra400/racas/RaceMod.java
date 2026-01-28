@@ -6,8 +6,10 @@ import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceSelectCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.commands.ResetClassCommand;
+import com.garra400.racas.commands.SetLanguageCommand;
 import com.garra400.racas.commands.TradeClassCommand;
 import com.garra400.racas.components.RaceData;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
 import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.garra400.racas.storage.loader.RaceConfigLoader;
@@ -45,6 +47,9 @@ public class RaceMod extends JavaPlugin {
 
     @Override
     protected void start() {
+        // Init translation system first
+        TranslationManager.initialize(getDataDirectory().toFile());
+        
         // Init configuration system - must be first
         RaceConfigLoader.init(getDataDirectory());
         ClassConfigLoader.init(getDataDirectory());
@@ -78,6 +83,7 @@ public class RaceMod extends JavaPlugin {
         commands.registerCommand(new TradeClassCommand());
         commands.registerCommand(new ResetClassCommand());
         commands.registerCommand(new RaceSelectCommand());
+        commands.registerCommand(new SetLanguageCommand());
 
         // Register event listener
         EventRegistry events = getEventRegistry();

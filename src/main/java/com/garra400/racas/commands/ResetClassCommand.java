@@ -1,6 +1,8 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.color.ColorConverter;
+import com.garra400.racas.i18n.TranslationManager;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -57,13 +59,13 @@ public class ResetClassCommand extends AbstractPlayerCommand {
                 // Target another player by username
                 targetRef = Universe.get().getPlayerByUsername(playerName, NameMatching.EXACT_IGNORE_CASE);
                 if (targetRef == null) {
-                    ctx.sendMessage(Message.raw("§cPlayer not found: " + playerName));
+                    ctx.sendMessage(ColorConverter.message("&cPlayer not found: " + playerName));
                     return;
                 }
                 
                 UUID worldUuid = targetRef.getWorldUuid();
                 if (worldUuid == null) {
-                    ctx.sendMessage(Message.raw("§cCannot find player's world"));
+                    ctx.sendMessage(ColorConverter.message("&cCannot find player's world"));
                     return;
                 }
                 UUID uuid = targetRef.getUuid();
@@ -71,14 +73,14 @@ public class ResetClassCommand extends AbstractPlayerCommand {
             }
 
             if (onlinePlayer == null) {
-                ctx.sendMessage(Message.raw("§cPlayer is not online"));
+                ctx.sendMessage(ColorConverter.message("&cPlayer is not online"));
                 return;
             }
 
             // Get current race (preserve it)
             String currentRace = RaceManager.getPlayerRace(onlinePlayer);
             if (currentRace == null || currentRace.equals("none")) {
-                ctx.sendMessage(Message.raw("§cYou must select a race first! Use /racetrade <race>"));
+                ctx.sendMessage(ColorConverter.message("&cYou must select a race first! Use /racetrade <race>"));
                 return;
             }
 
@@ -88,13 +90,13 @@ public class ResetClassCommand extends AbstractPlayerCommand {
             String targetName = targetRef.getUsername();
 
             if (targetRef.equals(playerRef)) {
-                ctx.sendMessage(Message.raw("§aYour class has been reset"));
+                ctx.sendMessage(ColorConverter.message("&aYour class has been reset"));
             } else {
-                ctx.sendMessage(Message.raw("§aReset " + targetName + "'s class"));
+                ctx.sendMessage(ColorConverter.message("&aReset " + targetName + "'s class"));
             }
 
         } catch (Exception ex) {
-            ctx.sendMessage(Message.raw("§cError resetting class: " + ex.getMessage()));
+            ctx.sendMessage(ColorConverter.message("&cError resetting class: " + ex.getMessage()));
             ex.printStackTrace();
         }
     }
