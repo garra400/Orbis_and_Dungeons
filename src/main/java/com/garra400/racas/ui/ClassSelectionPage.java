@@ -1,6 +1,7 @@
 package com.garra400.racas.ui;
 
 import com.garra400.racas.RaceManager;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.storage.config.ClassConfig;
 import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.hypixel.hytale.codec.Codec;
@@ -81,6 +82,17 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
             @Nonnull Store<EntityStore> store
     ) {
         cmd.append("Pages/class_selection.ui");
+        
+        // Apply translations to static UI elements
+        cmd.set("#Title.Text", TranslationManager.translate("ui.class_selection.title"));
+        cmd.set("#Subtitle.Text", TranslationManager.translate("ui.class_selection.subtitle"));
+        cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.class_selection.strengths"));
+        cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.class_selection.weaknesses"));
+        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.class_selection.confirm"));
+        cmd.set("#BackToRace.Text", TranslationManager.translate("ui.class_selection.back"));
+        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.class_selection.previous"));
+        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.class_selection.next"));
+        
         applyClassToUI(cmd, selectedClass);
         buildClassButtons(cmd, evt);
         
@@ -109,11 +121,13 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
         
         for (int i = start; i < end; i++) {
             String classId = allClassIds.get(i);
-            ClassConfig config = ClassConfigLoader.getConfig(classId);
-            if (config == null) continue;
             
             int btnIndex = i - start;
             String buttonId = "#ClassButton" + btnIndex;
+            
+            // Use translated class name
+            String className = TranslationManager.translate("class." + classId + ".name");
+            String classTagline = TranslationManager.translate("class." + classId + ".tagline");
             
             cmd.appendInline("#ClassButtons", String.format("""
                 Button %s {
@@ -132,7 +146,7 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
                     Style: (FontSize: 12, TextColor: #c0c0c0);
                   }
                 }
-                """, buttonId, config.displayName.toUpperCase(), config.tagline));
+                """, buttonId, className.toUpperCase(), classTagline));
             
             if (i < end - 1) {
                 cmd.appendInline("#ClassButtons", "Group { Anchor: (Height: 10); }");
@@ -145,20 +159,25 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
     }
 
     private void applyClassToUI(UICommandBuilder cmd, String classId) {
+        // Use translations for class name and tagline
+        String className = TranslationManager.translate("class." + classId + ".name");
+        String classTagline = TranslationManager.translate("class." + classId + ".tagline");
+        
+        cmd.set("#SelectedClassName.Text", className);
+        cmd.set("#SelectedClassTagline.Text", classTagline);
+
+        // Get class config for strengths and weaknesses
         ClassConfig config = ClassConfigLoader.getConfig(classId);
         if (config == null) return;
 
-        cmd.set("#SelectedClassName.Text", config.displayName);
-        cmd.set("#SelectedClassTagline.Text", config.tagline);
-
-        // Set strengths
+        // Set strengths (keep from config for now - could be translated later)
         List<String> strengths = config.strengths != null ? config.strengths : List.of();
         for (int i = 0; i < 5; i++) {
             String text = i < strengths.size() ? "- " + strengths.get(i) : "";
             cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
         }
 
-        // Set weaknesses
+        // Set weaknesses (keep from config for now - could be translated later)
         List<String> weaknesses = config.weaknesses != null ? config.weaknesses : List.of();
         for (int i = 0; i < 5; i++) {
             String text = i < weaknesses.size() ? "- " + weaknesses.get(i) : "";

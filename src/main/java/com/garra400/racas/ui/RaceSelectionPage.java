@@ -1,6 +1,6 @@
 package com.garra400.racas.ui;
 
-import com.garra400.racas.RaceManager;
+import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.codec.Codec;
@@ -8,7 +8,6 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
-import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
@@ -21,10 +20,7 @@ import com.hypixel.hytale.component.Store;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Race Selection Page - Interactive UI for choosing player race
@@ -53,7 +49,6 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
                 .build();
     }
 
-    private static final Map<String, RaceDetails> RACES = buildRaceDetails();
     private static final int RACES_PER_PAGE = 4;
     
     private final String selectedRace;
@@ -83,6 +78,16 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
             @Nonnull Store<EntityStore> store
     ) {
         cmd.append("Pages/race_selection.ui");
+        
+        // Apply translations to static UI elements
+        cmd.set("#Title.Text", TranslationManager.translate("ui.race_selection.title"));
+        cmd.set("#Subtitle.Text", TranslationManager.translate("ui.race_selection.subtitle"));
+        cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.race_selection.strengths"));
+        cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.race_selection.weaknesses"));
+        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.race_selection.confirm"));
+        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.race_selection.previous"));
+        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.race_selection.next"));
+        
         applyRaceToUI(cmd, selectedRace);
         buildRaceButtons(cmd, evt);
         
@@ -109,11 +114,13 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         
         for (int i = start; i < end; i++) {
             String raceId = allRaceIds.get(i);
-            RaceDetails details = RACES.get(raceId);
-            if (details == null) continue;
             
             int btnIndex = i - start;
             String buttonId = "#RaceButton" + btnIndex;
+            
+            // Use translated race name
+            String raceName = TranslationManager.translate("race." + raceId + ".name");
+            String raceTagline = TranslationManager.translate("race." + raceId + ".tagline");
             
             cmd.appendInline("#RaceButtons", String.format("""
                 Button %s {
@@ -132,7 +139,7 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
                     Style: (FontSize: 12, TextColor: #c0c0c0);
                   }
                 }
-                """, buttonId, details.title.toUpperCase(), details.tagline));
+                """, buttonId, raceName.toUpperCase(), raceTagline));
             
             if (i < end - 1) {
                 cmd.appendInline("#RaceButtons", "Group { Anchor: (Height: 10); }");
@@ -178,41 +185,30 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     /**
      * Apply race details to UI elements using cmd.set()
      * Pattern from Tutorial3Page - set values dynamically
+     * Uses TranslationManager for i18n support
      */
     private void applyRaceToUI(UICommandBuilder cmd, String raceKey) {
-        RaceDetails details = RACES.getOrDefault(raceKey, RACES.get("human"));
-        if (details == null) {
-            details = RACES.get("human");
-        }
+        // Use translations for all text
+        String raceName = TranslationManager.translate("race." + raceKey + ".name");
+        String raceTagline = TranslationManager.translate("race." + raceKey + ".tagline");
         
-        cmd.set("#SelectedRaceName.Text", details.title);
-        cmd.set("#SelectedRaceTagline.Text", details.tagline);
+        cmd.set("#SelectedRaceName.Text", raceName);
+        cmd.set("#SelectedRaceTagline.Text", raceTagline);
 
-        setListLine(cmd, "#PositiveLine1", details.positives, 0);
-        setListLine(cmd, "#PositiveLine2", details.positives, 1);
-        setListLine(cmd, "#PositiveLine3", details.positives, 2);
+        // Load strengths (positives)
+        String strength1 = TranslationManager.translate("race." + raceKey + ".strength.1");
+        String strength2 = TranslationManager.translate("race." + raceKey + ".strength.2");
+        String strength3 = TranslationManager.translate("race." + raceKey + ".strength.3");
+        
+        cmd.set("#PositiveLine1.Text", strength1);
+        cmd.set("#PositiveLine2.Text", strength2);
+        cmd.set("#PositiveLine3.Text", strength3);
 
-        setListLine(cmd, "#NegativeLine1", details.negatives, 0);
-        setListLine(cmd, "#NegativeLine2", details.negatives, 1);
-    }
-
-    private void setListLine(UICommandBuilder cmd, String elementId, List<String> lines, int index) {
-        String value = index < lines.size() ? lines.get(index) : "";
-        cmd.set(elementId + ".Text", value);
-    }
-
-    private record RaceDetails(String title, String tagline, List<String> positives, List<String> negatives) {}
-
-    private static Map<String, RaceDetails> buildRaceDetails() {
-        Map<String, RaceDetails> map = new LinkedHashMap<>();
-        for (RaceDefinition def : RaceRegistry.all()) {
-            map.put(def.id(), new RaceDetails(
-                    def.displayName(),
-                    def.tagline(),
-                    def.strengths(),
-                    def.weaknesses()
-            ));
-        }
-        return Collections.unmodifiableMap(map);
+        // Load weaknesses (negatives)
+        String weakness1 = TranslationManager.translate("race." + raceKey + ".weakness.1");
+        String weakness2 = TranslationManager.translate("race." + raceKey + ".weakness.2");
+        
+        cmd.set("#NegativeLine1.Text", weakness1);
+        cmd.set("#NegativeLine2.Text", weakness2);
     }
 }
