@@ -88,10 +88,10 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
         cmd.set("#Subtitle.Text", TranslationManager.translate("ui.class_selection.subtitle"));
         cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.class_selection.strengths"));
         cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.class_selection.weaknesses"));
-        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.class_selection.confirm"));
-        cmd.set("#BackToRace.Text", TranslationManager.translate("ui.class_selection.back"));
-        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.class_selection.previous"));
-        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.class_selection.next"));
+        cmd.set("#ConfirmSelectionLabel.Text", TranslationManager.translate("ui.class_selection.confirm"));
+        cmd.set("#BackToRaceLabel.Text", TranslationManager.translate("ui.class_selection.back"));
+        cmd.set("#PrevPageButtonLabel.Text", TranslationManager.translate("ui.class_selection.previous"));
+        cmd.set("#NextPageButtonLabel.Text", TranslationManager.translate("ui.class_selection.next"));
         
         applyClassToUI(cmd, selectedClass);
         buildClassButtons(cmd, evt);

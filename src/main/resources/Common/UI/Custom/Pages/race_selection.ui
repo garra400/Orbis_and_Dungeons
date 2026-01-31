@@ -66,7 +66,7 @@ Group {
         Anchor: (Height: 15);
       }
 
-      Label {
+      Label #StrengthsHeader {
         Text: "STRENGTHS";
         Anchor: (Height: 22);
         Style: (
@@ -107,7 +107,7 @@ Group {
         Anchor: (Height: 10);
       }
 
-      Label {
+      Label #WeaknessesHeader {
         Text: "WEAKNESSES";
         Anchor: (Height: 22);
         Style: (
@@ -150,7 +150,7 @@ Group {
       Padding: (Full: 10);
       Background: #3a3a3a;
 
-      Label {
+      Label #PrevPageButtonLabel {
         Text: "< Previous";
         Style: (
           FontSize: 14,
@@ -186,7 +186,7 @@ Group {
       Padding: (Full: 10);
       Background: #3a3a3a;
 
-      Label {
+      Label #NextPageButtonLabel {
         Text: "Next >";
         Style: (
           FontSize: 14,
@@ -207,7 +207,7 @@ Group {
       Padding: (Full: 12);
       Background: #2d7b4c;
 
-      Label {
+      Label #ConfirmSelectionLabel {
         Text: "Confirm Selection";
         Style: (
           FontSize: 16,

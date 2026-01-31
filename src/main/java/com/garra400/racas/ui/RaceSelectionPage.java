@@ -84,9 +84,9 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         cmd.set("#Subtitle.Text", TranslationManager.translate("ui.race_selection.subtitle"));
         cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.race_selection.strengths"));
         cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.race_selection.weaknesses"));
-        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.race_selection.confirm"));
-        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.race_selection.previous"));
-        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.race_selection.next"));
+        cmd.set("#ConfirmSelectionLabel.Text", TranslationManager.translate("ui.race_selection.confirm"));
+        cmd.set("#PrevPageButtonLabel.Text", TranslationManager.translate("ui.race_selection.previous"));
+        cmd.set("#NextPageButtonLabel.Text", TranslationManager.translate("ui.race_selection.next"));
         
         applyRaceToUI(cmd, selectedRace);
         buildRaceButtons(cmd, evt);
