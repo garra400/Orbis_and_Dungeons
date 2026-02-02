@@ -4,6 +4,7 @@ import com.garra400.racas.color.ColorConverter;
 import com.garra400.racas.i18n.T;
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -35,8 +36,11 @@ public class RaceReloadCommand extends AbstractPlayerCommand {
         @Nonnull World world
     ) {
         try {
-            RaceRegistry.reload();
-            TranslationManager.reload();
+            // Reload all JSON configurations
+            RaceRegistry.reload();           // races_config.json
+            ClassConfigLoader.reload();      // classes_config.json
+            TranslationManager.reload();     // language files (en.json, pt_br.json, etc.)
+            
             context.sendMessage(T.t("command.racereload.success"));
             context.sendMessage(T.t("command.racereload.updated"));
         } catch (Exception e) {
