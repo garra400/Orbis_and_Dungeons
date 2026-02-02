@@ -2,6 +2,194 @@
 
 ---
 
+## Version 2026.1.31 (Build 48910) - UI Fixes, Translation Updates & Balance Changes
+
+### 🏆 Honorable Mention
+
+**Special thanks to m1rrh** for the following contributions:
+- **ColorConverter utility** - Color conversion system for UI elements
+- **Translation System suggestion** - Inspired the multi-language support implementation
+
+### ⚖️ Balance Changes
+
+#### Orc - Major Buff (Tank Role)
+| Stat | Before | After | Change |
+|------|--------|-------|--------|
+| Health | +75 HP (175 total) | +100 HP (200 total) | **+25 HP** |
+| Stamina | 0 (10 total)  | **-2 (8 total)** | -2 (8 total) |
+| Role | Melee DPS | **Pure Tank** | Role shift |
+
+**Design Philosophy:** Orc is now the ultimate tank race with the highest HP pool in the game. Trades stamina for raw survivability.
+
+#### Dwarf - Resistance Update  
+| Stat | Before | After | Change |
+|------|--------|-------|--------|
+| Health | +50 HP (150 total) | +50 HP (150 total) | No change |
+| Physical Resistance | 30% | **20%** | -10% |
+| Fall Resistance | 50% | 50% | No change |
+
+**Design Philosophy:** Dwarf remains a defensive specialist with damage resistances, but slightly toned down physical resistance for better balance.
+
+#### UI Description Overhaul
+All race and class descriptions have been simplified to show **only concrete stats**:
+- Removed flavor text and subjective descriptions
+- Now shows exact numbers: `+100 Health (200 total)`, `-2 Stamina (8 total)`
+- Clearer understanding of what each race/class actually provides
+
+### 🐛 Bug Fixes
+
+#### Custom UI Element Selector Fix
+- **Problem:** Server failed to connect with error `"Selected element in CustomUI command was not found. Selector: #StrengthsHeader.Text"`
+- **Root Cause:** Java code was referencing UI element IDs that didn't exist in the `.ui` files
+- **Solution:** Added missing IDs to UI elements and updated Java selectors
+
+**Fixed Selectors:**
+- `#StrengthsHeader` - Added ID to "STRENGTHS" label
+- `#WeaknessesHeader` - Added ID to "WEAKNESSES" label  
+- `#PrevPageButtonLabel` - Added ID to Previous button's label
+- `#NextPageButtonLabel` - Added ID to Next button's label
+- `#ConfirmSelectionLabel` - Added ID to Confirm button's label
+- `#BackToRaceLabel` - Added ID to Back button's label (class selection only)
+
+**Files Modified:**
+- `resources/Common/UI/Custom/Pages/race_selection.ui`
+- `resources/Common/UI/Custom/Pages/class_selection.ui`
+- `ui/RaceSelectionPage.java`
+- `ui/ClassSelectionPage.java`
+
+### 🌐 Multi-Language Translation System
+
+#### Complete Translation System Implementation
+A comprehensive internationalization (i18n) system has been implemented, providing full multi-language support for the entire mod:
+
+**Supported Languages:**
+| Code | Language | Status |
+|------|----------|--------|
+| `en` | English | ✅ Complete |
+| `pt_br` | Português (Brasil) | ✅ Complete |
+| `ru` | Русский (Russian) | ✅ Complete |
+
+#### System Architecture
+
+**TranslationManager Class:**
+- Centralized translation service (`i18n/TranslationManager.java`)
+- Dynamic language file loading from `mods/languages/` folder
+- Auto-extraction of default language files from JAR resources
+- Runtime language switching with `/racesetlanguage` command
+- Persistent language preference per player
+
+**How It Works:**
+1. On startup, extracts default language files to `mods/languages/` folder
+2. Loads all `.json` translation files automatically
+3. Provides `translate(key)` method for all translatable strings
+4. Falls back to English if a key is missing in the selected language
+
+#### Translated Content
+
+**All Commands Fully Translated:**
+- `/raceinfo` - Race and class information display
+- `/racetrade` - Race trading messages
+- `/racereset` - Race reset confirmations
+- `/racereload` - Configuration reload status
+- `/tradeclass` - Class change messages
+- `/resetclass` - Class reset confirmations
+- `/raceselect` - UI opening messages
+- `/racesetlanguage` - Language selection
+
+**All UI Elements Translated:**
+- Race selection screen title, subtitle, buttons
+- Class selection screen title, subtitle, buttons
+- Navigation buttons (Previous, Next, Confirm, Back)
+- Strengths/Weaknesses headers
+
+**All Races Translated:**
+| Race | English | Português | Русский |
+|------|---------|-----------|---------|
+| Human | Human | Humano | Человек |
+| Elf | Elf | Elfo | Эльф |
+| Orc | Orc | Orc | Орк |
+| Dwarf | Dwarf | Anão | Дварф |
+| Tiefling | Tiefling | Tiefling | Тифлинг |
+
+**All Classes Translated:**
+| Class | English | Português | Русский |
+|-------|---------|-----------|---------|
+| None | None | Nenhuma | Нет |
+| Berserker | Berserker | Berserker | Берсерк |
+| Swordsman | Swordsman | Espadachim | Мечник |
+| Crusader | Crusader | Cruzado | Крестоносец |
+| Assassin | Assassin | Assassino | Убийца |
+| Archer | Archer | Arqueiro | Лучник |
+| Mage | Mage | Mago | Маг |
+
+#### Translation File Structure
+
+Each language file follows this JSON structure:
+```json
+{
+    "language.name": "English",
+    "language.code": "en",
+    
+    // Command translations
+    "command.raceinfo.title": "&6=== Race Info for &f%s &6===",
+    "command.raceinfo.race": "&6Race: &f%s",
+    
+    // UI translations
+    "ui.race_selection.title": "Select Your Race",
+    "ui.race_selection.strengths": "STRENGTHS",
+    
+    // Race translations
+    "race.human.name": "Human",
+    "race.human.tagline": "Balanced and adaptable...",
+    "race.human.strength.1": "+35 Health (135 total)",
+    "race.human.weakness.1": "No special abilities",
+    
+    // Class translations
+    "class.berserker.name": "Berserker",
+    "class.berserker.tagline": "Rage-fueled destruction."
+}
+```
+
+#### New Command: `/racesetlanguage`
+- **Usage:** `/racesetlanguage --confirm --language=<code>`
+- **Function:** Change the mod's display language
+- **Available:** `en`, `pt_br`, `ru`
+- **Example:** `/racesetlanguage --confirm --language=pt_br`
+
+#### Adding Custom Languages
+Server admins can add new languages:
+1. Create a new file in `mods/languages/` (e.g., `es.json`)
+2. Copy the structure from `en.json`
+3. Translate all keys to the new language
+4. Restart server or use `/racereload`
+5. Players can select with `/racesetlanguage`
+
+### 📝 Technical Details
+
+**Files Created:**
+- `i18n/TranslationManager.java` - Translation engine
+- `i18n/T.java` - Shorthand translation helper
+- `commands/SetLanguageCommand.java` - Language selection command
+- `resources/languages/en.json` - English translations (127 keys)
+- `resources/languages/pt_br.json` - Portuguese translations (127 keys)
+- `resources/languages/ru.json` - Russian translations (127 keys)
+
+**Files Modified:**
+- All command classes - Now use `TranslationManager.translate()`
+- `RaceSelectionPage.java` - UI text now translated
+- `ClassSelectionPage.java` - UI text now translated
+- `RaceMod.java` - Initializes TranslationManager on startup
+- `storage/loader/RaceConfigLoader.java` - Orc and Dwarf stat changes
+
+**Build Information:**
+- Build Number: 54844
+- Date: January 31, 2026
+
+### ⚠️ Note for Server Admins
+If you have existing language files in `mods/languages/`, you may need to **delete them** to receive the updated translations, or manually add the new translation keys.
+
+---
+
 ## Version 2026.1.27 (Build 48905) - Mana System, New Race & Class, JoinScreen Fix
 
 ### 🎉 What's New
@@ -64,7 +252,7 @@
 - `races/DwarfRace.java` - Dwarf race implementation
 
 **Build Information:**
-- Build Number: 48905
+- Build Number: 54844
 - Date: January 27, 2026
 - Java Warnings: 18 deprecation warnings (API compatibility maintained)
 

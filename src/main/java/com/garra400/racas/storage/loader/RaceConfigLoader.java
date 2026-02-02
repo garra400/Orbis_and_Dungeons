@@ -72,8 +72,8 @@ public final class RaceConfigLoader {
             "Agile and tireless, moves like the wind.",
             0f,
             15f,
-            List.of("100 HP (base)", "25 Stamina (+15)", "Extended mobility"),
-            List.of("No health bonus", "Stamina-dependent playstyle"),
+            List.of("+15 Stamina (25 total)"),
+            List.of("No health bonus (100 base)"),
             List.of(),
             Map.of() // No resistances
         ));
@@ -83,10 +83,10 @@ public final class RaceConfigLoader {
             "orc",
             "Orc",
             "Brutish and relentless, crushes all opposition.",
-            75f,
-            0f,
-            List.of("175 HP (+75)", "Massive health pool", "Tank role"),
-            List.of("10 Stamina (base)", "Limited mobility"),
+            100f,
+            -2f,
+            List.of("+100 Health (200 total)"),
+            List.of("-2 Stamina (8 total)"),
             List.of(),
             Map.of() // No resistances
         ));
@@ -98,8 +98,8 @@ public final class RaceConfigLoader {
             "Balanced and adaptable, jack of all trades.",
             35f,
             5f,
-            List.of("135 HP (+35)", "15 Stamina (+5)", "Well-rounded stats"),
-            List.of("No specialization", "Average at everything"),
+            List.of("+35 Health (135 total)", "+5 Stamina (15 total)"),
+            List.of("No special abilities"),
             List.of(),
             Map.of() // No resistances
         ));
@@ -112,16 +112,13 @@ public final class RaceConfigLoader {
             -15f,
             8f,
             List.of(
-                "85 HP (-15)",
-                "18 Stamina (+8)",
-                "Immune to Fire Damage",
-                "Immune to Lava Damage",
-                "Infernal heritage"
+                "+8 Stamina (18 total)",
+                "100% Fire immunity",
+                "100% Lava immunity"
             ),
             List.of(
-                "Fragile physique",
-                "Vulnerable to Magic damage (+50%)",
-                "Mistrusted by common folk"
+                "-15 Health (85 total)",
+                "+50% Magic damage taken"
             ),
             List.of(),
             Map.of(
@@ -138,11 +135,11 @@ public final class RaceConfigLoader {
             "Sturdy craftsmen with unbreakable resilience.",
             50f,
             0f,
-            List.of("150 HP (+50)", "10 Stamina (base)", "30% Physical resistance", "50% Fall resistance", "Tank Specialist"),
-            List.of("Short Stature (reduced reach)", "Very Low Mobility", "Slow Movement"),
+            List.of("+50 Health (150 total)", "20% Physical damage reduction", "50% Fall damage reduction"),
+            List.of("No stamina bonus (10 base)"),
             List.of(),
             Map.of(
-                "Physical", 0.7f,  // 30% physical damage reduction
+                "Physical", 0.8f,  // 20% physical damage reduction
                 "Fall", 0.5f       // 50% fall damage reduction
             )
         ));
