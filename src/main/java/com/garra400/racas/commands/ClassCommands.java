@@ -1,14 +1,11 @@
 package com.garra400.racas.commands;
 
 import com.garra400.racas.RaceManager;
-import com.garra400.racas.RaceMod;
 import com.garra400.racas.color.ColorConverter;
-import com.garra400.racas.components.RaceData;
 import com.garra400.racas.i18n.TranslationManager;
-import com.garra400.racas.races.RaceDefinition;
-import com.garra400.racas.races.RaceRegistry;
-import com.garra400.racas.storage.loader.RaceConfigLoader;
-import com.garra400.racas.ui.RaceSelectionPage;
+import com.garra400.racas.storage.config.ClassConfig;
+import com.garra400.racas.storage.loader.ClassConfigLoader;
+import com.garra400.racas.ui.ClassSelectionPage;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.NameMatching;
@@ -30,26 +27,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Unified Race Command Collection: /race
+ * Unified Class Command Collection: /class
  * 
  * Subcommands:
- * - /race select              - Opens race selection UI
- * - /race change <race>       - Change race directly
- * - /race reset               - Reset race to none
- * - /race info                - Show current race info
- * - /race reload              - Reload race configurations (admin)
+ * - /class select              - Opens class selection UI
+ * - /class change <class>      - Change class directly
+ * - /class reset               - Reset class to none
+ * - /class info                - Show current class info
  * 
  * All commands support --player <name> for targeting other players (admin feature)
  */
-public class RaceCommands extends AbstractCommandCollection {
+public class ClassCommands extends AbstractCommandCollection {
 
-    public RaceCommands() {
-        super("race", "Race management commands");
+    public ClassCommands() {
+        super("class", "Class management commands");
         addSubCommand(new SelectCommand());
         addSubCommand(new ChangeCommand());
         addSubCommand(new ResetCommand());
         addSubCommand(new InfoCommand());
-        addSubCommand(new ReloadCommand());
     }
 
     @Override
@@ -57,17 +52,17 @@ public class RaceCommands extends AbstractCommandCollection {
         return false;
     }
 
-    // ==================== /race select ====================
+    // ==================== /class select ====================
     
     /**
-     * /race select [--player <name>]
-     * Opens race selection UI for choosing/changing race
+     * /class select [--player <name>]
+     * Opens class selection UI for choosing/changing class
      */
     private static class SelectCommand extends AbstractPlayerCommand {
         private final OptionalArg<String> playerArg;
 
         public SelectCommand() {
-            super("select", "Open race selection UI", false);
+            super("select", "Open class selection UI", false);
             this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
         }
 
@@ -101,78 +96,76 @@ public class RaceCommands extends AbstractCommandCollection {
                 targetRef = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
                 if (targetRef == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.player_not_found", targetName)));
+                        TranslationManager.translate("command.class.player_not_found", targetName)));
                     return;
                 }
                 
                 UUID worldUuid = targetRef.getWorldUuid();
                 if (worldUuid == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.not_in_world")));
+                        TranslationManager.translate("command.class.not_in_world")));
                     return;
                 }
                 
                 targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(targetRef.getUuid());
                 if (targetPlayer == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.not_online")));
+                        TranslationManager.translate("command.class.not_online")));
                     return;
                 }
                 
-                // For other players, we need their refs
                 targetEntityRef = null;
                 targetStore = null;
             }
 
             if (targetPlayer == null) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.error_player_data")));
+                    TranslationManager.translate("command.class.error_player_data")));
+                return;
+            }
+
+            // Check if player has a race first
+            String currentRace = RaceManager.getPlayerRace(targetPlayer);
+            if (currentRace == null || currentRace.equals("none")) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.class.need_race_first")));
                 return;
             }
 
             PageManager pages = targetPlayer.getPageManager();
             
-            if (pages.getCustomPage() instanceof RaceSelectionPage) {
+            if (pages.getCustomPage() instanceof ClassSelectionPage) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.select.already_open")));
+                    TranslationManager.translate("command.class.select.already_open")));
                 return;
             }
 
             try {
-                String currentRace = RaceManager.getPlayerRace(targetPlayer);
-                if (currentRace != null && !currentRace.equals("none")) {
-                    pages.openCustomPage(targetEntityRef != null ? targetEntityRef : ref, 
-                                        targetStore != null ? targetStore : store, 
-                                        new RaceSelectionPage(targetRef, currentRace, 0));
-                    ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.select.opening_reselect")));
-                } else {
-                    pages.openCustomPage(targetEntityRef != null ? targetEntityRef : ref, 
-                                        targetStore != null ? targetStore : store, 
-                                        new RaceSelectionPage(targetRef));
-                    ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.select.opening")));
-                }
+                pages.openCustomPage(targetEntityRef != null ? targetEntityRef : ref, 
+                                    targetStore != null ? targetStore : store, 
+                                    new ClassSelectionPage(targetRef, currentRace));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.class.select.opening")));
             } catch (Exception e) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.select.failed", e.getMessage())));
+                    TranslationManager.translate("command.class.select.failed", e.getMessage())));
             }
         }
     }
 
-    // ==================== /race change ====================
+    // ==================== /class change ====================
     
     /**
-     * /race change <race> [--player <name>]
-     * Changes race directly without UI
+     * /class change <class> [--player <name>]
+     * Changes class directly without UI
      */
     private static class ChangeCommand extends AbstractPlayerCommand {
-        private final RequiredArg<String> raceArg;
+        private final RequiredArg<String> classArg;
         private final OptionalArg<String> playerArg;
 
         public ChangeCommand() {
-            super("change", "Change race directly", false);
-            this.raceArg = withRequiredArg("race", "Race to change to (" + listValidRaces() + ")", ArgTypes.STRING);
+            super("change", "Change class directly", false);
+            this.classArg = withRequiredArg("class", "Class to change to (" + listValidClasses() + ")", ArgTypes.STRING);
             this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
         }
 
@@ -189,14 +182,14 @@ public class RaceCommands extends AbstractCommandCollection {
                 @Nonnull PlayerRef playerRef,
                 @Nonnull World world
         ) {
-            String raceName = raceArg.get(ctx);
-            String raceId = raceName != null ? raceName.toLowerCase() : null;
+            String className = classArg.get(ctx);
+            String classId = className != null ? className.toLowerCase() : null;
             
-            if (!RaceRegistry.exists(raceId)) {
+            if (!ClassConfigLoader.hasConfig(classId)) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.change.invalid", raceName)));
+                    TranslationManager.translate("command.class.change.invalid", className)));
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.change.valid", listValidRaces())));
+                    TranslationManager.translate("command.class.change.valid", listValidClasses())));
                 return;
             }
 
@@ -211,14 +204,14 @@ public class RaceCommands extends AbstractCommandCollection {
                 targetRef = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
                 if (targetRef == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.player_not_found", targetName)));
+                        TranslationManager.translate("command.class.player_not_found", targetName)));
                     return;
                 }
                 
                 UUID worldUuid = targetRef.getWorldUuid();
                 if (worldUuid == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.not_in_world")));
+                        TranslationManager.translate("command.class.not_in_world")));
                     return;
                 }
                 
@@ -227,38 +220,46 @@ public class RaceCommands extends AbstractCommandCollection {
 
             if (targetPlayer == null) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.not_online")));
+                    TranslationManager.translate("command.class.not_online")));
                 return;
             }
 
-            RaceManager.applyRace(targetPlayer, raceId, targetRef);
+            // Check if player has a race first
+            String currentRace = RaceManager.getPlayerRace(targetPlayer);
+            if (currentRace == null || currentRace.equals("none")) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.class.need_race_first")));
+                return;
+            }
+
+            RaceManager.applyRaceAndClass(targetPlayer, currentRace, classId);
             
-            RaceDefinition race = RaceRegistry.get(raceId);
-            String displayName = race != null ? race.displayName() : raceId;
+            ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+            String displayName = classConfig != null ? classConfig.displayName : classId;
             
             if (targetName == null || targetName.isEmpty()) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.change.success_self", displayName)));
+                    TranslationManager.translate("command.class.change.success_self", displayName)));
             } else {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.change.success_other", targetRef.getUsername(), displayName)));
+                    TranslationManager.translate("command.class.change.success_other", targetRef.getUsername(), displayName)));
                 targetPlayer.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.change.by_admin", displayName)));
+                    TranslationManager.translate("command.class.change.by_admin", displayName)));
             }
         }
     }
 
-    // ==================== /race reset ====================
+    // ==================== /class reset ====================
     
     /**
-     * /race reset [--player <name>]
-     * Resets race to none (requires reconnect)
+     * /class reset [--player <name>]
+     * Resets class to none (keeps race)
      */
     private static class ResetCommand extends AbstractPlayerCommand {
         private final OptionalArg<String> playerArg;
 
         public ResetCommand() {
-            super("reset", "Reset race to none", false);
+            super("reset", "Reset class to none", false);
             this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
         }
 
@@ -286,14 +287,14 @@ public class RaceCommands extends AbstractCommandCollection {
                 targetRef = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
                 if (targetRef == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.player_not_found", targetName)));
+                        TranslationManager.translate("command.class.player_not_found", targetName)));
                     return;
                 }
                 
                 UUID worldUuid = targetRef.getWorldUuid();
                 if (worldUuid == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.not_in_world")));
+                        TranslationManager.translate("command.class.not_in_world")));
                     return;
                 }
                 
@@ -302,43 +303,44 @@ public class RaceCommands extends AbstractCommandCollection {
 
             if (targetPlayer == null) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.not_online")));
+                    TranslationManager.translate("command.class.not_online")));
                 return;
             }
 
-            boolean success = RaceManager.resetRace(targetPlayer, targetRef);
-            
-            if (!success) {
+            // Check if player has a race first
+            String currentRace = RaceManager.getPlayerRace(targetPlayer);
+            if (currentRace == null || currentRace.equals("none")) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.failed")));
+                    TranslationManager.translate("command.class.need_race_first")));
                 return;
             }
+
+            // Reset class to "none"
+            RaceManager.applyRaceAndClass(targetPlayer, currentRace, "none");
             
             if (targetName == null || targetName.isEmpty()) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.success_self")));
-                ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.reconnect")));
+                    TranslationManager.translate("command.class.reset.success_self")));
             } else {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.success_other", targetRef.getUsername())));
+                    TranslationManager.translate("command.class.reset.success_other", targetRef.getUsername())));
                 targetPlayer.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.by_admin")));
+                    TranslationManager.translate("command.class.reset.by_admin")));
             }
         }
     }
 
-    // ==================== /race info ====================
+    // ==================== /class info ====================
     
     /**
-     * /race info [--player <name>]
-     * Shows race information
+     * /class info [--player <name>]
+     * Shows class information
      */
     private static class InfoCommand extends AbstractPlayerCommand {
         private final OptionalArg<String> playerArg;
 
         public InfoCommand() {
-            super("info", "Show race information", false);
+            super("info", "Show class information", false);
             this.playerArg = withOptionalArg("player", "Target player", ArgTypes.STRING);
         }
 
@@ -366,14 +368,14 @@ public class RaceCommands extends AbstractCommandCollection {
                 targetRef = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
                 if (targetRef == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.player_not_found", targetName)));
+                        TranslationManager.translate("command.class.player_not_found", targetName)));
                     return;
                 }
                 
                 UUID worldUuid = targetRef.getWorldUuid();
                 if (worldUuid == null) {
                     ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.not_in_world")));
+                        TranslationManager.translate("command.class.not_in_world")));
                     return;
                 }
                 
@@ -382,88 +384,34 @@ public class RaceCommands extends AbstractCommandCollection {
 
             if (targetPlayer == null) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.not_online")));
+                    TranslationManager.translate("command.class.not_online")));
                 return;
             }
 
-            String raceId = RaceManager.getPlayerRace(targetPlayer);
+            String classId = RaceManager.getPlayerClass(targetPlayer);
             String displayTargetName = targetRef.getUsername();
 
-            if (raceId == null || raceId.equals("none")) {
+            if (classId == null || classId.equals("none")) {
                 ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.info.no_race", displayTargetName)));
+                    TranslationManager.translate("command.class.info.no_class", displayTargetName)));
                 return;
             }
 
-            RaceDefinition race = RaceRegistry.get(raceId);
-            String raceName = race != null ? race.displayName() : raceId;
+            ClassConfig classConfig = ClassConfigLoader.getClass(classId);
+            String className = classConfig != null ? classConfig.displayName : classId;
 
             ctx.sendMessage(ColorConverter.message(
-                TranslationManager.translate("command.race.info.title", displayTargetName)));
+                TranslationManager.translate("command.class.info.title", displayTargetName)));
             ctx.sendMessage(ColorConverter.message(
-                TranslationManager.translate("command.race.info.race", raceName)));
-
-            // Show timestamp if available
-            if (RaceMod.getRaceDataType() != null && targetRef.getHolder() != null) {
-                RaceData data = targetRef.getHolder().getComponent(RaceMod.getRaceDataType());
-                if (data != null && data.getSelectionTimestamp() != null && !data.getSelectionTimestamp().isEmpty()) {
-                    ctx.sendMessage(ColorConverter.message(
-                        TranslationManager.translate("command.race.info.selected", data.getSelectionDateFormatted())));
-                    long days = data.getDaysSinceSelection();
-                    if (days >= 0) {
-                        ctx.sendMessage(ColorConverter.message(
-                            TranslationManager.translate("command.race.info.days_ago", days)));
-                    }
-                }
-            }
-        }
-    }
-
-    // ==================== /race reload ====================
-    
-    /**
-     * /race reload
-     * Reloads race configuration files (admin command)
-     */
-    private static class ReloadCommand extends AbstractPlayerCommand {
-
-        public ReloadCommand() {
-            super("reload", "Reload race configurations", false);
-        }
-
-        @Override
-        protected boolean canGeneratePermission() {
-            return false;
-        }
-
-        @Override
-        protected void execute(
-                @Nonnull CommandContext ctx,
-                @Nonnull Store<EntityStore> store,
-                @Nonnull Ref<EntityStore> ref,
-                @Nonnull PlayerRef playerRef,
-                @Nonnull World world
-        ) {
-            try {
-                RaceConfigLoader.reload();
-                RaceRegistry.loadFromConfig();
-                
-                ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reload.success")));
-                ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reload.updated")));
-            } catch (Exception e) {
-                ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reload.failed", e.getMessage())));
-            }
+                TranslationManager.translate("command.class.info.class", className)));
         }
     }
 
     // ==================== Helper Methods ====================
     
-    private static String listValidRaces() {
-        return RaceRegistry.all().stream()
-                .map(RaceDefinition::id)
+    private static String listValidClasses() {
+        return ClassConfigLoader.getAllClasses().stream()
+                .map(c -> c.id)
                 .collect(Collectors.joining(", "));
     }
 }

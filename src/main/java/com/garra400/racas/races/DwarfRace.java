@@ -4,11 +4,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Dwarf Race - Sturdy and resilient, masters of craftsmanship
- * Focused on high health and moderate stamina
- * Based on traditional dwarf archetype: tough, enduring, skilled craftsmen
+ * Dwarf Race - Sturdy and resilient, masters of craftsmanship Focused on high
+ * health and moderate stamina Based on traditional dwarf archetype: tough,
+ * enduring, skilled craftsmen
  */
 public class DwarfRace implements RaceDefinition {
+
     @Override
     public String id() {
         return "dwarf";

@@ -1,15 +1,9 @@
 package com.garra400.racas;
 
-import com.garra400.racas.commands.RaceInfoCommand;
-import com.garra400.racas.commands.RaceReloadCommand;
-import com.garra400.racas.commands.RaceResetCommand;
-import com.garra400.racas.commands.RaceSelectCommand;
-import com.garra400.racas.commands.RaceTradeCommand;
 import com.garra400.racas.commands.RaceCommands;
-import com.garra400.racas.commands.ResetClassCommand;
-import com.garra400.racas.commands.SetLanguageCommand;
-import com.garra400.racas.commands.TradeClassCommand;
-import com.garra400.racas.commands.TradeAllCommand;
+import com.garra400.racas.commands.ClassCommands;
+import com.garra400.racas.commands.BuildCommands;
+import com.garra400.racas.commands.LanguageCommands;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
@@ -79,18 +73,34 @@ public class RaceMod extends JavaPlugin {
         getEntityStoreRegistry().registerSystem(new RaceDamageBoostSystem());
         getEntityStoreRegistry().registerSystem(new RaceDamageResistanceSystem());
 
-        // Register simple player commands (like Basic UIs approach)
+        // ==================== UNIFIED COMMAND SYSTEM ====================
+        // Clean, intuitive command structure:
+        //
+        // /race select              - Open race selection UI
+        // /race change <race>       - Change race directly
+        // /race reset               - Reset race to none
+        // /race info                - Show race information
+        // /race reload              - Reload race configs (admin)
+        //
+        // /class select             - Open class selection UI
+        // /class change <class>     - Change class directly
+        // /class reset              - Reset class to none
+        // /class info               - Show class information
+        //
+        // /build select             - Open full build selection UI
+        // /build change             - Change race and/or class
+        // /build info               - Show race + class information
+        //
+        // /language set <code>      - Set server language
+        // /language list            - List available languages
+        // /language current         - Show current language
+        // =================================================================
+        
         CommandRegistry commands = getCommandRegistry();
-        commands.registerCommand(new RaceCommands());        // /race with subcommands (select, trade, reset, info, class, clearclass)
-        commands.registerCommand(new RaceTradeCommand());    // /racetrade (standalone)
-        commands.registerCommand(new RaceResetCommand());    // /racereset (standalone)
-        commands.registerCommand(new RaceInfoCommand());     // /raceinfo (standalone)
-        commands.registerCommand(new RaceReloadCommand());   // /racereload (standalone)
-        commands.registerCommand(new TradeClassCommand());   // /tradeclass (standalone)
-        commands.registerCommand(new ResetClassCommand());   // /resetclass (standalone)
-        commands.registerCommand(new RaceSelectCommand());   // /raceselect (standalone)
-        commands.registerCommand(new SetLanguageCommand());  // /racesetlanguage (standalone)
-        commands.registerCommand(new TradeAllCommand());     // /changebuild (unified race+class change)
+        commands.registerCommand(new RaceCommands());      // /race
+        commands.registerCommand(new ClassCommands());     // /class
+        commands.registerCommand(new BuildCommands());     // /build
+        commands.registerCommand(new LanguageCommands());  // /language
 
         // Register event listener
         EventRegistry events = getEventRegistry();
