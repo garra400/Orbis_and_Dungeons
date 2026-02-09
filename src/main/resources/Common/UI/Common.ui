@@ -11,3 +11,80 @@
   Background: (Color: #1a1a1a(0.95));
   CornerRadius: 8;
 }
+
+@Title {
+  Alignment: Center;
+  Style: (FontSize: 24, RenderBold: true, TextColor: #ffffff);
+}
+
+@Subtitle {
+  Alignment: Center;
+  Style: (FontSize: 14, TextColor: #c0c0c0);
+}
+
+@BackButton {
+  Anchor: (Width: 120, Height: 40);
+  Padding: (Full: 10);
+  Background: #3a3a3a(0.8);
+  Style: (
+    Hovered: (Background: #4a4a4a(0.9)),
+    Pressed: (Background: #5a5a5a(0.95))
+  );
+  Label {
+    Alignment: Center;
+    Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
+    Text: "← Back";
+  }
+}
+
+@TextButton {
+  Padding: (Horizontal: 20, Vertical: 10);
+  Background: #2d7b4c(0.8);
+  CornerRadius: 4;
+  Style: (
+    Hovered: (Background: #3d8b5c(0.9)),
+    Pressed: (Background: #4d9b6c(0.95))
+  );
+  Label {
+    Alignment: Center;
+    Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
+  }
+}
+
+@DefaultScrollbarStyle {
+  Width: 8;
+  TrackColor: #2a2a2a(0.5);
+  ThumbColor: #555555(0.8);
+  ThumbHoverColor: #666666(0.9);
+}
+
+@SelectionCard {
+  LayoutMode: Left;
+  Anchor: (Height: 90, Bottom: 10);
+  Padding: (Full: 14);
+  Background: #1a1a1a(0.7);
+  BorderWidth: 2;
+  BorderColor: #404040(0.3);
+  CornerRadius: 6;
+  Style: (
+    Hovered: (Background: #2a2a2a(0.85), BorderColor: #606060(0.6)),
+    Pressed: (Background: #3a3a3a(0.95), BorderColor: #808080(0.8)),
+    Selected: (Background: #2d4050(0.9), BorderColor: #4d8ac0(0.9))
+  );
+}
+
+@PageButton {
+  Anchor: (Width: 120, Height: 40);
+  Padding: (Full: 10);
+  Background: #3a3a3a(0.7);
+  CornerRadius: 4;
+  Style: (
+    Hovered: (Background: #4a4a4a(0.85)),
+    Pressed: (Background: #5a5a5a(0.95)),
+    Disabled: (Background: #2a2a2a(0.5))
+  );
+  Label {
+    Alignment: Center;
+    Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
+  }
+}

@@ -1,221 +1,188 @@
-Group {
-  Anchor: (Width: 900, Height: 600);
-  Background: #1a1a1a(0.95);
-  LayoutMode: Top;
-  Padding: (Full: 20);
+$C = "../../Common.ui";
 
-  Label #Title {
-    Text: "Select Your Race";
-    Anchor: (Height: 40);
-    Style: (
-      FontSize: 24,
-      RenderBold: true,
-      TextColor: #ffffff
-    );
-  }
+$C.@PageOverlay {
+  $C.@DecoratedContainer #Container {
+    LayoutMode: Top;
+    Anchor: (Width: 950, Height: 650);
 
-  Label #Subtitle {
-    Text: "Choose a race to continue.";
-    Anchor: (Height: 25);
-    Style: (
-      FontSize: 14,
-      TextColor: #c0c0c0
-    );
-  }
+    Group #Header {
+      LayoutMode: MiddleCenter;
+      Anchor: (Height: 80);
+      Padding: (Full: 15);
+      Background: #0a0a0a(0.5);
 
-  Group {
-    Anchor: (Height: 10);
-  }
+      Label #Title {
+        Alignment: Center;
+        Style: (FontSize: 28, RenderBold: true, TextColor: #f0e68c);
+        Text: "⚔️ SELECT YOUR RACE ⚔️";
+      }
 
-  Group #Content {
-    LayoutMode: Left;
-    FlexWeight: 1;
-
-    Group #RaceListPanel {
-      Anchor: (Width: 280);
-      LayoutMode: Top;
-      Padding: (Right: 10);
+      Label #Subtitle {
+        Anchor: (Top: 5);
+        Alignment: Center;
+        Style: (FontSize: 14, TextColor: #a9a9a9);
+        Text: "Choose wisely - your race defines your destiny";
+      }
     }
 
-    Group #RaceDetailPanel {
+    Group #Content {
+      LayoutMode: Left;
       FlexWeight: 1;
-      LayoutMode: Top;
-      Padding: (Full: 16);
-      Background: #0f0f0f(0.85);
+      Padding: (Full: 15);
 
-      Label #SelectedRaceName {
-        Text: "Elf";
-        Anchor: (Height: 30);
-        Style: (
-          FontSize: 20,
-          RenderBold: true,
-          TextColor: #ffffff
-        );
+      Group #RaceListPanel {
+        Anchor: (Width: 320);
+        LayoutMode: TopScrolling;
+        Padding: (Right: 12);
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
       }
 
-      Label #SelectedRaceTagline {
-        Text: "Agile and tireless, moves like the wind.";
-        Anchor: (Height: 22);
-        Style: (
-          FontSize: 13,
-          TextColor: #c0c0c0
-        );
+      Group #RaceDetailPanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+        Padding: (Full: 20);
+        Background: #0f0f0f(0.9);
+        BorderWidth: 2;
+        BorderColor: #3a3a3a(0.6);
+        CornerRadius: 8;
+
+        Group #RaceHeader {
+          LayoutMode: MiddleCenter;
+          Anchor: (Height: 70);
+          Padding: (Bottom: 15);
+          BorderBottom: (Width: 2, Color: #2a2a2a);
+
+          Label #RaceIcon {
+            Anchor: (Height: 40);
+            Alignment: Center;
+            Style: (FontSize: 32);
+            Text: "🧝";
+          }
+
+          Label #SelectedRaceName {
+            Anchor: (Top: 5);
+            Alignment: Center;
+            Style: (FontSize: 22, RenderBold: true, TextColor: #ffffff);
+            Text: "Elf";
+          }
+
+          Label #SelectedRaceTagline {
+            Anchor: (Top: 3);
+            Alignment: Center;
+            Style: (FontSize: 13, TextColor: #b0b0b0, Italic: true);
+            Text: "Agile and tireless, moves like the wind.";
+          }
+        }
+
+        Group #StatsSection {
+          LayoutMode: TopScrolling;
+          FlexWeight: 1;
+          Padding: (Top: 20);
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+
+          Group #StrengthsSection {
+            LayoutMode: Top;
+            Anchor: (Bottom: 15);
+
+            Label #StrengthsHeader {
+              Anchor: (Height: 28);
+              Padding: (Left: 8, Bottom: 8);
+              Style: (FontSize: 15, RenderBold: true, TextColor: #5cc45c);
+              Text: "✓ STRENGTHS";
+            }
+
+            Group #StrengthsList {
+              LayoutMode: Top;
+              Padding: (Left: 12);
+
+              Label #PositiveLine1 {
+                Anchor: (Height: 22);
+                Style: (FontSize: 13, TextColor: #aaffaa);
+                Text: "• Enhanced agility and speed";
+              }
+
+              Label #PositiveLine2 {
+                Anchor: (Height: 22);
+                Style: (FontSize: 13, TextColor: #aaffaa);
+                Text: "• Natural archery mastery";
+              }
+
+              Label #PositiveLine3 {
+                Anchor: (Height: 22);
+                Style: (FontSize: 13, TextColor: #aaffaa);
+                Text: "• Forest affinity bonus";
+              }
+            }
+          }
+
+          Group #WeaknessesSection {
+            LayoutMode: Top;
+            Anchor: (Top: 10);
+
+            Label #WeaknessesHeader {
+              Anchor: (Height: 28);
+              Padding: (Left: 8, Bottom: 8);
+              Style: (FontSize: 15, RenderBold: true, TextColor: #d75f5f);
+              Text: "✗ WEAKNESSES";
+            }
+
+            Group #WeaknessesList {
+              LayoutMode: Top;
+              Padding: (Left: 12);
+
+              Label #NegativeLine1 {
+                Anchor: (Height: 22);
+                Style: (FontSize: 13, TextColor: #ffaaaa);
+                Text: "• Lower physical strength";
+              }
+
+              Label #NegativeLine2 {
+                Anchor: (Height: 22);
+                Style: (FontSize: 13, TextColor: #ffaaaa);
+                Text: "• Reduced endurance";
+              }
+            }
+          }
+        }
+      }
+    }
+
+    Group #Footer {
+      LayoutMode: Left;
+      Anchor: (Height: 60);
+      Padding: (Full: 15);
+      Background: #0a0a0a(0.5);
+
+      $C.@PageButton #PrevPageButton {
+        Text: "← Previous";
       }
 
       Group {
-        Anchor: (Height: 15);
+        Anchor: (Width: 15);
       }
 
-      Label #StrengthsHeader {
-        Text: "STRENGTHS";
-        Anchor: (Height: 22);
-        Style: (
-          FontSize: 14,
-          RenderBold: true,
-          TextColor: #5cc45c
-        );
-      }
-
-      Label #PositiveLine1 {
-        Text: "";
-        Anchor: (Height: 18);
-        Style: (
-          FontSize: 12,
-          TextColor: #c2ffc2
-        );
-      }
-
-      Label #PositiveLine2 {
-        Text: "";
-        Anchor: (Height: 18);
-        Style: (
-          FontSize: 12,
-          TextColor: #c2ffc2
-        );
-      }
-
-      Label #PositiveLine3 {
-        Text: "";
-        Anchor: (Height: 18);
-        Style: (
-          FontSize: 12,
-          TextColor: #c2ffc2
-        );
+      Label #PageInfo {
+        Anchor: (Width: 100);
+        Alignment: Center;
+        Style: (FontSize: 14, TextColor: #cccccc);
+        Text: "Page 1 / 2";
       }
 
       Group {
-        Anchor: (Height: 10);
+        Anchor: (Width: 15);
       }
 
-      Label #WeaknessesHeader {
-        Text: "WEAKNESSES";
-        Anchor: (Height: 22);
-        Style: (
-          FontSize: 14,
-          RenderBold: true,
-          TextColor: #d75f5f
-        );
+      $C.@PageButton #NextPageButton {
+        Text: "Next →";
       }
 
-      Label #NegativeLine1 {
-        Text: "";
-        Anchor: (Height: 18);
-        Style: (
-          FontSize: 12,
-          TextColor: #ffc2c2
-        );
+      Group {
+        FlexWeight: 1;
       }
 
-      Label #NegativeLine2 {
-        Text: "";
-        Anchor: (Height: 18);
-        Style: (
-          FontSize: 12,
-          TextColor: #ffc2c2
-        );
-      }
-    }
-  }
-
-  Group {
-    Anchor: (Height: 15);
-  }
-
-  Group {
-    LayoutMode: Left;
-    Anchor: (Height: 50);
-
-    Button #PrevPageButton {
-      Anchor: (Width: 120, Height: 50);
-      Padding: (Full: 10);
-      Background: #3a3a3a;
-
-      Label #PrevPageButtonLabel {
-        Text: "< Previous";
-        Style: (
-          FontSize: 14,
-          RenderBold: true,
-          TextColor: #ffffff,
-          HorizontalAlignment: Center,
-          VerticalAlignment: Center
-        );
-      }
-    }
-
-    Group {
-      Anchor: (Width: 10);
-    }
-
-    Label #PageInfo {
-      Text: "Page 1 / 2";
-      Anchor: (Width: 100);
-      Style: (
-        FontSize: 14,
-        TextColor: #ffffff,
-        HorizontalAlignment: Center,
-        VerticalAlignment: Center
-      );
-    }
-
-    Group {
-      Anchor: (Width: 10);
-    }
-
-    Button #NextPageButton {
-      Anchor: (Width: 120, Height: 50);
-      Padding: (Full: 10);
-      Background: #3a3a3a;
-
-      Label #NextPageButtonLabel {
-        Text: "Next >";
-        Style: (
-          FontSize: 14,
-          RenderBold: true,
-          TextColor: #ffffff,
-          HorizontalAlignment: Center,
-          VerticalAlignment: Center
-        );
-      }
-    }
-
-    Group {
-      Anchor: (Width: 20);
-    }
-
-    Button #ConfirmSelection {
-      Anchor: (Width: 200, Height: 50);
-      Padding: (Full: 12);
-      Background: #2d7b4c;
-
-      Label #ConfirmSelectionLabel {
-        Text: "Confirm Selection";
-        Style: (
-          FontSize: 16,
-          RenderBold: true,
-          TextColor: #ffffff,
-          HorizontalAlignment: Center,
-          VerticalAlignment: Center
-        );
+      $C.@TextButton #ConfirmSelection {
+        Anchor: (Width: 200, Height: 45);
+        Text: "Confirm Selection ✓";
       }
     }
   }

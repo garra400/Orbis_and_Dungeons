@@ -95,11 +95,16 @@ _Classes are specialized for combat. They generally trade base Health/Stamina fo
 ## Technical Features
 
 *   **One-Time Selection:** UI appears only on first entry.
-*   **Paginated UI:** New interface allows navigation between pages of choices.
+*   **Paginated UI:** Modern interface with smooth navigation between pages.
+*   **Modernized Design:** Complete UI overhaul with hover effects, rounded corners, and visual polish.
 *   **Persistence:** Choices are stored in `race_cache.txt` (offline-safe) and player components.
+*   **Multi-Language Support:** English, Portuguese, Russian, and Spanish translations included.
+*   **Dynamic Configuration:** UI automatically adapts to custom races and classes from config files.
 *   **Commands:**
-*   `/raceinfo [--player <name>]` — Check stats/class.
-*   `/racetrade` & `/racereset` — Admin management.
+    *   `/raceinfo [--player <name>]` — Check stats/class.
+    *   `/racetrade` & `/racereset` — Admin management.
+    *   `/racereload` — Reload configuration without restart.
+    *   `/racesetlanguage --confirm --language=<code>` — Change display language.
 
 ## Installation
 

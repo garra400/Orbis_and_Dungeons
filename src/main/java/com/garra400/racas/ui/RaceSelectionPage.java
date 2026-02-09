@@ -186,29 +186,36 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
      * Apply race details to UI elements using cmd.set()
      * Pattern from Tutorial3Page - set values dynamically
      * Uses TranslationManager for i18n support
+     *
+     * FIXED: Now loads strengths/weaknesses dynamically from RaceConfig
+     * instead of hardcoding 3 strengths and 2 weaknesses
      */
     private void applyRaceToUI(UICommandBuilder cmd, String raceKey) {
-        // Use translations for all text
+        // Use translations for race name and tagline
         String raceName = TranslationManager.translate("race." + raceKey + ".name");
         String raceTagline = TranslationManager.translate("race." + raceKey + ".tagline");
-        
+
         cmd.set("#SelectedRaceName.Text", raceName);
         cmd.set("#SelectedRaceTagline.Text", raceTagline);
 
-        // Load strengths (positives)
-        String strength1 = TranslationManager.translate("race." + raceKey + ".strength.1");
-        String strength2 = TranslationManager.translate("race." + raceKey + ".strength.2");
-        String strength3 = TranslationManager.translate("race." + raceKey + ".strength.3");
-        
-        cmd.set("#PositiveLine1.Text", strength1);
-        cmd.set("#PositiveLine2.Text", strength2);
-        cmd.set("#PositiveLine3.Text", strength3);
+        // Get race config to load strengths and weaknesses dynamically
+        com.garra400.racas.storage.config.RaceConfig config =
+            com.garra400.racas.storage.loader.RaceConfigLoader.getConfig(raceKey);
 
-        // Load weaknesses (negatives)
-        String weakness1 = TranslationManager.translate("race." + raceKey + ".weakness.1");
-        String weakness2 = TranslationManager.translate("race." + raceKey + ".weakness.2");
-        
-        cmd.set("#NegativeLine1.Text", weakness1);
-        cmd.set("#NegativeLine2.Text", weakness2);
+        if (config == null) return;
+
+        // Set strengths dynamically based on config
+        java.util.List<String> strengths = config.strengths != null ? config.strengths : java.util.List.of();
+        for (int i = 0; i < 3; i++) {
+            String text = i < strengths.size() ? "- " + strengths.get(i) : "";
+            cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
+        }
+
+        // Set weaknesses dynamically based on config
+        java.util.List<String> weaknesses = config.weaknesses != null ? config.weaknesses : java.util.List.of();
+        for (int i = 0; i < 2; i++) {
+            String text = i < weaknesses.size() ? "- " + weaknesses.get(i) : "";
+            cmd.set("#NegativeLine" + (i + 1) + ".Text", text);
+        }
     }
 }

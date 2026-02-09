@@ -51,8 +51,8 @@ public class TranslationManager {
      * Extract default language files from resources to the languages folder
      */
     private static void extractDefaultLanguageFiles() {
-        String[] languages = {"en", "ru", "pt_br"};
-        
+        String[] languages = {"en", "ru", "pt_br", "es"};
+
         for (String lang : languages) {
             File langFile = new File(languagesDir, lang + ".json");
             if (!langFile.exists()) {

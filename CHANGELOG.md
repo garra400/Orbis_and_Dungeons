@@ -2,6 +2,279 @@
 
 ---
 
+## Version 2026.2.9 - UI Modernization & Dynamic Configuration System
+
+### 🎨 UI System Modernization
+
+#### Complete UI Redesign
+- **New Modern Aesthetic**: Completely redesigned race and class selection interfaces
+  - Gradient backgrounds with transparency effects
+  - Rounded corners (CornerRadius: 6-8px)
+  - Hover/pressed state animations on all interactive elements
+  - Consistent color palette (#1a1a1a backgrounds, #d4af37 gold accents)
+
+- **Enhanced Visual Hierarchy**:
+  - Larger, bolder titles (24-28px)
+  - Clear section separation with borders
+  - Icon-based visual feedback (emoji support)
+  - Status badges for selection indicators
+
+- **Improved Component System** (`Common.ui`):
+  - `@PageOverlay` - Full-screen modal overlay
+  - `@DecoratedContainer` - Styled containers with borders
+  - `@Title` / `@Subtitle` - Standardized text styles
+  - `@BackButton` / `@TextButton` - Reusable interactive buttons
+  - `@DefaultScrollbarStyle` - Consistent scrollbar appearance
+  - `@SelectionCard` - Interactive selection cards with states
+  - `@PageButton` - Navigation buttons with disabled state support
+
+### 🐛 Critical Bug Fixes
+
+#### Fixed: Hardcoded Translation Keys Issue
+**Problem**: Users reported seeing "race.finstermensch.strength.3" even when configuring only 2 strengths
+
+**Root Cause**: `RaceSelectionPage.java` was hardcoded to load exactly 3 strengths and 2 weaknesses from translation keys, ignoring the actual `RaceConfig` data:
+
+```java
+// OLD CODE (BROKEN)
+String strength1 = TranslationManager.translate("race." + raceKey + ".strength.1");
+String strength2 = TranslationManager.translate("race." + raceKey + ".strength.2");
+String strength3 = TranslationManager.translate("race." + raceKey + ".strength.3");
+```
+
+**Solution**: Now dynamically reads from `RaceConfig` like `ClassSelectionPage` does:
+
+```java
+// NEW CODE (FIXED)
+RaceConfig config = RaceConfigLoader.getConfig(raceKey);
+List<String> strengths = config.strengths != null ? config.strengths : List.of();
+for (int i = 0; i < 3; i++) {
+    String text = i < strengths.size() ? "- " + strengths.get(i) : "";
+    cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
+}
+```
+
+**Impact**:
+- ✅ Custom races with 1-3 strengths now work correctly
+- ✅ Empty strength slots don't show translation keys
+- ✅ Race descriptions now read directly from `races_config.json`
+- ✅ Consistent behavior between races and classes
+
+#### Fixed: Race Descriptions Not Updating from Config
+**Problem**: Users reported that editing race descriptions in `races_config.json` worked for classes but not races
+
+**Root Cause**: Same as above - race UI was loading from translation keys instead of config
+
+**Solution**: Race UI now reads descriptions from config file like class UI does
+
+**Testing Checklist**:
+1. Edit `races_config.json` - change race strengths/weaknesses
+2. Run `/racereload` command
+3. Open race selection UI - changes should appear immediately
+4. Verify empty slots don't show translation keys
+
+### 🌐 Translation System Enhancements
+
+#### Added: Spanish (es.json) Translation
+Complete Spanish translation added with 127 translation keys:
+
+**New Language**:
+- **Code**: `es`
+- **Name**: Español (Spanish)
+- **Status**: ✅ Complete
+- **Coverage**: All commands, UI elements, races, and classes
+
+**How to Use**:
+```
+/racesetlanguage --confirm --language=es
+```
+
+**Updated Language List**:
+| Code | Language | Status |
+|------|----------|--------|
+| `en` | English | ✅ Complete |
+| `pt_br` | Português (Brasil) | ✅ Complete |
+| `ru` | Русский (Russian) | ✅ Complete |
+| `es` | Español (Spanish) | ✅ NEW |
+
+#### Improved: Translation File Location Documentation
+**Clarification**: Translation files must be placed in the correct location:
+
+**Correct Path**:
+```
+UserData/Saves/[WorldName]/mods/OrbisAndDungeons_RaceSelection/languages/
+```
+
+**NOT** in `UserData/Mods/` (common mistake)
+
+**Why**: Hytale's mod system uses per-world data directories. Each world save has its own mod configuration folder to allow different settings per world.
+
+**Adding Custom Translations**:
+1. Navigate to your world save folder
+2. Go to `mods/OrbisAndDungeons_RaceSelection/languages/`
+3. Add your custom `.json` file (e.g., `fr.json` for French)
+4. Restart server or use `/racereload`
+5. Select with `/racesetlanguage --confirm --language=fr`
+
+### 📚 New Documentation
+
+#### docs/UI_SYSTEM.md
+Complete UI system documentation including:
+- Component reference (all `@` components)
+- Color palette guide
+- Java integration examples
+- Event handling patterns
+- Translation integration
+- Best practices for UI development
+- Accessibility considerations
+
+**Topics Covered**:
+- UI file structure and organization
+- Reusable component definitions
+- Color palette and theming
+- Java-UI integration patterns
+- Event data serialization
+- Dynamic content generation
+- Translation key naming conventions
+- Pagination system implementation
+
+### 🔧 Technical Improvements
+
+#### Modular Configuration System
+The UI now fully respects the modular config system:
+
+**Race Configuration** (`races_config.json`):
+```json
+{
+  "id": "custom_race",
+  "displayName": "Custom Race",
+  "tagline": "Your description here",
+  "strengths": [
+    "First strength",
+    "Second strength"
+  ],
+  "weaknesses": [
+    "First weakness"
+  ]
+}
+```
+
+**Benefits**:
+- Add races with any number of strengths (0-3 shown in UI)
+- Add races with any number of weaknesses (0-2 shown in UI)
+- UI automatically adapts to config data
+- No code changes required for new races
+- No hardcoded translation keys
+
+#### Enhanced RaceSelectionPage.java
+- Added dynamic config loading
+- Removed hardcoded translation assumptions
+- Added proper null checking
+- Improved code documentation
+- Fixed inconsistency with ClassSelectionPage
+
+### 🎯 UI Features Summary
+
+**Race Selection Screen (950x650px)**:
+- Dynamic race list from `RaceRegistry`
+- Pagination support (4 races per page)
+- Real-time preview panel
+- Strengths/weaknesses from config
+- Selection indicator (checkmark)
+- Translatable labels
+- Hover effects on all buttons
+
+**Class Selection Screen (950x650px)**:
+- Dynamic class list from `ClassConfigLoader`
+- Pagination support (4 classes per page)
+- Back button to race selection
+- Combined race + class preview
+- Confirm button to apply
+- Consistent styling with race screen
+
+**Color Palette**:
+- Background: `#1a1a1a`, `#0f0f0f`, `#0a0a0a`
+- Borders: `#404040` → `#4d8ac0` (selected)
+- Text: `#ffffff` (primary), `#c0c0c0` (secondary)
+- Accents: `#d4af37` (gold), `#ff8c00` (orange)
+- Status: `#66ff66` (success), `#ff6666` (error)
+
+### 📝 Files Modified
+
+**UI Files**:
+- `src/main/resources/Common/UI/Common.ui` - Added 7 reusable components
+- `src/main/resources/Common/UI/Custom/Pages/race_selection.ui` - Complete redesign
+- `src/main/resources/Common/UI/Custom/Pages/class_selection.ui` - Complete redesign
+
+**Java Files**:
+- `src/main/java/com/garra400/racas/ui/RaceSelectionPage.java` - Fixed dynamic loading
+- `src/main/java/com/garra400/racas/i18n/TranslationManager.java` - Added ES support
+
+**Translation Files**:
+- `src/main/resources/languages/es.json` - NEW Spanish translation (127 keys)
+
+**Documentation**:
+- `docs/UI_SYSTEM.md` - NEW comprehensive UI documentation
+
+### 🚀 For Server Admins
+
+**No Breaking Changes**:
+- Existing race/class selections preserved
+- Config files remain compatible
+- Translation keys backward compatible
+- No database migrations needed
+
+**Update Steps**:
+1. Replace JAR file with new version
+2. Restart server
+3. Spanish translation available automatically
+4. Custom races will now display correctly
+5. No config changes needed
+
+**What Players Will Notice**:
+- ✅ Modern, polished UI design
+- ✅ Custom races display properly
+- ✅ Spanish language option available
+- ✅ Smoother animations and transitions
+- ✅ Better visual feedback on interactions
+
+### 🐛 Known Issues Resolved
+
+1. ✅ "race.finstermensch.strength.3" translation key shown
+2. ✅ Custom race descriptions not appearing in UI
+3. ✅ Race config changes not reflected in UI
+4. ✅ Inconsistency between race and class UI behavior
+
+### 📖 Migration Guide
+
+**For Mod Developers**:
+If you were adding custom races, you may have worked around the hardcoded translation issue. This workaround is no longer needed:
+
+**Old Workaround** (no longer needed):
+```json
+// You may have added these dummy translations
+"race.myrace.strength.1": "...",
+"race.myrace.strength.2": "...",
+"race.myrace.strength.3": ""  // Had to add even if unused
+```
+
+**New System** (proper way):
+```json
+// In races_config.json
+{
+  "id": "myrace",
+  "strengths": [
+    "First strength",
+    "Second strength"
+    // No need to add empty third entry
+  ]
+}
+```
+
+The UI will now read directly from config and won't require translation keys for unused slots.
+
+---
+
 ## Version 2026.1.31 (Build 48910) - UI Fixes, Translation Updates & Balance Changes
 
 ### 🏆 Honorable Mention
