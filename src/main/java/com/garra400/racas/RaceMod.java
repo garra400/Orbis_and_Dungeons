@@ -5,9 +5,11 @@ import com.garra400.racas.commands.RaceReloadCommand;
 import com.garra400.racas.commands.RaceResetCommand;
 import com.garra400.racas.commands.RaceSelectCommand;
 import com.garra400.racas.commands.RaceTradeCommand;
+import com.garra400.racas.commands.RaceCommands;
 import com.garra400.racas.commands.ResetClassCommand;
 import com.garra400.racas.commands.SetLanguageCommand;
 import com.garra400.racas.commands.TradeClassCommand;
+import com.garra400.racas.commands.TradeAllCommand;
 import com.garra400.racas.components.RaceData;
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceRegistry;
@@ -49,16 +51,19 @@ public class RaceMod extends JavaPlugin {
     protected void start() {
         // Init translation system first
         TranslationManager.initialize(getDataDirectory().toFile());
-        
+
         // Init configuration system - must be first
         RaceConfigLoader.init(getDataDirectory());
         ClassConfigLoader.init(getDataDirectory());
-        
+
         // Load races from JSON config
         RaceRegistry.loadFromConfig();
-        
+
         // Init storage for race cache
         RaceStorage.init(getDataDirectory());
+
+        // Initialize mod integrations (RPGLeveling, HardcoreMode)
+        com.garra400.racas.integration.ModIntegration.initialize();
 
         // Register the RaceData component with Hytale's persistence system
         raceDataType = getEntityStoreRegistry().registerComponent(
@@ -76,14 +81,16 @@ public class RaceMod extends JavaPlugin {
 
         // Register simple player commands (like Basic UIs approach)
         CommandRegistry commands = getCommandRegistry();
-        commands.registerCommand(new RaceTradeCommand());
-        commands.registerCommand(new RaceResetCommand());
-        commands.registerCommand(new RaceInfoCommand());
-        commands.registerCommand(new RaceReloadCommand());
-        commands.registerCommand(new TradeClassCommand());
-        commands.registerCommand(new ResetClassCommand());
-        commands.registerCommand(new RaceSelectCommand());
-        commands.registerCommand(new SetLanguageCommand());
+        commands.registerCommand(new RaceCommands());        // /race with subcommands (select, trade, reset, info, class, clearclass)
+        commands.registerCommand(new RaceTradeCommand());    // /racetrade (standalone)
+        commands.registerCommand(new RaceResetCommand());    // /racereset (standalone)
+        commands.registerCommand(new RaceInfoCommand());     // /raceinfo (standalone)
+        commands.registerCommand(new RaceReloadCommand());   // /racereload (standalone)
+        commands.registerCommand(new TradeClassCommand());   // /tradeclass (standalone)
+        commands.registerCommand(new ResetClassCommand());   // /resetclass (standalone)
+        commands.registerCommand(new RaceSelectCommand());   // /raceselect (standalone)
+        commands.registerCommand(new SetLanguageCommand());  // /racesetlanguage (standalone)
+        commands.registerCommand(new TradeAllCommand());     // /changebuild (unified race+class change)
 
         // Register event listener
         EventRegistry events = getEventRegistry();

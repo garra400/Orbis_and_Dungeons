@@ -14,7 +14,8 @@
         "Hytale:EntityModule": "*"
     },
     "OptionalDependencies": {
-        
+        "RPGLeveling": "*",
+        "HardcoreMode": "*"
     },
     "DisabledByDefault": false,
     "Main": "com.garra400.racas.RaceMod",

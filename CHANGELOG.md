@@ -2,7 +2,65 @@
 
 ---
 
-## Version 2026.2.9 - UI Modernization & Dynamic Configuration System
+## Version 2026.2.9 - UI Modernization & Mod Integration
+
+### 🔌 Mod Integration System
+
+#### New: RPGLeveling Integration
+**Automatic stat synchronization with RPGLeveling mod**:
+
+- **Event-Driven Sync**: Listens for level-up events and reapplies race/class bonuses
+- **Additive System**: Race bonuses stack with RPGLeveling stats (no conflicts)
+- **Zero Dependencies**: Uses reflection - works with or without RPGLeveling installed
+- **API Access**: Get player level/XP for future features
+
+**How It Works**:
+1. Player levels up in RPGLeveling
+2. Event listener catches `LevelUpEvent`
+3. Automatically reapplies race/class bonuses
+4. Stats persist correctly (e.g., Orc keeps +100 HP after level-up)
+
+**Console Output**:
+```
+[Orbis] RPGLeveling detected - integration enabled
+[Orbis] Successfully registered RPGLeveling event listeners
+[Orbis] Reapplying race bonuses after level-up: orc / berserker
+```
+
+#### New: HardcoreMode Integration
+**Dynamic difficulty scaling based on race and class**:
+
+- **Race-Based Difficulty**: Tank races face +15% harder mobs, fragile races face -10% easier mobs
+- **Class-Based Difficulty**: High-damage classes face +10% challenge
+- **Spawn Rate Modifiers**: Tank races attract more enemies, stealthy races attract fewer
+- **Level Scaling**: Difficulty increases with player level (+2% per level)
+
+**Difficulty Multipliers**:
+| Combination | Multiplier | Effect |
+|-------------|------------|--------|
+| Orc Berserker | 1.265x | +26.5% mob difficulty |
+| Human Swordsman | 1.05x | +5% mob difficulty |
+| Elf Assassin | 0.855x | -14.5% mob difficulty |
+
+**Spawn Rate Modifiers**:
+- **+20% Spawns**: Orc, Dwarf (attract enemies)
+- **-20% Spawns**: Elf, Tiefling (stealthy/repelling)
+
+**Console Output**:
+```
+[Orbis] HardcoreMode detected - integration enabled
+[Orbis] HardcoreMode integration initialized (passive API mode)
+```
+
+#### Integration Architecture
+- **Files Created**:
+  - `ModIntegration.java` - Main facade with auto-detection
+  - `RPGLevelingIntegration.java` - Event handling and stat sync
+  - `HardcoreModeIntegration.java` - Difficulty scaling API
+
+- **Initialization**: Added `ModIntegration.initialize()` to `RaceMod.start()`
+- **Manifest**: Declared optional dependencies in `manifest.json`
+- **Documentation**: Created comprehensive `docs/MOD_INTEGRATION.md`
 
 ### 🎨 UI System Modernization
 

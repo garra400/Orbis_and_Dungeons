@@ -7,17 +7,28 @@ import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
 import com.garra400.racas.storage.config.ClassConfig;
 import com.garra400.racas.storage.loader.ClassConfigLoader;
+import com.garra400.racas.ui.ClassSelectionPage;
+import com.garra400.racas.ui.RaceSelectionPage;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.NameMatching;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.FlagArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
 import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractAsyncCommand;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.pages.PageManager;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import javax.annotation.Nonnull;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -38,6 +49,7 @@ public class RaceCommands extends AbstractCommandCollection {
 
     public RaceCommands() {
         super("race", "Commands for managing player races");
+        addSubCommand(new SelectSubCommand());
         addSubCommand(new TradeCommand());
         addSubCommand(new ResetCommand());
         addSubCommand(new InfoCommand());
@@ -48,6 +60,88 @@ public class RaceCommands extends AbstractCommandCollection {
     @Override
     protected boolean canGeneratePermission() {
         return false;
+    }
+
+    /**
+     * /race select [--race] [--class]
+     * Opens race/class selection UI for reselection
+     */
+    private static class SelectSubCommand extends AbstractPlayerCommand {
+        private final FlagArg raceOnlyArg;
+        private final FlagArg classOnlyArg;
+
+        public SelectSubCommand() {
+            super("select", "Open race/class selection UI", false);
+            this.raceOnlyArg = withFlagArg("race", "Open only race selection UI");
+            this.classOnlyArg = withFlagArg("class", "Open only class selection UI");
+        }
+
+        @Override
+        protected boolean canGeneratePermission() {
+            return false;
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext ctx,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player == null) {
+                ctx.sendMessage(Message.raw("§cPlayer not found"));
+                return;
+            }
+
+            PageManager pages = player.getPageManager();
+            boolean raceOnly = raceOnlyArg.get(ctx);
+            boolean classOnly = classOnlyArg.get(ctx);
+
+            // If only class selection requested
+            if (classOnly && !raceOnly) {
+                String currentRace = RaceManager.getPlayerRace(player);
+                if (currentRace == null || currentRace.equals("none")) {
+                    ctx.sendMessage(Message.raw("§cYou must select a race first!"));
+                    return;
+                }
+
+                if (pages.getCustomPage() instanceof ClassSelectionPage) {
+                    ctx.sendMessage(Message.raw("§eClass selection UI is already open!"));
+                    return;
+                }
+
+                try {
+                    pages.openCustomPage(ref, store, new ClassSelectionPage(playerRef, currentRace));
+                    ctx.sendMessage(Message.raw("§6Opening class selection UI..."));
+                } catch (Exception e) {
+                    ctx.sendMessage(Message.raw("§cFailed to open UI: " + e.getMessage()));
+                    e.printStackTrace();
+                }
+                return;
+            }
+
+            // Race selection (or both)
+            if (pages.getCustomPage() instanceof RaceSelectionPage) {
+                ctx.sendMessage(Message.raw("§eRace selection UI is already open!"));
+                return;
+            }
+
+            try {
+                String currentRace = RaceManager.getPlayerRace(player);
+                if (currentRace != null && !currentRace.equals("none")) {
+                    pages.openCustomPage(ref, store, new RaceSelectionPage(playerRef, currentRace, 0));
+                    ctx.sendMessage(Message.raw("§6Opening race selection UI (reselection mode)..."));
+                } else {
+                    pages.openCustomPage(ref, store, new RaceSelectionPage(playerRef));
+                    ctx.sendMessage(Message.raw("§6Opening race selection UI..."));
+                }
+            } catch (Exception e) {
+                ctx.sendMessage(Message.raw("§cFailed to open UI: " + e.getMessage()));
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
