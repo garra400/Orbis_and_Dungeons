@@ -1,5 +1,10 @@
 package com.garra400.racas.commands;
 
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.color.ColorConverter;
 import com.garra400.racas.i18n.TranslationManager;
@@ -23,10 +28,6 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import javax.annotation.Nonnull;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 /**
  * Unified Build Command Collection: /build
  * 
@@ -45,6 +46,7 @@ public class BuildCommands extends AbstractCommandCollection {
         super("build", "Build management (race + class combined)");
         addSubCommand(new SelectCommand());
         addSubCommand(new ChangeCommand());
+        addSubCommand(new ResetCommand());
         addSubCommand(new InfoCommand());
     }
 
@@ -294,6 +296,96 @@ public class BuildCommands extends AbstractCommandCollection {
                         targetRef.getUsername(), raceDisplayName, classDisplayName)));
                 targetPlayer.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.build.change.by_admin", raceDisplayName, classDisplayName)));
+            }
+        }
+    }
+
+    // ==================== /build reset ====================
+    
+    /**
+     * /build reset [--player <name>]
+     * Resets both race and class, then opens race selection UI (flows to class)
+     */
+    private static class ResetCommand extends AbstractPlayerCommand {
+        private final OptionalArg<String> playerArg;
+
+        public ResetCommand() {
+            super("reset", "Reset race and class, open selection UI", false);
+            this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
+        }
+
+        @Override
+        protected boolean canGeneratePermission() {
+            return false;
+        }
+
+        @Override
+        protected void execute(
+                @Nonnull CommandContext ctx,
+                @Nonnull Store<EntityStore> store,
+                @Nonnull Ref<EntityStore> ref,
+                @Nonnull PlayerRef playerRef,
+                @Nonnull World world
+        ) {
+            String targetName = playerArg.get(ctx);
+            PlayerRef targetRef;
+            Player targetPlayer;
+            
+            if (targetName == null || targetName.isEmpty()) {
+                targetRef = playerRef;
+                targetPlayer = store.getComponent(ref, Player.getComponentType());
+            } else {
+                targetRef = Universe.get().getPlayerByUsername(targetName, NameMatching.EXACT_IGNORE_CASE);
+                if (targetRef == null) {
+                    ctx.sendMessage(ColorConverter.message(
+                        TranslationManager.translate("command.build.player_not_found", targetName)));
+                    return;
+                }
+                
+                UUID worldUuid = targetRef.getWorldUuid();
+                if (worldUuid == null) {
+                    ctx.sendMessage(ColorConverter.message(
+                        TranslationManager.translate("command.build.not_in_world")));
+                    return;
+                }
+                
+                targetPlayer = (Player) Universe.get().getWorld(worldUuid).getEntity(targetRef.getUuid());
+            }
+
+            if (targetPlayer == null) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.not_online")));
+                return;
+            }
+
+            // Reset race (which also clears class)
+            boolean success = RaceManager.resetRace(targetPlayer, targetRef);
+            
+            if (!success) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.failed")));
+                return;
+            }
+            
+            if (targetName == null || targetName.isEmpty()) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.success_self")));
+            } else {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.success_other", targetRef.getUsername())));
+                targetPlayer.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.by_admin")));
+            }
+
+            // Auto-open race selection UI (flows to class selection after picking race)
+            try {
+                PageManager pages = targetPlayer.getPageManager();
+                pages.openCustomPage(ref, store, new RaceSelectionPage(targetRef));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.opening_ui")));
+            } catch (Exception e) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.build.reset.ui_failed")));
             }
         }
     }

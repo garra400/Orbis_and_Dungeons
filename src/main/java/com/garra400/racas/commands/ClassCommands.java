@@ -1,5 +1,10 @@
 package com.garra400.racas.commands;
 
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.color.ColorConverter;
 import com.garra400.racas.i18n.TranslationManager;
@@ -21,10 +26,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-import javax.annotation.Nonnull;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Unified Class Command Collection: /class
@@ -253,13 +254,13 @@ public class ClassCommands extends AbstractCommandCollection {
     
     /**
      * /class reset [--player <name>]
-     * Resets class to none (keeps race)
+     * Resets class to none (keeps race) and opens class selection UI
      */
     private static class ResetCommand extends AbstractPlayerCommand {
         private final OptionalArg<String> playerArg;
 
         public ResetCommand() {
-            super("reset", "Reset class to none", false);
+            super("reset", "Reset class and open selection UI", false);
             this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
         }
 
@@ -326,6 +327,17 @@ public class ClassCommands extends AbstractCommandCollection {
                     TranslationManager.translate("command.class.reset.success_other", targetRef.getUsername())));
                 targetPlayer.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.class.reset.by_admin")));
+            }
+
+            // Auto-open class selection UI
+            try {
+                PageManager pages = targetPlayer.getPageManager();
+                pages.openCustomPage(ref, store, new ClassSelectionPage(targetRef, currentRace));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.class.reset.opening_ui")));
+            } catch (Exception e) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.class.reset.ui_failed")));
             }
         }
     }

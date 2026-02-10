@@ -1,5 +1,10 @@
 package com.garra400.racas.commands;
 
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
+
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.RaceMod;
 import com.garra400.racas.color.ColorConverter;
@@ -24,10 +29,6 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-import javax.annotation.Nonnull;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Unified Race Command Collection: /race
@@ -252,13 +253,13 @@ public class RaceCommands extends AbstractCommandCollection {
     
     /**
      * /race reset [--player <name>]
-     * Resets race to none (requires reconnect)
+     * Resets race to none and opens race selection UI
      */
     private static class ResetCommand extends AbstractPlayerCommand {
         private final OptionalArg<String> playerArg;
 
         public ResetCommand() {
-            super("reset", "Reset race to none", false);
+            super("reset", "Reset race and open selection UI", false);
             this.playerArg = withOptionalArg("player", "Target player (admin only)", ArgTypes.STRING);
         }
 
@@ -317,13 +318,22 @@ public class RaceCommands extends AbstractCommandCollection {
             if (targetName == null || targetName.isEmpty()) {
                 ctx.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.race.reset.success_self")));
-                ctx.sendMessage(ColorConverter.message(
-                    TranslationManager.translate("command.race.reset.reconnect")));
             } else {
                 ctx.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.race.reset.success_other", targetRef.getUsername())));
                 targetPlayer.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.race.reset.by_admin")));
+            }
+
+            // Auto-open race selection UI
+            try {
+                PageManager pages = targetPlayer.getPageManager();
+                pages.openCustomPage(ref, store, new RaceSelectionPage(targetRef));
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.race.reset.opening_ui")));
+            } catch (Exception e) {
+                ctx.sendMessage(ColorConverter.message(
+                    TranslationManager.translate("command.race.reset.ui_failed")));
             }
         }
     }

@@ -43,7 +43,7 @@ public class RPGLevelingIntegration {
                     ModIntegration.onPlayerLevelUp(player);
 
                 } catch (Exception e) {
-                    System.err.println("[Orbis] Error handling RPGLeveling level-up event: " + e.getMessage());
+                    System.out.println("[Orbis] Error handling RPGLeveling level-up event: " + e.getMessage());
                 }
             });
 
@@ -51,8 +51,8 @@ public class RPGLevelingIntegration {
             System.out.println("[Orbis] Successfully registered RPGLeveling event listeners");
 
         } catch (Exception e) {
-            System.err.println("[Orbis] Failed to initialize RPGLeveling integration: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("[Orbis] RPGLeveling integration not available (non-fatal): " + e.getMessage());
+            // Non-fatal - mod works without this integration
         }
     }
 
@@ -66,7 +66,7 @@ public class RPGLevelingIntegration {
             Object result = getLevelMethod.invoke(null, player);
             return result != null ? (Integer) result : 0;
         } catch (Exception e) {
-            System.err.println("[Orbis] Error getting player level: " + e.getMessage());
+            System.out.println("[Orbis] RPGLeveling API not available for getPlayerLevel");
             return 0;
         }
     }
@@ -81,7 +81,7 @@ public class RPGLevelingIntegration {
             Object result = getXPMethod.invoke(null, player);
             return result != null ? (Long) result : 0L;
         } catch (Exception e) {
-            System.err.println("[Orbis] Error getting player XP: " + e.getMessage());
+            System.out.println("[Orbis] RPGLeveling API not available for getPlayerXP");
             return 0L;
         }
     }
