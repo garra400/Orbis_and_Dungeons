@@ -1,11 +1,18 @@
 package com.garra400.racas.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -15,12 +22,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-import com.hypixel.hytale.component.Ref;
-import com.hypixel.hytale.component.Store;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Race Selection Page - Interactive UI for choosing player race
@@ -80,13 +81,12 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         cmd.append("Pages/race_selection.ui");
         
         // Apply translations to static UI elements
-        cmd.set("#Title.Text", TranslationManager.translate("ui.race_selection.title"));
-        cmd.set("#Subtitle.Text", TranslationManager.translate("ui.race_selection.subtitle"));
+        // Note: #Title is a Group slot in @DecoratedContainer, title text is set via @Text in the .ui file
         cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.race_selection.strengths"));
         cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.race_selection.weaknesses"));
-        cmd.set("#ConfirmSelectionLabel.Text", TranslationManager.translate("ui.race_selection.confirm"));
-        cmd.set("#PrevPageButtonLabel.Text", TranslationManager.translate("ui.race_selection.previous"));
-        cmd.set("#NextPageButtonLabel.Text", TranslationManager.translate("ui.race_selection.next"));
+        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.race_selection.confirm"));
+        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.race_selection.previous"));
+        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.race_selection.next"));
         
         applyRaceToUI(cmd, selectedRace);
         buildRaceButtons(cmd, evt);
@@ -124,25 +124,25 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
             
             cmd.appendInline("#RaceButtons", String.format("""
                 Button %s {
-                  Anchor: (Width: 280, Height: 80);
+                  Anchor: (Height: 60);
                   LayoutMode: Top;
-                  Padding: (Full: 10);
-                  Background: #0f0f0f(0.9);
+                  Padding: (Full: 8);
+                  Background: #1a1a2e(0.9);
                   Label {
                     Text: "%s";
-                    Anchor: (Height: 22);
-                    Style: (FontSize: 16, RenderBold: true, TextColor: #ffffff);
+                    Anchor: (Height: 20);
+                    Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
                   }
                   Label {
                     Text: "%s";
-                    Anchor: (Height: 18);
-                    Style: (FontSize: 12, TextColor: #c0c0c0);
+                    Anchor: (Height: 16);
+                    Style: (FontSize: 11, TextColor: #aaaaaa);
                   }
                 }
                 """, buttonId, raceName.toUpperCase(), raceTagline));
             
             if (i < end - 1) {
-                cmd.appendInline("#RaceButtons", "Group { Anchor: (Height: 10); }");
+                cmd.appendInline("#RaceButtons", "Group { Anchor: (Height: 6); }");
             }
             
             evt.addEventBinding(CustomUIEventBindingType.Activating, 

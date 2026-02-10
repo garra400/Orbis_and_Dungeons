@@ -1,189 +1,151 @@
-$C = "../../Common.ui";
+$C = "../Common.ui";
 
-$C.@PageOverlay {
-  $C.@DecoratedContainer #Container {
-    LayoutMode: Top;
-    Anchor: (Width: 950, Height: 650);
+$C.@DecoratedContainer {
+  Anchor: (Width: 850, Height: 600);
 
-    Group #Header {
-      LayoutMode: MiddleCenter;
-      Anchor: (Height: 80);
-      Padding: (Full: 15);
-      Background: #0a0a0a(0.5);
-
-      Label #Title {
-        Alignment: Center;
-        Style: (FontSize: 28, RenderBold: true, TextColor: #f0e68c);
-        Text: "⚔️ SELECT YOUR RACE ⚔️";
-      }
-
-      Label #Subtitle {
-        Anchor: (Top: 5);
-        Alignment: Center;
-        Style: (FontSize: 14, TextColor: #a9a9a9);
-        Text: "Choose wisely - your race defines your destiny";
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = "Select Your Race";
       }
     }
+  }
 
-    Group #Content {
-      LayoutMode: Left;
+  #Content {
+    Group {
+      LayoutMode: Top;
       FlexWeight: 1;
       Padding: (Full: 15);
 
-      Group #RaceListPanel {
-        Anchor: (Width: 320);
-        LayoutMode: TopScrolling;
-        Padding: (Right: 12);
-        ScrollbarStyle: $C.@DefaultScrollbarStyle;
-      }
-
-      Group #RaceDetailPanel {
+      Group {
+        LayoutMode: Left;
         FlexWeight: 1;
-        LayoutMode: Top;
-        Padding: (Full: 20);
-        Background: #0f0f0f(0.9);
-        BorderWidth: 2;
-        BorderColor: #3a3a3a(0.6);
-        CornerRadius: 8;
 
-        Group #RaceHeader {
-          LayoutMode: MiddleCenter;
-          Anchor: (Height: 70);
-          Padding: (Bottom: 15);
-          BorderBottom: (Width: 2, Color: #2a2a2a);
+        Group #RaceListContainer {
+          Anchor: (Width: 300);
+          LayoutMode: Top;
+          Padding: (Right: 15);
 
-          Label #RaceIcon {
-            Anchor: (Height: 40);
-            Alignment: Center;
-            Style: (FontSize: 32);
-            Text: "🧝";
+          Label {
+            Style: (RenderBold: true);
+            Text: "Available Races";
+            Padding: (Bottom: 8);
           }
 
-          Label #SelectedRaceName {
-            Anchor: (Top: 5);
-            Alignment: Center;
-            Style: (FontSize: 22, RenderBold: true, TextColor: #ffffff);
-            Text: "Elf";
-          }
-
-          Label #SelectedRaceTagline {
-            Anchor: (Top: 3);
-            Alignment: Center;
-            Style: (FontSize: 13, TextColor: #b0b0b0, Italic: true);
-            Text: "Agile and tireless, moves like the wind.";
+          Group #RaceListPanel {
+            FlexWeight: 1;
+            LayoutMode: TopScrolling;
+            ScrollbarStyle: $C.@DefaultScrollbarStyle;
           }
         }
 
-        Group #StatsSection {
-          LayoutMode: TopScrolling;
+        Group #DescriptionContainer {
           FlexWeight: 1;
-          Padding: (Top: 20);
-          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          LayoutMode: Top;
+          Padding: (Left: 15);
 
-          Group #StrengthsSection {
+          Label {
+            Style: (RenderBold: true);
+            Text: "Race Details";
+            Padding: (Bottom: 8);
+          }
+
+          Group #DescriptionPanel {
+            FlexWeight: 1;
             LayoutMode: Top;
-            Anchor: (Bottom: 15);
+            Padding: (Full: 15);
+            Background: #2a2a2a;
 
-            Label #StrengthsHeader {
-              Anchor: (Height: 28);
-              Padding: (Left: 8, Bottom: 8);
-              Style: (FontSize: 15, RenderBold: true, TextColor: #5cc45c);
-              Text: "✓ STRENGTHS";
+            Label #SelectedRaceName {
+              Style: (RenderBold: true, FontSize: 18);
+              Text: "";
+              Padding: (Bottom: 8);
             }
 
-            Group #StrengthsList {
-              LayoutMode: Top;
-              Padding: (Left: 12);
+            Group {
+              FlexWeight: 1;
+              LayoutMode: TopScrolling;
+              ScrollbarStyle: $C.@DefaultScrollbarStyle;
+
+              Label #SelectedRaceTagline {
+                Style: (FontSize: 12, TextColor: #aaaaaa);
+                Text: "";
+                Padding: (Bottom: 10);
+              }
+
+              Label #StrengthsHeader {
+                Style: (RenderBold: true, TextColor: #55ff55);
+                Text: "Strengths:";
+                Padding: (Top: 8, Bottom: 4);
+              }
 
               Label #PositiveLine1 {
-                Anchor: (Height: 22);
-                Style: (FontSize: 13, TextColor: #aaffaa);
-                Text: "• Enhanced agility and speed";
+                Style: (FontSize: 12, TextColor: #88ff88);
+                Text: "";
               }
 
               Label #PositiveLine2 {
-                Anchor: (Height: 22);
-                Style: (FontSize: 13, TextColor: #aaffaa);
-                Text: "• Natural archery mastery";
+                Style: (FontSize: 12, TextColor: #88ff88);
+                Text: "";
               }
 
               Label #PositiveLine3 {
-                Anchor: (Height: 22);
-                Style: (FontSize: 13, TextColor: #aaffaa);
-                Text: "• Forest affinity bonus";
+                Style: (FontSize: 12, TextColor: #88ff88);
+                Text: "";
               }
-            }
-          }
 
-          Group #WeaknessesSection {
-            LayoutMode: Top;
-            Anchor: (Top: 10);
-
-            Label #WeaknessesHeader {
-              Anchor: (Height: 28);
-              Padding: (Left: 8, Bottom: 8);
-              Style: (FontSize: 15, RenderBold: true, TextColor: #d75f5f);
-              Text: "✗ WEAKNESSES";
-            }
-
-            Group #WeaknessesList {
-              LayoutMode: Top;
-              Padding: (Left: 12);
+              Label #WeaknessesHeader {
+                Style: (RenderBold: true, TextColor: #ff5555);
+                Text: "Weaknesses:";
+                Padding: (Top: 8, Bottom: 4);
+              }
 
               Label #NegativeLine1 {
-                Anchor: (Height: 22);
-                Style: (FontSize: 13, TextColor: #ffaaaa);
-                Text: "• Lower physical strength";
+                Style: (FontSize: 12, TextColor: #ff8888);
+                Text: "";
               }
 
               Label #NegativeLine2 {
-                Anchor: (Height: 22);
-                Style: (FontSize: 13, TextColor: #ffaaaa);
-                Text: "• Reduced endurance";
+                Style: (FontSize: 12, TextColor: #ff8888);
+                Text: "";
               }
             }
           }
         }
       }
-    }
-
-    Group #Footer {
-      LayoutMode: Left;
-      Anchor: (Height: 60);
-      Padding: (Full: 15);
-      Background: #0a0a0a(0.5);
-
-      $C.@PageButton #PrevPageButton {
-        Text: "← Previous";
-      }
 
       Group {
-        Anchor: (Width: 15);
-      }
+        LayoutMode: Left;
+        Padding: (Top: 12);
 
-      Label #PageInfo {
-        Anchor: (Width: 100);
-        Alignment: Center;
-        Style: (FontSize: 14, TextColor: #cccccc);
-        Text: "Page 1 / 2";
-      }
+        Label #PageInfo {
+          Style: (FontSize: 12);
+          Text: "Page 1 / 1";
+          Anchor: (Width: 80);
+        }
 
-      Group {
-        Anchor: (Width: 15);
-      }
+        $C.@SecondaryTextButton #PrevPageButton {
+          Text: "< Previous";
+        }
 
-      $C.@PageButton #NextPageButton {
-        Text: "Next →";
-      }
+        Group {
+          Anchor: (Width: 10);
+        }
 
-      Group {
-        FlexWeight: 1;
-      }
+        $C.@SecondaryTextButton #NextPageButton {
+          Text: "Next >";
+        }
 
-      $C.@TextButton #ConfirmSelection {
-        Anchor: (Width: 200, Height: 45);
-        Text: "Confirm Selection ✓";
+        Group {
+          FlexWeight: 1;
+        }
+
+        $C.@TextButton #ConfirmSelection {
+          Text: "Confirm Selection";
+        }
       }
     }
   }
 }
+
+$C.@BackButton {}

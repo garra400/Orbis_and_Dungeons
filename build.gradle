@@ -92,15 +92,9 @@ processResources {
     }
 }
 
-// Adiciona a UI com ambos caminhos (Common e common) direto no jar para lidar com case-sensitive.
+// Default jar task configuration
 tasks.named('jar') {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from('src/main/resources/Common/UI/Custom/Pages/race_selection.ui') {
-        into 'Common/UI/Custom/Pages'
-    }
-    from('src/main/resources/Common/UI/Custom/Pages/race_selection.ui') {
-        into 'common/ui/custom/pages'
-    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 // Creates a run configuration in IDEA that will run the Hytale server with your plugin and the default assets.

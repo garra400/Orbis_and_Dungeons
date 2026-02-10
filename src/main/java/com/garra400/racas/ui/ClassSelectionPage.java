@@ -1,5 +1,10 @@
 package com.garra400.racas.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Nonnull;
+
 import com.garra400.racas.RaceManager;
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.storage.config.ClassConfig;
@@ -18,10 +23,6 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class Selection Page - Second step after race selection
@@ -84,14 +85,13 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
         cmd.append("Pages/class_selection.ui");
         
         // Apply translations to static UI elements
-        cmd.set("#Title.Text", TranslationManager.translate("ui.class_selection.title"));
-        cmd.set("#Subtitle.Text", TranslationManager.translate("ui.class_selection.subtitle"));
+        // Note: #Title is a Group slot in @DecoratedContainer, title text is set via @Text in the .ui file
         cmd.set("#StrengthsHeader.Text", TranslationManager.translate("ui.class_selection.strengths"));
         cmd.set("#WeaknessesHeader.Text", TranslationManager.translate("ui.class_selection.weaknesses"));
-        cmd.set("#ConfirmSelectionLabel.Text", TranslationManager.translate("ui.class_selection.confirm"));
-        cmd.set("#BackToRaceLabel.Text", TranslationManager.translate("ui.class_selection.back"));
-        cmd.set("#PrevPageButtonLabel.Text", TranslationManager.translate("ui.class_selection.previous"));
-        cmd.set("#NextPageButtonLabel.Text", TranslationManager.translate("ui.class_selection.next"));
+        cmd.set("#ConfirmSelection.Text", TranslationManager.translate("ui.class_selection.confirm"));
+        cmd.set("#BackToRace.Text", TranslationManager.translate("ui.class_selection.back"));
+        cmd.set("#PrevPageButton.Text", TranslationManager.translate("ui.class_selection.previous"));
+        cmd.set("#NextPageButton.Text", TranslationManager.translate("ui.class_selection.next"));
         
         applyClassToUI(cmd, selectedClass);
         buildClassButtons(cmd, evt);
@@ -131,25 +131,25 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
             
             cmd.appendInline("#ClassButtons", String.format("""
                 Button %s {
-                  Anchor: (Width: 280, Height: 80);
+                  Anchor: (Height: 60);
                   LayoutMode: Top;
-                  Padding: (Full: 10);
-                  Background: #0f0f0f(0.9);
+                  Padding: (Full: 8);
+                  Background: #1a1a2e(0.9);
                   Label {
                     Text: "%s";
-                    Anchor: (Height: 22);
-                    Style: (FontSize: 16, RenderBold: true, TextColor: #ffffff);
+                    Anchor: (Height: 20);
+                    Style: (FontSize: 14, RenderBold: true, TextColor: #ffffff);
                   }
                   Label {
                     Text: "%s";
-                    Anchor: (Height: 18);
-                    Style: (FontSize: 12, TextColor: #c0c0c0);
+                    Anchor: (Height: 16);
+                    Style: (FontSize: 11, TextColor: #aaaaaa);
                   }
                 }
                 """, buttonId, className.toUpperCase(), classTagline));
             
             if (i < end - 1) {
-                cmd.appendInline("#ClassButtons", "Group { Anchor: (Height: 10); }");
+                cmd.appendInline("#ClassButtons", "Group { Anchor: (Height: 6); }");
             }
             
             evt.addEventBinding(CustomUIEventBindingType.Activating, 
@@ -170,16 +170,16 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
         ClassConfig config = ClassConfigLoader.getConfig(classId);
         if (config == null) return;
 
-        // Set strengths (keep from config for now - could be translated later)
+        // Set strengths (UI has 3 PositiveLine labels)
         List<String> strengths = config.strengths != null ? config.strengths : List.of();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             String text = i < strengths.size() ? "- " + strengths.get(i) : "";
             cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
         }
 
-        // Set weaknesses (keep from config for now - could be translated later)
+        // Set weaknesses (UI has 2 NegativeLine labels)
         List<String> weaknesses = config.weaknesses != null ? config.weaknesses : List.of();
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 2; i++) {
             String text = i < weaknesses.size() ? "- " + weaknesses.get(i) : "";
             cmd.set("#NegativeLine" + (i + 1) + ".Text", text);
         }

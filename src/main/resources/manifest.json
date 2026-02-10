@@ -1,8 +1,8 @@
 {
     "Group": "OrbisAndDungeons",
-    "Name": "RaceSelection",
-    "Version": "2026.2.9-84223",
-    "Description": "Tela de escolha de raca com detalhes e confirmacao obrigatoria.",
+    "Name": "Orbis_and_Dungeons",
+    "Version": "2026.2.10-6307",
+    "Description": "Sistema de ra\u00e7as e classes com UI de sele\u00e7\u00e3o, b\u00f4nus de status e integra\u00e7\u00e3o com outros mods.",
     "Authors": [
         {
             "Name": "Garra400"
@@ -14,8 +14,8 @@
         "Hytale:EntityModule": "*"
     },
     "OptionalDependencies": {
-        "RPGLeveling": "*",
-        "HardcoreMode": "*"
+        "Zuxaw:RPGLeveling": "*",
+        "com.example:HardcoreMode": "*"
     },
     "DisabledByDefault": false,
     "Main": "com.garra400.racas.RaceMod",
