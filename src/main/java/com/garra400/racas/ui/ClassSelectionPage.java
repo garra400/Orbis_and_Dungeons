@@ -125,9 +125,18 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
             int btnIndex = i - start;
             String buttonId = "#ClassButton" + btnIndex;
             
-            // Use translated class name
-            String className = TranslationManager.translate("class." + classId + ".name");
-            String classTagline = TranslationManager.translate("class." + classId + ".tagline");
+            // Priority: translation first (supports multilingual), config as fallback (new classes without translations)
+            ClassConfig btnConfig = ClassConfigLoader.getConfig(classId);
+            String className = TranslationManager.translateOrNull("class." + classId + ".name");
+            if (className == null) {
+                className = (btnConfig != null && btnConfig.displayName != null && !btnConfig.displayName.isEmpty())
+                    ? btnConfig.displayName : classId;
+            }
+            String classTagline = TranslationManager.translateOrNull("class." + classId + ".tagline");
+            if (classTagline == null) {
+                classTagline = (btnConfig != null && btnConfig.tagline != null && !btnConfig.tagline.isEmpty())
+                    ? btnConfig.tagline : "";
+            }
             
             cmd.appendInline("#ClassButtons", String.format("""
                 Button %s {
@@ -159,15 +168,23 @@ public class ClassSelectionPage extends InteractiveCustomUIPage<ClassSelectionPa
     }
 
     private void applyClassToUI(UICommandBuilder cmd, String classId) {
-        // Use translations for class name and tagline
-        String className = TranslationManager.translate("class." + classId + ".name");
-        String classTagline = TranslationManager.translate("class." + classId + ".tagline");
-        
+        // Get class config for strengths/weaknesses and as description fallback
+        ClassConfig config = ClassConfigLoader.getConfig(classId);
+
+        // Priority: translation first (supports multilingual), config as fallback (new classes without translations)
+        String className = TranslationManager.translateOrNull("class." + classId + ".name");
+        if (className == null) {
+            className = (config != null && config.displayName != null && !config.displayName.isEmpty())
+                ? config.displayName : classId;
+        }
+        String classTagline = TranslationManager.translateOrNull("class." + classId + ".tagline");
+        if (classTagline == null) {
+            classTagline = (config != null && config.tagline != null && !config.tagline.isEmpty())
+                ? config.tagline : "";
+        }
+
         cmd.set("#SelectedClassName.Text", className);
         cmd.set("#SelectedClassTagline.Text", classTagline);
-
-        // Get class config for strengths and weaknesses
-        ClassConfig config = ClassConfigLoader.getConfig(classId);
         if (config == null) return;
 
         // Set strengths (UI has 3 PositiveLine labels)

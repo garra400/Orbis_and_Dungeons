@@ -1,9 +1,5 @@
 package com.garra400.racas.i18n;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -13,6 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * Translation Manager for Orbis and Dungeons
@@ -68,7 +68,7 @@ public class TranslationManager {
                         createEmptyLanguageFile(langFile);
                     }
                 } catch (IOException e) {
-                    System.err.println("[Orbis] Failed to extract language file " + lang + ".json: " + e.getMessage());
+                    System.out.println("[Orbis] Failed to extract language file " + lang + ".json: " + e.getMessage());
                     createEmptyLanguageFile(langFile);
                 }
             }
@@ -88,7 +88,7 @@ public class TranslationManager {
             GSON.toJson(emptyLang, writer);
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("[Orbis] Failed to create empty language file: " + e.getMessage());
         }
     }
 
@@ -99,13 +99,13 @@ public class TranslationManager {
         translations.clear();
         
         if (!languagesDir.exists() || !languagesDir.isDirectory()) {
-            System.err.println("[Orbis] Languages directory not found!");
+            System.out.println("[Orbis] Languages directory not found!");
             return;
         }
 
         File[] files = languagesDir.listFiles((dir, name) -> name.endsWith(".json"));
         if (files == null || files.length == 0) {
-            System.err.println("[Orbis] No language files found!");
+            System.out.println("[Orbis] No language files found!");
             return;
         }
 
@@ -115,7 +115,7 @@ public class TranslationManager {
                 loadLanguageFile(langCode, file);
                 System.out.println("[Orbis] Loaded language: " + langCode);
             } catch (IOException e) {
-                System.err.println("[Orbis] Failed to load language file " + file.getName() + ": " + e.getMessage());
+                System.out.println("[Orbis] Failed to load language file " + file.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -155,7 +155,7 @@ public class TranslationManager {
                     }
                 }
             } catch (IOException e) {
-                System.err.println("[Orbis] Failed to load language preference: " + e.getMessage());
+                System.out.println("[Orbis] Failed to load language preference: " + e.getMessage());
             }
         }
     }
@@ -173,7 +173,7 @@ public class TranslationManager {
             GSON.toJson(config, writer);
             writer.close();
         } catch (IOException e) {
-            System.err.println("[Orbis] Failed to save language preference: " + e.getMessage());
+            System.out.println("[Orbis] Failed to save language preference: " + e.getMessage());
         }
     }
 
@@ -190,7 +190,7 @@ public class TranslationManager {
             try {
                 return String.format(translation, args);
             } catch (Exception e) {
-                System.err.println("[Orbis] Failed to format translation for key: " + key);
+                System.out.println("[Orbis] Failed to format translation for key: " + key);
                 return translation;
             }
         }
@@ -217,7 +217,6 @@ public class TranslationManager {
         }
 
         // Fall back to key itself
-        System.err.println("[Orbis] Missing translation key: " + key);
         return key;
     }
 
@@ -233,7 +232,7 @@ public class TranslationManager {
             System.out.println("[Orbis] Changed language to: " + langCode);
             return true;
         }
-        System.err.println("[Orbis] Language not found: " + langCode);
+        System.out.println("[Orbis] Language not found: " + langCode);
         return false;
     }
 
@@ -269,5 +268,29 @@ public class TranslationManager {
      */
     public static boolean isLanguageAvailable(String langCode) {
         return translations.containsKey(langCode);
+    }
+
+    /**
+     * Translate a key, returning null if not found in any language.
+     * Unlike {@link #translate(String, Object...)}, this does NOT fall back to the key itself.
+     * Useful for checking if a translation exists before using a config fallback.
+     */
+    public static String translateOrNull(String key) {
+        // Try current language
+        Map<String, String> currentLangMap = translations.get(currentLanguage);
+        if (currentLangMap != null && currentLangMap.containsKey(key)) {
+            return currentLangMap.get(key);
+        }
+
+        // Fall back to English
+        if (!currentLanguage.equals(DEFAULT_LANGUAGE)) {
+            Map<String, String> defaultLangMap = translations.get(DEFAULT_LANGUAGE);
+            if (defaultLangMap != null && defaultLangMap.containsKey(key)) {
+                return defaultLangMap.get(key);
+            }
+        }
+
+        // Not found in any language
+        return null;
     }
 }

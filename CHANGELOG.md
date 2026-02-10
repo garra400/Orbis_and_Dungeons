@@ -2,334 +2,236 @@
 
 ---
 
-## Version 2026.2.9 - UI Modernization & Mod Integration
+## Version 2026.2.9 - Unified Commands, Mod Integration, Smart Resets & UI Modernization
 
-### 🔌 Mod Integration System
+### 🎮 Unified Command System (Complete Overhaul)
 
-#### New: RPGLeveling Integration
+**All legacy commands have been replaced** with a clean, unified structure using 4 base commands with subcommands:
+
+#### Old → New Command Migration
+
+| Old Command | New Command | Notes |
+|-------------|-------------|-------|
+| `/racetrade <race>` | `/race change <race>` | Now a subcommand |
+| `/racereset` | `/race reset` | Auto-opens race UI |
+| `/raceinfo` | `/race info` | Unchanged behavior |
+| `/racereload` | `/race reload` | Unchanged behavior |
+| `/raceselect` | `/race select` | Now a subcommand |
+| `/tradeclass <class>` | `/class change <class>` | Now a subcommand |
+| `/resetclass` | `/class reset` | Auto-opens class UI |
+| `/racesetlanguage --confirm --language=X` | `/language set X` | Simplified syntax |
+| *(new)* | `/build select` | Opens race → class flow |
+| *(new)* | `/build change --race X --class Y` | Change both at once |
+| *(new)* | `/build reset` | Resets both, opens full UI flow |
+| *(new)* | `/build info` | Shows race + class combined |
+
+#### `/race` — Race Management
+| Subcommand | Usage | Description |
+|------------|-------|-------------|
+| `select` | `/race select [--player <name>]` | Opens race selection UI |
+| `change` | `/race change <race> [--player <name>]` | Change race directly by name |
+| `reset` | `/race reset [--player <name>]` | Reset race → opens **race UI only** |
+| `info` | `/race info [--player <name>]` | Show current race info |
+| `reload` | `/race reload` | Reload configs (admin) |
+
+#### `/class` — Class Management
+| Subcommand | Usage | Description |
+|------------|-------|-------------|
+| `select` | `/class select [--player <name>]` | Opens class selection UI |
+| `change` | `/class change <class> [--player <name>]` | Change class directly by name |
+| `reset` | `/class reset [--player <name>]` | Reset class → opens **class UI only** |
+| `info` | `/class info [--player <name>]` | Show current class info |
+
+#### `/build` — Combined Race + Class (NEW)
+| Subcommand | Usage | Description |
+|------------|-------|-------------|
+| `select` | `/build select [--player <name>]` | Opens race UI → flows to class UI |
+| `change` | `/build change --race <race> [--class <class>] [--player <name>]` | Change both at once |
+| `reset` | `/build reset [--player <name>]` | Reset both → opens **race UI → class UI** |
+| `info` | `/build info [--player <name>]` | Show race + class combined info |
+
+#### `/language` — Language Management (NEW)
+| Subcommand | Usage | Description |
+|------------|-------|-------------|
+| `set` | `/language set <code>` | Set server language |
+| `list` | `/language list` | List all available languages |
+| `current` | `/language current` | Show current language |
+
+**Architecture**: Each command extends `AbstractPlayerCommand` with `withOptionalArg("player", ...)` for admin targeting.
+
+### 🔄 Smart Reset Commands with Auto-UI
+
+**Reset commands now automatically open the corresponding selection UI**, eliminating the need for players to manually re-open the UI after a reset.
+
+| Command | What Resets | UI Behavior |
+|---------|------------|-------------|
+| `/race reset` | Race + Class data | Opens **race selection UI only** → applies race with saved class → closes |
+| `/class reset` | Class only (keeps race) | Opens **class selection UI only** → select class → closes |
+| `/build reset` | Race + Class data | Opens **race UI → class UI** (full selection flow) |
+
+**Technical Implementation:**
+
+- **`RaceSelectionPage`** now has a `raceOnly` mode:
+  - Normal mode (`/build select`, `/build reset`): confirm → opens `ClassSelectionPage`
+  - Race-only mode (`/race reset`): confirm → applies race + saved class directly → `this.close()`
+- **`/race reset`**: Saves the player's current class before resetting, then opens `RaceSelectionPage(targetRef, true, savedClass)`. After race selection, the saved class is reapplied automatically.
+- **`/class reset`**: Keeps the race, sets class to `"none"`, opens `ClassSelectionPage(targetRef, currentRace)`.
+
+**Translation Keys Added:**
+- `command.race.reset.opening_ui` / `command.race.reset.ui_failed`
+- `command.class.reset.opening_ui` / `command.class.reset.ui_failed`
+- `command.build.reset.success_self` / `command.build.reset.success_other` / `command.build.reset.by_admin`
+- `command.build.reset.failed` / `command.build.reset.opening_ui` / `command.build.reset.ui_failed`
+
+### 🔌 Mod Integration System (NEW)
+
+#### RPGLeveling Integration
 **Automatic stat synchronization with RPGLeveling mod**:
 
 - **Event-Driven Sync**: Listens for level-up events and reapplies race/class bonuses
 - **Additive System**: Race bonuses stack with RPGLeveling stats (no conflicts)
-- **Zero Dependencies**: Uses reflection - works with or without RPGLeveling installed
-- **API Access**: Get player level/XP for future features
+- **Zero Dependencies**: Uses reflection — works with or without RPGLeveling installed
 
-**How It Works**:
-1. Player levels up in RPGLeveling
-2. Event listener catches `LevelUpEvent`
-3. Automatically reapplies race/class bonuses
-4. Stats persist correctly (e.g., Orc keeps +100 HP after level-up)
+**Architecture**:
+- `ModIntegration.java` — Main facade with auto-detection
+- `RPGLevelingIntegration.java` — Event handling and stat sync (all output via `System.out` to avoid SEVERE log issues)
+- `HardcoreModeIntegration.java` — Difficulty scaling API
 
-**Console Output**:
-```
-[Orbis] RPGLeveling detected - integration enabled
-[Orbis] Successfully registered RPGLeveling event listeners
-[Orbis] Reapplying race bonuses after level-up: orc / berserker
-```
-
-#### New: HardcoreMode Integration
+#### HardcoreMode Integration
 **Dynamic difficulty scaling based on race and class**:
 
-- **Race-Based Difficulty**: Tank races face +15% harder mobs, fragile races face -10% easier mobs
-- **Class-Based Difficulty**: High-damage classes face +10% challenge
-- **Spawn Rate Modifiers**: Tank races attract more enemies, stealthy races attract fewer
-- **Level Scaling**: Difficulty increases with player level (+2% per level)
-
-**Difficulty Multipliers**:
 | Combination | Multiplier | Effect |
 |-------------|------------|--------|
 | Orc Berserker | 1.265x | +26.5% mob difficulty |
 | Human Swordsman | 1.05x | +5% mob difficulty |
 | Elf Assassin | 0.855x | -14.5% mob difficulty |
 
-**Spawn Rate Modifiers**:
-- **+20% Spawns**: Orc, Dwarf (attract enemies)
-- **-20% Spawns**: Elf, Tiefling (stealthy/repelling)
+**Spawn Rate Modifiers**: Orc/Dwarf +20% spawns, Elf/Tiefling -20% spawns.
 
-**Console Output**:
-```
-[Orbis] HardcoreMode detected - integration enabled
-[Orbis] HardcoreMode integration initialized (passive API mode)
-```
+### ⚖️ Balance Changes
 
-#### Integration Architecture
-- **Files Created**:
-  - `ModIntegration.java` - Main facade with auto-detection
-  - `RPGLevelingIntegration.java` - Event handling and stat sync
-  - `HardcoreModeIntegration.java` - Difficulty scaling API
+#### Orc — Major Buff (Pure Tank Role)
+| Stat | Before | After | Change |
+|------|--------|-------|--------|
+| Health | +75 HP (175 total) | **+100 HP (200 total)** | **+25 HP** |
+| Stamina | 0 (10 total) | **-2 (8 total)** | **-2 Stamina** |
 
-- **Initialization**: Added `ModIntegration.initialize()` to `RaceMod.start()`
-- **Manifest**: Declared optional dependencies in `manifest.json`
-- **Documentation**: Created comprehensive `docs/MOD_INTEGRATION.md`
+**Design**: Orc is now the ultimate tank with the highest HP pool in the game (200). Trades stamina for raw survivability.
+
+#### Dwarf — Resistance Adjustment
+| Stat | Before | After | Change |
+|------|--------|-------|--------|
+| Physical Resistance | 30% | **20%** | -10% |
+
+Slightly toned down physical resistance for better balance. Fall resistance remains at 50%.
 
 ### 🎨 UI System Modernization
 
-#### Complete UI Redesign
-- **New Modern Aesthetic**: Completely redesigned race and class selection interfaces
-  - Gradient backgrounds with transparency effects
-  - Rounded corners (CornerRadius: 6-8px)
-  - Hover/pressed state animations on all interactive elements
-  - Consistent color palette (#1a1a1a backgrounds, #d4af37 gold accents)
+#### Complete UI Redesign (850×600px)
+- **Modern Aesthetic**: Gradient backgrounds, rounded corners (6-8px), hover/pressed animations
+- **Color Palette**: `#1a1a1a` backgrounds, `#d4af37` gold accents, `#4d8ac0` selection borders
+- **Enhanced Layout**: 300px list panel, 60px auto-width buttons, clear section separation
+- **Reusable Components** (`Common.ui`): `@PageOverlay`, `@DecoratedContainer`, `@Title`, `@Subtitle`, `@BackButton`, `@TextButton`, `@SecondaryTextButton`, `@CancelTextButton`, `@DefaultScrollbarStyle`, `@SelectionCard`
 
-- **Enhanced Visual Hierarchy**:
-  - Larger, bolder titles (24-28px)
-  - Clear section separation with borders
-  - Icon-based visual feedback (emoji support)
-  - Status badges for selection indicators
+#### Fixed: UTF-8 BOM Encoding
+- `.ui` files must be UTF-8 **without BOM** — fixed all UI files to remove BOM bytes that prevented Hytale from parsing them.
 
-- **Improved Component System** (`Common.ui`):
-  - `@PageOverlay` - Full-screen modal overlay
-  - `@DecoratedContainer` - Styled containers with borders
-  - `@Title` / `@Subtitle` - Standardized text styles
-  - `@BackButton` / `@TextButton` - Reusable interactive buttons
-  - `@DefaultScrollbarStyle` - Consistent scrollbar appearance
-  - `@SelectionCard` - Interactive selection cards with states
-  - `@PageButton` - Navigation buttons with disabled state support
+#### Fixed: Invalid Template References
+- Replaced `@PageButton` (does not exist) with `@SecondaryTextButton` across all UI files.
+- Fixed `#Title` and `#Content` — these are Group slots in `@DecoratedContainer`, not Labels.
 
 ### 🐛 Critical Bug Fixes
 
-#### Fixed: Hardcoded Translation Keys Issue
-**Problem**: Users reported seeing "race.finstermensch.strength.3" even when configuring only 2 strengths
+#### Fixed: Mod Not Loading (SEVERE Log Issue)
+**Problem**: After adding mod integrations, the plugin loaded but never "Enabled" — commands and UI didn't work.
 
-**Root Cause**: `RaceSelectionPage.java` was hardcoded to load exactly 3 strengths and 2 weaknesses from translation keys, ignoring the actual `RaceConfig` data:
+**Root Cause**: `RPGLevelingIntegration.java` used `System.err.println()` and `e.printStackTrace()` which output as `SEVERE` in the Hytale log. The PluginManager treats SEVERE output during `start()` as a plugin failure.
 
-```java
-// OLD CODE (BROKEN)
-String strength1 = TranslationManager.translate("race." + raceKey + ".strength.1");
-String strength2 = TranslationManager.translate("race." + raceKey + ".strength.2");
-String strength3 = TranslationManager.translate("race." + raceKey + ".strength.3");
-```
+**Solution**: Changed all `System.err.println` → `System.out.println`, removed `e.printStackTrace()`, made error messages indicate non-fatal status.
 
-**Solution**: Now dynamically reads from `RaceConfig` like `ClassSelectionPage` does:
+**Rule Discovered**: **Never use `System.err` or `e.printStackTrace()` in Hytale plugins** — always use `System.out.println` for all mod logging.
 
-```java
-// NEW CODE (FIXED)
-RaceConfig config = RaceConfigLoader.getConfig(raceKey);
-List<String> strengths = config.strengths != null ? config.strengths : List.of();
-for (int i = 0; i < 3; i++) {
-    String text = i < strengths.size() ? "- " + strengths.get(i) : "";
-    cmd.set("#PositiveLine" + (i + 1) + ".Text", text);
-}
-```
-
-**Impact**:
-- ✅ Custom races with 1-3 strengths now work correctly
-- ✅ Empty strength slots don't show translation keys
-- ✅ Race descriptions now read directly from `races_config.json`
-- ✅ Consistent behavior between races and classes
+#### Fixed: Hardcoded Translation Keys
+- Race UI now dynamically reads strengths/weaknesses from `RaceConfig` instead of hardcoded translation keys.
+- Empty slots no longer show raw keys like "race.finstermensch.strength.3".
 
 #### Fixed: Race Descriptions Not Updating from Config
-**Problem**: Users reported that editing race descriptions in `races_config.json` worked for classes but not races
+- Race UI now reads descriptions from config file (like class UI already did).
 
-**Root Cause**: Same as above - race UI was loading from translation keys instead of config
+#### Fixed: CustomUI Selector Mismatches
+- Fixed `cmd.set()` selectors that referenced non-existent UI element IDs.
+- Added missing IDs to `.ui` files: `#StrengthsHeader`, `#WeaknessesHeader`, `#PrevPageButton`, etc.
 
-**Solution**: Race UI now reads descriptions from config file like class UI does
+### 🌐 Translation System
 
-**Testing Checklist**:
-1. Edit `races_config.json` - change race strengths/weaknesses
-2. Run `/racereload` command
-3. Open race selection UI - changes should appear immediately
-4. Verify empty slots don't show translation keys
+#### Spanish Translation Added
+Complete Spanish (es.json) translation — 127+ keys covering all commands, UI, races, and classes.
 
-### 🌐 Translation System Enhancements
-
-#### Added: Spanish (es.json) Translation
-Complete Spanish translation added with 127 translation keys:
-
-**New Language**:
-- **Code**: `es`
-- **Name**: Español (Spanish)
-- **Status**: ✅ Complete
-- **Coverage**: All commands, UI elements, races, and classes
-
-**How to Use**:
-```
-/racesetlanguage --confirm --language=es
-```
-
-**Updated Language List**:
+#### Supported Languages (4 total)
 | Code | Language | Status |
 |------|----------|--------|
 | `en` | English | ✅ Complete |
 | `pt_br` | Português (Brasil) | ✅ Complete |
-| `ru` | Русский (Russian) | ✅ Complete |
-| `es` | Español (Spanish) | ✅ NEW |
+| `es` | Español | ✅ Complete |
+| `ru` | Русский | ✅ Complete |
 
-#### Improved: Translation File Location Documentation
-**Clarification**: Translation files must be placed in the correct location:
-
-**Correct Path**:
-```
-UserData/Saves/[WorldName]/mods/OrbisAndDungeons_RaceSelection/languages/
-```
-
-**NOT** in `UserData/Mods/` (common mistake)
-
-**Why**: Hytale's mod system uses per-world data directories. Each world save has its own mod configuration folder to allow different settings per world.
-
-**Adding Custom Translations**:
-1. Navigate to your world save folder
-2. Go to `mods/OrbisAndDungeons_RaceSelection/languages/`
-3. Add your custom `.json` file (e.g., `fr.json` for French)
-4. Restart server or use `/racereload`
-5. Select with `/racesetlanguage --confirm --language=fr`
+**Usage**: `/language set es` (replaces old `/racesetlanguage --confirm --language=es`)
 
 ### 📚 New Documentation
+- `docs/UI_SYSTEM.md` — Complete UI system reference (components, colors, Java integration, events)
+- `docs/MOD_INTEGRATION.md` — Mod integration guide (RPGLeveling, HardcoreMode)
 
-#### docs/UI_SYSTEM.md
-Complete UI system documentation including:
-- Component reference (all `@` components)
-- Color palette guide
-- Java integration examples
-- Event handling patterns
-- Translation integration
-- Best practices for UI development
-- Accessibility considerations
+### 📝 Files Modified/Created
 
-**Topics Covered**:
-- UI file structure and organization
-- Reusable component definitions
-- Color palette and theming
-- Java-UI integration patterns
-- Event data serialization
-- Dynamic content generation
-- Translation key naming conventions
-- Pagination system implementation
+**Java Files (New)**:
+- `commands/RaceCommands.java` — `/race` command with 5 subcommands
+- `commands/ClassCommands.java` — `/class` command with 4 subcommands
+- `commands/BuildCommands.java` — `/build` command with 4 subcommands
+- `commands/LanguageCommands.java` — `/language` command with 3 subcommands
+- `integration/ModIntegration.java` — Integration facade
+- `integration/RPGLevelingIntegration.java` — RPGLeveling integration
+- `integration/HardcoreModeIntegration.java` — HardcoreMode integration
 
-### 🔧 Technical Improvements
+**Java Files (Modified)**:
+- `ui/RaceSelectionPage.java` — Added `raceOnly` mode, dynamic config loading, fixed templates
+- `ui/ClassSelectionPage.java` — Fixed templates, consistent with RaceSelectionPage
+- `RaceMod.java` — Registers 4 unified commands + ModIntegration.initialize()
+- `RaceManager.java` — Updated stat application for Orc balance changes
 
-#### Modular Configuration System
-The UI now fully respects the modular config system:
+**UI Files (Modified)**:
+- `Common/UI/Common.ui` — Added 10 reusable components
+- `Custom/Pages/race_selection.ui` — Complete redesign (850×600), BOM removed
+- `Custom/Pages/class_selection.ui` — Complete redesign (850×600), BOM removed
 
-**Race Configuration** (`races_config.json`):
-```json
-{
-  "id": "custom_race",
-  "displayName": "Custom Race",
-  "tagline": "Your description here",
-  "strengths": [
-    "First strength",
-    "Second strength"
-  ],
-  "weaknesses": [
-    "First weakness"
-  ]
-}
-```
+**Translation Files (Modified)**:
+- `en.json`, `pt_br.json`, `ru.json` — Added 20+ new keys for unified commands and reset UIs
+- `es.json` — **NEW** complete Spanish translation
 
-**Benefits**:
-- Add races with any number of strengths (0-3 shown in UI)
-- Add races with any number of weaknesses (0-2 shown in UI)
-- UI automatically adapts to config data
-- No code changes required for new races
-- No hardcoded translation keys
-
-#### Enhanced RaceSelectionPage.java
-- Added dynamic config loading
-- Removed hardcoded translation assumptions
-- Added proper null checking
-- Improved code documentation
-- Fixed inconsistency with ClassSelectionPage
-
-### 🎯 UI Features Summary
-
-**Race Selection Screen (950x650px)**:
-- Dynamic race list from `RaceRegistry`
-- Pagination support (4 races per page)
-- Real-time preview panel
-- Strengths/weaknesses from config
-- Selection indicator (checkmark)
-- Translatable labels
-- Hover effects on all buttons
-
-**Class Selection Screen (950x650px)**:
-- Dynamic class list from `ClassConfigLoader`
-- Pagination support (4 classes per page)
-- Back button to race selection
-- Combined race + class preview
-- Confirm button to apply
-- Consistent styling with race screen
-
-**Color Palette**:
-- Background: `#1a1a1a`, `#0f0f0f`, `#0a0a0a`
-- Borders: `#404040` → `#4d8ac0` (selected)
-- Text: `#ffffff` (primary), `#c0c0c0` (secondary)
-- Accents: `#d4af37` (gold), `#ff8c00` (orange)
-- Status: `#66ff66` (success), `#ff6666` (error)
-
-### 📝 Files Modified
-
-**UI Files**:
-- `src/main/resources/Common/UI/Common.ui` - Added 7 reusable components
-- `src/main/resources/Common/UI/Custom/Pages/race_selection.ui` - Complete redesign
-- `src/main/resources/Common/UI/Custom/Pages/class_selection.ui` - Complete redesign
-
-**Java Files**:
-- `src/main/java/com/garra400/racas/ui/RaceSelectionPage.java` - Fixed dynamic loading
-- `src/main/java/com/garra400/racas/i18n/TranslationManager.java` - Added ES support
-
-**Translation Files**:
-- `src/main/resources/languages/es.json` - NEW Spanish translation (127 keys)
-
-**Documentation**:
-- `docs/UI_SYSTEM.md` - NEW comprehensive UI documentation
+**Java Files (Removed)**:
+- `commands/RaceSelectCommand.java` — Replaced by `/race select`
+- `commands/TradeClassCommand.java` — Replaced by `/class change`
+- `commands/ResetClassCommand.java` — Replaced by `/class reset`
+- `commands/SetLanguageCommand.java` — Replaced by `/language set`
 
 ### 🚀 For Server Admins
 
-**No Breaking Changes**:
-- Existing race/class selections preserved
-- Config files remain compatible
-- Translation keys backward compatible
-- No database migrations needed
+**Breaking Changes**:
+- ⚠️ All old commands (`/racetrade`, `/resetclass`, `/tradeclass`, `/racereset`, `/raceselect`, `/racesetlanguage`) are **removed**
+- Use the new unified commands: `/race`, `/class`, `/build`, `/language`
+- If coming from pre-2026.2.9, delete `races_config.json` to get updated Orc stats (200 HP, -2 Stamina)
 
 **Update Steps**:
-1. Replace JAR file with new version
-2. Restart server
-3. Spanish translation available automatically
-4. Custom races will now display correctly
-5. No config changes needed
+1. Replace JAR file
+2. Delete old `races_config.json` (to get Orc balance update)
+3. Restart server
+4. Verify with `/race info` and `/build info`
 
 **What Players Will Notice**:
-- ✅ Modern, polished UI design
-- ✅ Custom races display properly
-- ✅ Spanish language option available
-- ✅ Smoother animations and transitions
-- ✅ Better visual feedback on interactions
-
-### 🐛 Known Issues Resolved
-
-1. ✅ "race.finstermensch.strength.3" translation key shown
-2. ✅ Custom race descriptions not appearing in UI
-3. ✅ Race config changes not reflected in UI
-4. ✅ Inconsistency between race and class UI behavior
-
-### 📖 Migration Guide
-
-**For Mod Developers**:
-If you were adding custom races, you may have worked around the hardcoded translation issue. This workaround is no longer needed:
-
-**Old Workaround** (no longer needed):
-```json
-// You may have added these dummy translations
-"race.myrace.strength.1": "...",
-"race.myrace.strength.2": "...",
-"race.myrace.strength.3": ""  // Had to add even if unused
-```
-
-**New System** (proper way):
-```json
-// In races_config.json
-{
-  "id": "myrace",
-  "strengths": [
-    "First strength",
-    "Second strength"
-    // No need to add empty third entry
-  ]
-}
-```
-
-The UI will now read directly from config and won't require translation keys for unused slots.
+- ✅ New cleaner commands (`/race`, `/class`, `/build`)
+- ✅ Reset commands auto-open selection UI (no manual `/race select` needed)
+- ✅ Modern, polished UI with hover effects
+- ✅ Spanish language available
+- ✅ Orc is now 200 HP (massive tank buff)
 
 ---
 

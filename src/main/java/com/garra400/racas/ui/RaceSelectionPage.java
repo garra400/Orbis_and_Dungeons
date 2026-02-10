@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.garra400.racas.RaceManager;
 import com.garra400.racas.i18n.TranslationManager;
 import com.garra400.racas.races.RaceDefinition;
 import com.garra400.racas.races.RaceRegistry;
@@ -55,15 +56,31 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
     private final String selectedRace;
     private final int currentPage;
     private final List<String> allRaceIds;
+    private final boolean raceOnly;
+    private final String existingClass;
 
+    /**
+     * Normal constructor - after confirm, chains to ClassSelectionPage.
+     * Used by /build reset and first-time race selection.
+     */
     public RaceSelectionPage(@Nonnull PlayerRef playerRef) {
-        this(playerRef, "elf", 0);
+        this(playerRef, "elf", 0, false, null);
     }
 
-    public RaceSelectionPage(@Nonnull PlayerRef playerRef, String selectedRace, int page) {
+    /**
+     * Race-only constructor - after confirm, applies race directly + keeps existingClass.
+     * Used by /race reset so only the race UI is shown.
+     */
+    public RaceSelectionPage(@Nonnull PlayerRef playerRef, boolean raceOnly, String existingClass) {
+        this(playerRef, "elf", 0, raceOnly, existingClass);
+    }
+
+    public RaceSelectionPage(@Nonnull PlayerRef playerRef, String selectedRace, int page, boolean raceOnly, String existingClass) {
         super(playerRef, CustomPageLifetime.CantClose, RaceEventData.CODEC);
         this.selectedRace = selectedRace;
         this.currentPage = page;
+        this.raceOnly = raceOnly;
+        this.existingClass = existingClass;
         // Build race list dynamically from registry
         this.allRaceIds = new ArrayList<>();
         for (RaceDefinition race : RaceRegistry.all()) {
@@ -118,9 +135,18 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
             int btnIndex = i - start;
             String buttonId = "#RaceButton" + btnIndex;
             
-            // Use translated race name
-            String raceName = TranslationManager.translate("race." + raceId + ".name");
-            String raceTagline = TranslationManager.translate("race." + raceId + ".tagline");
+            // Priority: translation first (supports multilingual), config as fallback (new races without translations)
+            com.garra400.racas.storage.config.RaceConfig btnConfig = com.garra400.racas.storage.loader.RaceConfigLoader.getConfig(raceId);
+            String raceName = TranslationManager.translateOrNull("race." + raceId + ".name");
+            if (raceName == null) {
+                raceName = (btnConfig != null && btnConfig.displayName != null && !btnConfig.displayName.isEmpty())
+                    ? btnConfig.displayName : raceId;
+            }
+            String raceTagline = TranslationManager.translateOrNull("race." + raceId + ".tagline");
+            if (raceTagline == null) {
+                raceTagline = (btnConfig != null && btnConfig.tagline != null && !btnConfig.tagline.isEmpty())
+                    ? btnConfig.tagline : "";
+            }
             
             cmd.appendInline("#RaceButtons", String.format("""
                 Button %s {
@@ -161,24 +187,31 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         
         if ("select".equals(data.action)) {
             if (data.race != null && RaceRegistry.exists(data.race)) {
-                player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race, currentPage));
+                player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, data.race, currentPage, raceOnly, existingClass));
             }
             return;
         }
         
         if ("prevpage".equals(data.action)) {
-            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage - 1));
+            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage - 1, raceOnly, existingClass));
             return;
         }
         
         if ("nextpage".equals(data.action)) {
-            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage + 1));
+            player.getPageManager().openCustomPage(ref, store, new RaceSelectionPage(playerRef, selectedRace, currentPage + 1, raceOnly, existingClass));
             return;
         }
 
         if ("confirm".equals(data.action)) {
-            // Move to class selection instead of applying immediately
-            player.getPageManager().openCustomPage(ref, store, new ClassSelectionPage(playerRef, selectedRace));
+            if (raceOnly) {
+                // Race-only mode: apply race directly with existing class and close
+                String classToApply = (existingClass != null && !existingClass.isEmpty()) ? existingClass : "none";
+                RaceManager.applyRaceAndClass(ref, store, selectedRace, classToApply);
+                this.close();
+            } else {
+                // Normal mode: move to class selection
+                player.getPageManager().openCustomPage(ref, store, new ClassSelectionPage(playerRef, selectedRace));
+            }
         }
     }
 
@@ -191,16 +224,24 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
      * instead of hardcoding 3 strengths and 2 weaknesses
      */
     private void applyRaceToUI(UICommandBuilder cmd, String raceKey) {
-        // Use translations for race name and tagline
-        String raceName = TranslationManager.translate("race." + raceKey + ".name");
-        String raceTagline = TranslationManager.translate("race." + raceKey + ".tagline");
+        // Get race config for strengths/weaknesses and as description fallback
+        com.garra400.racas.storage.config.RaceConfig config =
+            com.garra400.racas.storage.loader.RaceConfigLoader.getConfig(raceKey);
+
+        // Priority: translation first (supports multilingual), config as fallback (new races without translations)
+        String raceName = TranslationManager.translateOrNull("race." + raceKey + ".name");
+        if (raceName == null) {
+            raceName = (config != null && config.displayName != null && !config.displayName.isEmpty())
+                ? config.displayName : raceKey;
+        }
+        String raceTagline = TranslationManager.translateOrNull("race." + raceKey + ".tagline");
+        if (raceTagline == null) {
+            raceTagline = (config != null && config.tagline != null && !config.tagline.isEmpty())
+                ? config.tagline : "";
+        }
 
         cmd.set("#SelectedRaceName.Text", raceName);
         cmd.set("#SelectedRaceTagline.Text", raceTagline);
-
-        // Get race config to load strengths and weaknesses dynamically
-        com.garra400.racas.storage.config.RaceConfig config =
-            com.garra400.racas.storage.loader.RaceConfigLoader.getConfig(raceKey);
 
         if (config == null) return;
 

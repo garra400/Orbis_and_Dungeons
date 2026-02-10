@@ -139,7 +139,7 @@ public class BuildCommands extends AbstractCommandCollection {
                 if (currentRace != null && !currentRace.equals("none")) {
                     pages.openCustomPage(targetEntityRef != null ? targetEntityRef : ref, 
                                         targetStore != null ? targetStore : store, 
-                                        new RaceSelectionPage(targetRef, currentRace, 0));
+                                        new RaceSelectionPage(targetRef, currentRace, 0, false, null));
                     ctx.sendMessage(ColorConverter.message(
                         TranslationManager.translate("command.build.select.opening_reselect")));
                 } else {

@@ -144,7 +144,7 @@ public class RaceCommands extends AbstractCommandCollection {
                 if (currentRace != null && !currentRace.equals("none")) {
                     pages.openCustomPage(targetEntityRef != null ? targetEntityRef : ref, 
                                         targetStore != null ? targetStore : store, 
-                                        new RaceSelectionPage(targetRef, currentRace, 0));
+                                        new RaceSelectionPage(targetRef, currentRace, 0, false, null));
                     ctx.sendMessage(ColorConverter.message(
                         TranslationManager.translate("command.race.select.opening_reselect")));
                 } else {
@@ -307,6 +307,10 @@ public class RaceCommands extends AbstractCommandCollection {
                 return;
             }
 
+            // Save current class before resetting (so we can keep it after race change)
+            String savedClass = RaceManager.getPlayerClass(targetPlayer);
+            if (savedClass == null) savedClass = "none";
+
             boolean success = RaceManager.resetRace(targetPlayer, targetRef);
             
             if (!success) {
@@ -325,10 +329,10 @@ public class RaceCommands extends AbstractCommandCollection {
                     TranslationManager.translate("command.race.reset.by_admin")));
             }
 
-            // Auto-open race selection UI
+            // Auto-open race selection UI (race-only mode - keeps existing class)
             try {
                 PageManager pages = targetPlayer.getPageManager();
-                pages.openCustomPage(ref, store, new RaceSelectionPage(targetRef));
+                pages.openCustomPage(ref, store, new RaceSelectionPage(targetRef, true, savedClass));
                 ctx.sendMessage(ColorConverter.message(
                     TranslationManager.translate("command.race.reset.opening_ui")));
             } catch (Exception e) {
