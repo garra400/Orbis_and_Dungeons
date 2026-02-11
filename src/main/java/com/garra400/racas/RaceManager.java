@@ -622,20 +622,27 @@ public final class RaceManager {
      * health proportionally. This method exists as a placeholder for potential
      * future API support.
      */
+    /**
+     * Heals player to full health using Hytale's EntityStatMap API.
+     * Uses maximizeStatValue for the Health stat.
+     * 
+     * @param player The player to heal
+     * @param stats The player's EntityStatMap
+     */
     private static void healPlayerToFull(Player player, EntityStatMap stats) {
         if (player == null || stats == null) {
             return;
         }
         
         try {
+            // Get Health stat by name and maximize it
             var healthStat = stats.get("Health");
             if (healthStat != null) {
-                float maxHealth = healthStat.getMax();
+                stats.maximizeStatValue(healthStat.getIndex());
+                
                 if (ModConfigLoader.isDebugMode()) {
-                    System.out.println("[Orbis] Stats applied - max health is now: " + maxHealth);
+                    System.out.println("[Orbis] Health restored to max: " + healthStat.getMax());
                 }
-                // Hytale handles health scaling automatically when modifiers change
-                // No direct API available to set current health value
             }
         } catch (Exception e) {
             if (ModConfigLoader.isDebugMode()) {
@@ -689,6 +696,10 @@ public final class RaceManager {
         return finalResistance;
     }
 
+    /**
+     * Applies stat bonus using string-based stat lookup.
+     * More flexible, works with custom stats.
+     */
     private static void applyBonus(EntityStatMap stats, String statId, float amount) {
         var stat = stats.get(statId);
         if (stat == null) {
@@ -701,6 +712,24 @@ public final class RaceManager {
         }
         Modifier modifier = new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, amount);
         stats.putModifier(stat.getIndex(), modKey, modifier);
+    }
+
+    /**
+     * Applies stat bonus using DefaultEntityStatTypes index.
+     * Follows HytaleModding.dev recommended pattern.
+     * 
+     * @param stats The EntityStatMap
+     * @param statIndex Index from DefaultEntityStatTypes (e.g., getHealth(), getStamina())
+     * @param modKey Modifier key for tracking (e.g., "race_mod_health")
+     * @param amount Amount to add
+     */
+    private static void applyBonusByIndex(EntityStatMap stats, int statIndex, String modKey, float amount) {
+        stats.removeModifier(statIndex, modKey);
+        if (amount == 0f) {
+            return;
+        }
+        Modifier modifier = new StaticModifier(Modifier.ModifierTarget.MAX, StaticModifier.CalculationType.ADDITIVE, amount);
+        stats.putModifier(statIndex, modKey, modifier);
     }
 
     private static String inferRaceFromStats(Player player) {
