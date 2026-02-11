@@ -96,6 +96,7 @@
     "ui.class_selection.back": "< Back",
     "ui.class_selection.previous": "< Previous",
     "ui.class_selection.next": "Next >",
+    "ui.page": "Page",
     "race.human.name": "Human",
     "race.human.tagline": "Balanced and adaptable, jack of all trades.",
     "race.human.strength.1": "+35 Health (135 total)",

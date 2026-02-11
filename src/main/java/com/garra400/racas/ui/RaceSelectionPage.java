@@ -110,7 +110,8 @@ public class RaceSelectionPage extends InteractiveCustomUIPage<RaceSelectionPage
         
         // Page navigation
         int totalPages = (allRaceIds.size() + RACES_PER_PAGE - 1) / RACES_PER_PAGE;
-        cmd.set("#PageInfo.Text", "Page " + (currentPage + 1) + " / " + totalPages);
+        String pageLabel = TranslationManager.translate("ui.page");
+        cmd.set("#PageInfo.Text", pageLabel + " " + (currentPage + 1) + " / " + totalPages);
         cmd.set("#PrevPageButton.Visible", currentPage > 0);
         cmd.set("#NextPageButton.Visible", currentPage < totalPages - 1);
         

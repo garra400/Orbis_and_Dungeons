@@ -190,12 +190,87 @@ Change with: `/language set <code>`
 
 | File | Location | Purpose |
 |------|----------|---------|
+| `mod_config.json` | World save `mods/` folder | Main mod settings, compatibility options |
 | `races_config.json` | World save `mods/` folder | Race stats, resistances, descriptions |
 | `classes_config.json` | World save `mods/` folder | Class stats, weapons, descriptions |
 | `languages/*.json` | World save `mods/` folder | Translation files |
 | `race_cache.txt` | World save `mods/` folder | File-backed persistence cache |
 
 **Persistence:** This mod uses a dual persistence strategy — file-backed cache (`race_cache.txt`) + Hytale's component system. Your choices are safe even if the server crashes.
+
+***
+
+## ⚙️ Compatibility Mode
+
+If you're using other mods that manage player stats (like **Endless Levelling**, **MMO Skilltree**, or **RPGLeveling**), you can configure Orbis to work alongside them.
+
+### `mod_config.json` Options
+
+```json
+{
+  "applyStatModifiers": true,      // Master toggle for all stat modifiers
+  "applyHealthModifier": true,     // Toggle health bonuses specifically
+  "applyStaminaModifier": true,    // Toggle stamina bonuses specifically  
+  "applyManaModifier": true,       // Toggle mana bonuses specifically
+  "statApplicationDelayMs": 500,   // Delay before applying stats (ms)
+  "compatibilityMode": true,       // Enable compatibility with other mods
+  "autoDetectStatMods": true,      // Auto-detect conflicting mods
+  "applyWeaponDamageMultipliers": true,  // Weapon damage bonuses
+  "applyDamageResistance": true,   // Damage resistance system
+  "showRaceUiOnFirstJoin": true,   // Show UI on first join
+  "healAfterStatApplication": true, // Heal player after applying stats
+  "debugMode": false               // Enable debug logging
+}
+```
+
+### For Users of Other Stat Mods
+
+If you're using **Endless Levelling**, **MMO Skilltree**, **RPGLeveling**, or similar mods:
+
+1. Open `mod_config.json` in your world save's `mods/OrbisAndDungeons_RaceSelection/` folder
+2. Set `"applyStatModifiers": false` to disable health/stamina/mana modifiers
+3. Keep `"applyWeaponDamageMultipliers": true` and `"applyDamageResistance": true` for weapon bonuses and resistances
+
+This allows you to enjoy race/class identity (weapon bonuses, resistances) without conflicting with other mods that manage base stats.
+
+***
+
+## ❓ Troubleshooting
+
+### Files Not Generated / Commands Don't Exist
+
+If the mod doesn't seem to be loading:
+
+1. **Check mod placement**: The JAR must be in `UserData/Mods/` folder
+2. **Check server logs**: Look for `[Orbis] Starting Orbis and Dungeons mod...` message
+3. **Dependencies**: This mod requires `Hytale:EntityModule` which is built-in
+4. **Permissions**: Ensure the server has write permissions to create config files
+5. **Server type**: This mod is for **dedicated servers**. Single-player mode uses a different mod loading system.
+
+### Instant Death on Login
+
+This can happen when stat mods conflict. To fix:
+
+1. Open `mod_config.json`
+2. Set `"healAfterStatApplication": true`
+3. Set `"statApplicationDelayMs": 500` or higher
+4. If still occurring, set `"applyStatModifiers": false`
+
+### Stats Being Overwritten by Other Mods
+
+If your health keeps getting reduced after teleporting or chunk reloading:
+
+1. Open `mod_config.json`
+2. Set `"compatibilityMode": true`
+3. Set `"statApplicationDelayMs": 1000` (1 second delay)
+4. If persistent, set `"applyHealthModifier": false` to let other mods handle health
+
+### Commands Not Working
+
+1. Check if you have operator permissions
+2. Try `/help race` to see if command is registered
+3. Check server logs for registration errors
+4. Restart the server completely
 
 ***
 

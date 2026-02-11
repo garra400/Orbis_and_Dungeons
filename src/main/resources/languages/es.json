@@ -96,6 +96,7 @@
     "ui.class_selection.back": "< Atrás",
     "ui.class_selection.previous": "< Anterior",
     "ui.class_selection.next": "Siguiente >",
+    "ui.page": "Página",
     "race.human.name": "Humano",
     "race.human.tagline": "Balanceado y adaptable, todoterreno.",
     "race.human.strength.1": "+35 Salud (135 total)",

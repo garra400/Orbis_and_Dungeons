@@ -7,6 +7,7 @@ import com.garra400.racas.storage.config.ClassConfig;
 import com.garra400.racas.storage.loader.ClassConfigLoader;
 import com.garra400.racas.storage.config.RaceConfig;
 import com.garra400.racas.storage.loader.RaceConfigLoader;
+import com.garra400.racas.storage.loader.ModConfigLoader;
 import com.garra400.racas.storage.RaceStorage;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.component.Holder;
@@ -74,23 +75,44 @@ public final class RaceManager {
 
     /**
      * Reaplica apenas os bônus de stats sem alterar o timestamp salvo.
+     * Respects mod configuration for stat modifiers.
      */
     public static void applyRaceStats(Player player, String raceId) {
         if (player == null || raceId == null) {
             return;
         }
+        
+        // Check if stat modifiers are enabled in config
+        if (!ModConfigLoader.shouldApplyStatModifiers()) {
+            if (ModConfigLoader.isDebugMode()) {
+                System.out.println("[Orbis] Stat modifiers disabled - skipping applyRaceStats for " + raceId);
+            }
+            return;
+        }
+        
         RaceDefinition race = RaceRegistry.get(raceId);
         EntityStatMap stats = EntityStatsModule.get(player); // deprecated em API, mas funcional
         if (stats != null) {
-            applyBonus(stats, "Health", race.healthBonus());
-            applyBonus(stats, "Stamina", race.staminaBonus());
+            // Only apply if individual modifiers are enabled
+            if (ModConfigLoader.shouldApplyHealthModifier()) {
+                applyBonus(stats, "Health", race.healthBonus());
+            }
+            if (ModConfigLoader.shouldApplyStaminaModifier()) {
+                applyBonus(stats, "Stamina", race.staminaBonus());
+            }
             stats.update();
+            
+            // Heal player after stat application to prevent instant death
+            if (ModConfigLoader.shouldHealAfterStatApplication()) {
+                healPlayerToFull(player, stats);
+            }
         }
     }
 
     /**
      * Aplica raça e classe ao jogador, combinando os bônus de ambos.
      * Versão que usa Ref e Store para salvar componentes (UI context).
+     * Respects mod configuration for stat modifiers.
      */
     public static void applyRaceAndClass(Ref<EntityStore> ref, Store<EntityStore> store, String raceId, String classId) {
         if (ref == null || store == null || raceId == null || classId == null) {
@@ -104,7 +126,9 @@ public final class RaceManager {
             return;
         }
 
-        System.out.println("applyRaceAndClass: Applying race=" + raceId + ", class=" + classId);
+        if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] applyRaceAndClass: Applying race=" + raceId + ", class=" + classId);
+        }
 
         RaceDefinition race = RaceRegistry.get(raceId);
         ClassConfig classConfig = ClassConfigLoader.getClass(classId);
@@ -114,20 +138,38 @@ public final class RaceManager {
             return;
         }
 
-        System.out.println("applyRaceAndClass: Found race=" + race.displayName() + ", class=" + classConfig.displayName);
+        if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] applyRaceAndClass: Found race=" + race.displayName() + ", class=" + classConfig.displayName);
+        }
 
-        // Combina os bônus de raça e classe
-        int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
-        int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
-        int totalManaBonus = Math.round(classConfig.manaModifier); // Mana é apenas da classe
+        // Only apply stat modifiers if enabled in config
+        if (ModConfigLoader.shouldApplyStatModifiers()) {
+            // Combina os bônus de raça e classe
+            int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
+            int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
+            int totalManaBonus = Math.round(classConfig.manaModifier); // Mana é apenas da classe
 
-        // Aplica os stats combinados
-        EntityStatMap stats = EntityStatsModule.get(player);
-        if (stats != null) {
-            applyBonus(stats, "Health", totalHealthBonus);
-            applyBonus(stats, "Stamina", totalStaminaBonus);
-            applyBonus(stats, "Mana", totalManaBonus); // Aplica modificador de mana
-            stats.update();
+            // Aplica os stats combinados
+            EntityStatMap stats = EntityStatsModule.get(player);
+            if (stats != null) {
+                if (ModConfigLoader.shouldApplyHealthModifier()) {
+                    applyBonus(stats, "Health", totalHealthBonus);
+                }
+                if (ModConfigLoader.shouldApplyStaminaModifier()) {
+                    applyBonus(stats, "Stamina", totalStaminaBonus);
+                }
+                if (ModConfigLoader.shouldApplyManaModifier()) {
+                    applyBonus(stats, "Mana", totalManaBonus);
+                }
+                stats.update();
+                
+                // Heal player after stat application to prevent instant death
+                if (ModConfigLoader.shouldHealAfterStatApplication()) {
+                    healPlayerToFull(player, stats);
+                }
+            }
+        } else if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] Stat modifiers disabled - only saving race/class selection");
         }
 
         // Salva a seleção de raça e classe usando Store
@@ -149,6 +191,7 @@ public final class RaceManager {
     /**
      * Aplica raça e classe ao jogador, combinando os bônus de ambos.
      * Versão legada que usa Player (comandos).
+     * Respects mod configuration for stat modifiers.
      */
     public static void applyRaceAndClass(Player player, String raceId, String classId) {
         if (player == null || raceId == null || classId == null) {
@@ -156,7 +199,9 @@ public final class RaceManager {
             return;
         }
 
-        System.out.println("applyRaceAndClass (command): Applying race=" + raceId + ", class=" + classId);
+        if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] applyRaceAndClass (command): Applying race=" + raceId + ", class=" + classId);
+        }
 
         RaceDefinition race = RaceRegistry.get(raceId);
         ClassConfig classConfig = ClassConfigLoader.getClass(classId);
@@ -166,18 +211,34 @@ public final class RaceManager {
             return;
         }
 
-        System.out.println("applyRaceAndClass (command): Found race=" + race.displayName() + ", class=" + classConfig.displayName);
+        if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] applyRaceAndClass (command): Found race=" + race.displayName() + ", class=" + classConfig.displayName);
+        }
 
-        // Combina os bônus de raça e classe
-        int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
-        int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
+        // Only apply stat modifiers if enabled in config
+        if (ModConfigLoader.shouldApplyStatModifiers()) {
+            // Combina os bônus de raça e classe
+            int totalHealthBonus = Math.round(race.healthBonus() + classConfig.healthModifier);
+            int totalStaminaBonus = Math.round(race.staminaBonus() + classConfig.staminaModifier);
 
-        // Aplica os stats combinados
-        EntityStatMap stats = EntityStatsModule.get(player);
-        if (stats != null) {
-            applyBonus(stats, "Health", totalHealthBonus);
-            applyBonus(stats, "Stamina", totalStaminaBonus);
-            stats.update();
+            // Aplica os stats combinados
+            EntityStatMap stats = EntityStatsModule.get(player);
+            if (stats != null) {
+                if (ModConfigLoader.shouldApplyHealthModifier()) {
+                    applyBonus(stats, "Health", totalHealthBonus);
+                }
+                if (ModConfigLoader.shouldApplyStaminaModifier()) {
+                    applyBonus(stats, "Stamina", totalStaminaBonus);
+                }
+                stats.update();
+                
+                // Heal player after stat application to prevent instant death
+                if (ModConfigLoader.shouldHealAfterStatApplication()) {
+                    healPlayerToFull(player, stats);
+                }
+            }
+        } else if (ModConfigLoader.isDebugMode()) {
+            System.out.println("[Orbis] Stat modifiers disabled - only saving race/class selection");
         }
 
         // Atualiza o cache e storage
@@ -459,6 +520,11 @@ public final class RaceManager {
     }
 
     public static float getWeaponDamageMultiplier(Player player, ItemStack weapon) {
+        // Check if weapon damage multipliers are enabled in config
+        if (!ModConfigLoader.shouldApplyWeaponDamage()) {
+            return 1.0f;
+        }
+        
         String classId = getPlayerClass(player);
         if (classId == null || classId.equals("none")) {
             return 1.0f;
@@ -483,6 +549,11 @@ public final class RaceManager {
     }
 
     public static float getWeaponDamageMultiplier(String raceId, ItemStack weapon) {
+        // Check if weapon damage multipliers are enabled in config
+        if (!ModConfigLoader.shouldApplyWeaponDamage()) {
+            return 1.0f;
+        }
+        
         // Deprecated: Use getWeaponDamageMultiplier(Player, ItemStack) instead
         RaceDefinition race = RaceRegistry.get(raceId);
         return race.resolveWeaponMultiplier(weapon);
@@ -543,8 +614,39 @@ public final class RaceManager {
     // --- Helpers ---
 
     /**
+     * Heals the player to full health after stat application.
+     * Prevents instant death when stats change.
+     */
+    private static void healPlayerToFull(Player player, EntityStatMap stats) {
+        if (player == null || stats == null) {
+            return;
+        }
+        
+        try {
+            var healthStat = stats.get("Health");
+            if (healthStat != null) {
+                float maxHealth = healthStat.getMax();
+                float currentHealth = healthStat.getCurrent();
+                
+                // Only heal if current health is below max
+                if (currentHealth < maxHealth) {
+                    healthStat.setCurrent(maxHealth);
+                    if (ModConfigLoader.isDebugMode()) {
+                        System.out.println("[Orbis] Healed player from " + currentHealth + " to " + maxHealth);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            if (ModConfigLoader.isDebugMode()) {
+                System.err.println("[Orbis] Failed to heal player: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Gets the damage resistance multiplier for a specific damage type.
      * Combines resistances from both race and class - the best (lowest) resistance applies.
+     * Respects mod configuration for damage resistance.
      * 
      * @param player The player
      * @param damageType The damage type ID (e.g., "Fire", "Physical", "Magic")
@@ -553,6 +655,11 @@ public final class RaceManager {
     public static float getDamageResistance(Player player, String damageType) {
         if (player == null || damageType == null) {
             return 1.0f; // No resistance
+        }
+        
+        // Check if damage resistance is enabled in config
+        if (!ModConfigLoader.shouldApplyDamageResistance()) {
+            return 1.0f; // No resistance when disabled
         }
 
         String raceId = getPlayerRace(player);
