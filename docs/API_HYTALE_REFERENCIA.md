@@ -1,772 +1,628 @@
-# Referência Completa da API do Hytale
-**Data de Extração:** 22 de Janeiro de 2026  
-**Versão:** Hytale Early Access (pós Update 1)  
-**Fonte:** HytaleServer.jar
+# Hytale Modding API Reference
+
+> **Baseado em:** [HytaleModding.dev](https://hytalemodding.dev) - Documentação oficial da comunidade  
+> **Última atualização:** Fevereiro 2026
+
+Este documento serve como referência rápida para desenvolvimento de mods no Hytale, com foco especial nas APIs utilizadas pelo mod **Orbis and Dungeons**.
 
 ---
 
-## 📋 Índice
+## Índice
 
-1. [Módulos Principais](#módulos-principais)
-2. [Sistema de Dano (Damage)](#sistema-de-dano-damage)
-3. [Sistema de Stats (EntityStats)](#sistema-de-stats-entitystats)
-4. [Sistema de Itens (Item)](#sistema-de-itens-item)
-5. [Sistema de Interação (Interaction)](#sistema-de-interação-interaction)
-6. [Sistema de Física (Physics)](#sistema-de-física-physics)
-7. [Sistema de Colisão (Collision)](#sistema-de-colisão-collision)
-8. [Componentes ECS](#componentes-ecs)
-9. [Eventos Disponíveis](#eventos-disponíveis)
-10. [Como Usar](#como-usar)
-
----
-
-## Módulos Principais
-
-### Lista Completa de Módulos
-
-O Hytale organiza sua API em módulos localizados em `com.hypixel.hytale.server.core.modules.*`:
-
-| Módulo | Pacote | Descrição |
-|--------|---------|-----------|
-| **AccessControl** | `accesscontrol` | Sistema de bans, whitelist e controle de acesso |
-| **Block** | `block` | Gerenciamento de blocos e containers |
-| **BlockHealth** | `blockhealth` | Sistema de saúde/durabilidade de blocos |
-| **BlockSet** | `blockset` | Conjuntos e grupos de blocos |
-| **Camera** | `camera` | Controle de câmera e visão |
-| **Collision** | `collision` | Detecção de colisões físicas |
-| **Debug** | `debug` | Ferramentas de debug e visualização |
-| **Entity** | `entity` | Sistema base de entidades |
-| **EntityStats** | `entitystats` | Stats (Health, Stamina, Mana, etc.) |
-| **EntityUI** | `entityui` | UI associada a entidades |
-| **I18n** | `i18n` | Internacionalização e traduções |
-| **Interaction** | `interaction` | Interações de jogador (click, use, etc.) |
-| **Item** | `item` | Sistema de itens e receitas |
-| **Migrations** | `migrations` | Migrações de dados entre versões |
-| **Physics** | `physics` | Física e movimento |
-| **Projectile** | `projectile` | Sistema de projéteis |
-| **Time** | `time` | Gerenciamento de tempo do mundo |
-| **Damage** ⚠️ | `entity.damage` | **Sistema de dano e morte** |
+1. [Arquitetura ECS](#arquitetura-ecs)
+2. [Store, Ref e Holder](#store-ref-e-holder)
+3. [Componentes de Player](#componentes-de-player)
+4. [Sistema de Stats](#sistema-de-stats)
+5. [Sistema de Comandos](#sistema-de-comandos)
+6. [Sistema de Eventos](#sistema-de-eventos)
+7. [Interface UI](#interface-ui)
+8. [Persistência de Dados](#persistência-de-dados)
+9. [Sistema de Dano](#sistema-de-dano)
+10. [Referência de Eventos](#referência-de-eventos)
 
 ---
 
-## Sistema de Dano (Damage)
+## Arquitetura ECS
 
-### 📍 Localização
-```
-com.hypixel.hytale.server.core.modules.entity.damage.*
-```
+O Hytale utiliza uma arquitetura **Entity-Component-System (ECS)** para organizar entidades no mundo. Este modelo separa dados (Componentes) da lógica (Sistemas).
 
-### Classes Principais
+### Conceitos Fundamentais
 
-#### 1. **DamageModule**
-Módulo principal que gerencia todo o sistema de dano.
+| Conceito | Descrição |
+|----------|-----------|
+| **Entity** | Um ID único que representa algo no mundo (jogador, mob, item) |
+| **Component** | Dados puros associados a uma entidade (posição, saúde, nome) |
+| **System** | Lógica que processa entidades com certos componentes |
+| **Store** | Armazena e gerencia todas as entidades e seus componentes |
 
-```java
-public class DamageModule extends JavaPlugin {
-    public static DamageModule get();
-    
-    // Componentes
-    public ComponentType<EntityStore, DeathComponent> getDeathComponentType();
-    public ComponentType<EntityStore, DeferredCorpseRemoval> getDeferredCorpseRemovalComponentType();
-    
-    // Grupos de Sistema (Pipeline de Dano)
-    public SystemGroup<EntityStore> getGatherDamageGroup();   // Antes das reduções
-    public SystemGroup<EntityStore> getFilterDamageGroup();    // Filtrar/cancelar
-    public SystemGroup<EntityStore> getInspectDamageGroup();   // Após cálculo
-}
-```
+### Benefícios do ECS
 
-**Pipeline de Dano:**
-```
-Ataque → [GatherDamageGroup] → [FilterDamageGroup] → [InspectDamageGroup] → Aplicação
-         ↑ Modificar dano      ↑ Cancelar/reduzir    ↑ Efeitos pós-dano
-```
-
-#### 2. **Damage** (Evento)
-Evento ECS que representa um dano sendo aplicado.
-
-```java
-public class Damage extends CancellableEcsEvent implements IMetaStore<Damage> {
-    // Construtor
-    public Damage(Source source, DamageCause cause, float amount);
-    public Damage(Source source, int damageCauseIndex, float amount);
-    
-    // Métodos Principais
-    public float getAmount();                    // Quantidade de dano
-    public void setAmount(float amount);         // Modificar dano
-    public float getInitialAmount();             // Dano original
-    
-    public DamageCause getCause();               // Causa do dano
-    public Source getSource();                   // Fonte do dano
-    public void setSource(Source source);
-    
-    // Meta Dados (chaves estáticas)
-    public static final MetaKey<Vector4d> HIT_LOCATION;
-    public static final MetaKey<Float> HIT_ANGLE;
-    public static final MetaKey<Boolean> BLOCKED;              // Bloqueado?
-    public static final MetaKey<Float> STAMINA_DRAIN_MULTIPLIER;
-    public static final MetaKey<KnockbackComponent> KNOCKBACK_COMPONENT;
-}
-```
-
-**Damage.Source (Fontes de Dano):**
-- `EntitySource` - Dano causado por entidade
-- Outros tipos (verificar sub-classes)
-
-#### 3. **DamageEventSystem**
-Sistema abstrato para processar eventos de dano.
-
-```java
-public abstract class DamageEventSystem 
-    extends EntityEventSystem<EntityStore, Damage> {
-    
-    // Implementar este método para processar dano
-    @Override
-    public abstract void handle(Damage damage, EntityStore entity);
-    
-    // Registrar em qual grupo do pipeline
-    @Override
-    protected abstract void registerSystemGroup();
-}
-```
-
-**Exemplo de Uso:**
-```java
-public class MeuSistemaDano extends DamageEventSystem {
-    @Override
-    public void handle(Damage damage, EntityStore entity) {
-        // Verificar fonte
-        if (damage.getSource() instanceof Damage.EntitySource src) {
-            var attacker = src.getRef().getEntity();
-            
-            // Modificar dano
-            if (alguma_condição) {
-                damage.setAmount(damage.getAmount() * 1.5f);
-            }
-            
-            // Cancelar dano
-            if (outra_condição) {
-                damage.cancel();
-            }
-        }
-    }
-    
-    @Override
-    protected void registerSystemGroup() {
-        // Registrar no grupo gather (antes de reduções)
-        DamageModule.get().getGatherDamageGroup().addToGroup(this);
-    }
-}
-```
-
-#### 4. **DamageCause**
-Representa a causa/tipo de dano.
-
-```java
-public class DamageCause {
-    // Tipos de dano (verificar assets do jogo)
-    // Exemplos: MELEE, FIRE, FALL, DROWNING, etc.
-}
-```
-
-#### 5. **DeathComponent**
-Componente anexado quando uma entidade morre.
-
-```java
-public class DeathComponent {
-    // Dados sobre a morte da entidade
-}
-```
-
-#### 6. **DamageSystems**
-Sistemas internos de dano do Hytale (referência).
-
-```java
-public class DamageSystems {
-    // PlayerDamageFilterSystem - Filtra dano de jogadores
-    // ArmorDamageReduction - Redução por armadura
-    // E outros sistemas internos
-}
-```
-
-### ⚠️ Status Atual
-**As classes existem mas a API não está completamente exposta:**
-- ✅ Classes compiladas presentes no JAR
-- ❌ Assinaturas de métodos não documentadas
-- ❌ Impossível compilar sistemas customizados atualmente
-- ⏳ Aguardando documentação oficial em futuras atualizações
+- **Performance**: Dados agrupados em "chunks" para acesso rápido
+- **Modularidade**: Componentes podem ser adicionados/removidos dinamicamente
+- **Composição**: Entidades são definidas pelos componentes que possuem
 
 ---
 
-## Sistema de Stats (EntityStats)
+## Store, Ref e Holder
 
-### 📍 Localização
-```
-com.hypixel.hytale.server.core.modules.entitystats.*
-```
+### Store
 
-### Classes Principais
-
-#### 1. **EntityStatsModule**
-Módulo que gerencia stats de entidades.
+O `Store` é o núcleo do sistema ECS. Armazena todas as entidades e seus componentes.
 
 ```java
-public class EntityStatsModule extends JavaPlugin {
-    public static EntityStatsModule get();
-    
-    // Obter stats de uma entidade
-    @Deprecated // Mas funcional
-    public static EntityStatMap get(Entity entity);
-    
-    // Resolver stats por nome para ID
-    public static Int2FloatMap resolveEntityStats(Object2FloatMap<String> stats);
-    public static int[] resolveEntityStats(String[] statNames);
-    
-    // Componentes
-    public ComponentType<EntityStore, EntityStatMap> getEntityStatMapComponentType();
+// Acessar componente de uma entidade
+Player player = store.getComponent(ref, Player.getComponentType());
+TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
+```
+
+### EntityStore
+
+`EntityStore` é uma especialização de `Store` que inclui acesso ao `World`:
+
+```java
+EntityStore entityStore = store.getExternalData();
+World world = entityStore.getWorld();
+```
+
+### Ref (Referência)
+
+`Ref` é um "ponteiro seguro" para uma entidade. **Nunca armazene referências diretas a entidades** - sempre use `Ref`.
+
+```java
+Ref<EntityStore> playerRef = ctx.senderAsPlayerRef();
+
+// Verificar se a entidade ainda existe
+if (playerRef != null && playerRef.isValid()) {
+    // Seguro para usar
 }
 ```
 
-#### 2. **EntityStatMap**
-Mapa de stats de uma entidade.
+### Holder
+
+`Holder` é um "blueprint" para uma entidade. Usado para construir uma entidade antes de adicioná-la ao Store.
 
 ```java
-public class EntityStatMap {
-    // Obter/modificar stat por nome
-    public float getStat(String statName);
-    public void setStat(String statName, float value);
-    
-    // Adicionar modificadores
-    public void addModifier(String statName, Modifier modifier);
-    public void removeModifier(String statName, Modifier modifier);
-    
-    // Atualizar cálculos
-    public void update();
-}
+Holder holder = playerRef.getHolder();
+
+// Obter ou criar componente
+RaceData raceData = holder.ensureAndGetComponent(raceDataType);
+
+// Salvar componente
+holder.putComponent(raceDataType, raceData.clone());
 ```
 
-#### 3. **Modifier** (Modificadores de Stats)
+---
+
+## Componentes de Player
+
+O "jogador" no Hytale é composto por múltiplos componentes:
+
+### PlayerRef (Componente)
+
+Representa a **conexão e identidade** do jogador. Persiste enquanto o jogador está conectado, mesmo ao trocar de mundo.
+
 ```java
-public interface Modifier {
-    float apply(float baseValue);
-}
-
-public class StaticModifier implements Modifier {
-    public StaticModifier(float value);  // Soma fixa
-    // Ex: +10 Health
-}
-
-// Outros tipos de modificadores disponíveis
-public class DefaultModifiers {
-    // Multiplicadores, porcentagens, etc.
-}
+// Dados disponíveis
+playerRef.getUsername()    // Nome do jogador
+playerRef.getUuid()        // UUID persistente
+playerRef.getLanguage()    // Idioma preferido
 ```
 
-#### 4. **Stats Nativos Disponíveis**
+### Player (Componente)
+
+Representa a **presença física** do jogador. Só existe quando o jogador está "spawnado" em um mundo.
+
 ```java
-// Pacote: com.hypixel.hytale.server.core.modules.entitystats.asset
-public class DefaultEntityStatTypes {
-    public static final String HEALTH = "Health";
-    public static final String OXYGEN = "Oxygen";
-    public static final String STAMINA = "Stamina";
-    public static final String MANA = "Mana";
-    public static final String SIGNATURE_ENERGY = "SignatureEnergy";
-    public static final String AMMO = "Ammo";
-}
+Player player = store.getComponent(ref, Player.getComponentType());
+
+// Métodos úteis
+player.sendMessage(Message.raw("Olá!"));
+player.getDisplayName();
+player.getHudManager();
+player.getPageManager();
 ```
 
-**Valores Base Padrão:**
-- Health: 100
-- Stamina: 10
-- Mana: 100 (presumido)
-- Oxygen: 100 (presumido)
+### Outros Componentes Úteis
 
-### ✅ Status Atual
-**Totalmente funcional e usado no mod:**
 ```java
+// UUID
+UUIDComponent uuid = store.getComponent(ref, UUIDComponent.getComponentType());
+
+// Posição/Rotação
+TransformComponent transform = store.getComponent(ref, TransformComponent.getComponentType());
+Vec3 position = transform.getPosition();
+
+// Stats (HP, Stamina, etc)
+EntityStatMap stats = store.getComponent(ref, EntityStatMap.getComponentType());
+```
+
+---
+
+## Sistema de Stats
+
+Stats são gerenciados pelo módulo `EntityStats`.
+
+### Stats Disponíveis
+
+| Stat | Método | Padrão |
+|------|--------|--------|
+| Health | `DefaultEntityStatTypes.getHealth()` | 100 |
+| Stamina | `DefaultEntityStatTypes.getStamina()` | 10 |
+| Mana | `DefaultEntityStatTypes.getMana()` | 100 |
+| Oxygen | `DefaultEntityStatTypes.getOxygen()` | - |
+| Signature Energy | `DefaultEntityStatTypes.getSignatureEnergy()` | - |
+| Ammo | `DefaultEntityStatTypes.getAmmo()` | - |
+
+### Acessar EntityStatMap
+
+```java
+// Via Store (preferido)
+EntityStatMap statMap = store.getComponent(ref, EntityStatMap.getComponentType());
+
+// Via EntityStatsModule (deprecated, mas funcional)
 EntityStatMap stats = EntityStatsModule.get(player);
-stats.addModifier("Health", new StaticModifier(75f));  // +75 HP
-stats.addModifier("Stamina", new StaticModifier(15f)); // +15 Stamina
+```
+
+### Modificar Stats
+
+```java
+// Obter stat index
+int healthIdx = DefaultEntityStatTypes.getHealth();
+
+// Maximizar um stat
+statMap.maximizeStatValue(healthIdx);
+
+// Subtrair valor
+statMap.subtractStatValue(healthIdx, 25.0f);
+
+// Adicionar valor
+statMap.addValue(healthIdx, 50.0f);
+```
+
+### Modificadores de Stats
+
+Modificadores permitem alterar stats de forma **aditiva** ou **multiplicativa**:
+
+```java
+// Criar modificador (+75 HP)
+Modifier healthMod = new StaticModifier(
+    Modifier.ModifierTarget.MAX,           // Afeta valor máximo
+    StaticModifier.CalculationType.ADDITIVE, // Soma
+    75.0f                                   // Valor
+);
+
+// Aplicar modificador
+stats.putModifier(healthIdx, "race_mod_Health", healthMod);
+
+// Remover modificador
+stats.removeModifier(healthIdx, "race_mod_Health");
+
+// Aplicar mudanças
 stats.update();
 ```
 
 ---
 
-## Sistema de Itens (Item)
+## Sistema de Comandos
 
-### 📍 Localização
-```
-com.hypixel.hytale.server.core.modules.item.*
-com.hypixel.hytale.server.core.inventory.*
-```
+O Hytale oferece várias classes base para criar comandos:
 
-### Classes Principais
+### Tipos de Comando
 
-#### 1. **ItemModule**
-```java
-public class ItemModule extends JavaPlugin {
-    public static ItemModule get();
-    
-    // Verificar se item existe
-    public static boolean exists(String itemId);
-    
-    // Obter categorias de itens
-    public List<String> getFlatItemCategoryList();
-    
-    // Drops aleatórios
-    public List<ItemStack> getRandomItemDrops(String lootTable);
-}
-```
+| Classe | Uso | Thread |
+|--------|-----|--------|
+| `AbstractAsyncCommand` | Comandos sem acesso a Store/Ref | Background |
+| `AbstractPlayerCommand` | Comandos executados pelo jogador | World Thread |
+| `AbstractTargetPlayerCommand` | Comandos que visam outro jogador | World Thread |
+| `AbstractTargetEntityCommand` | Comandos que visam entidade olhada | World Thread |
 
-#### 2. **ItemStack**
-Representa uma pilha de itens.
+### AbstractPlayerCommand (Mais Usado)
 
 ```java
-// Pacote: com.hypixel.hytale.server.core.inventory.ItemStack
-public class ItemStack {
-    // Obter informações
-    public String getItemId();              // ID do item (ex: "hytale:iron_sword")
-    public Item getItem();                  // Objeto Item
-    public int getAmount();                 // Quantidade na pilha
-    
-    // Metadata
-    public Metadata getMetadata();
-    public ItemStack withMetadata(Metadata meta);
-    
-    // Item.getCategories() - Categorias/tags do item
-    // Ex: ["Sword", "Weapon", "Melee"]
-}
-```
+public class MyCommand extends AbstractPlayerCommand {
 
-#### 3. **Item**
-Representa o tipo de item.
+    public MyCommand() {
+        super("mycommand", "Descrição do comando");
+    }
 
-```java
-public class Item {
-    public String getId();
-    public List<String> getCategories();   // Tags do asset
-    // Outros métodos de configuração do item
-}
-```
-
-### ✅ Status Atual
-**Totalmente funcional:**
-```java
-ItemStack weapon = player.getInventory().getItemInHand();
-if (weapon != null) {
-    String id = weapon.getItemId();
-    List<String> categories = weapon.getItem().getCategories();
-    
-    if (categories.contains("Hammer")) {
-        // Fazer algo com martelos
+    @Override
+    protected void execute(
+            @Nonnull CommandContext ctx,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull World world) {
+        
+        Player player = store.getComponent(ref, Player.getComponentType());
+        player.sendMessage(Message.raw("Comando executado!"));
     }
 }
 ```
 
+### Argumentos de Comando
+
+```java
+public class HealCommand extends AbstractPlayerCommand {
+    private final DefaultArg<Float> amountArg;
+    private final OptionalArg<String> messageArg;
+    private final FlagArg debugArg;
+
+    public HealCommand() {
+        super("heal", "Cura o jogador");
+        
+        // Argumento com valor padrão
+        this.amountArg = this.withDefaultArg(
+            "amount",           // Nome
+            "Quantidade de HP", // Descrição
+            ArgTypes.FLOAT,     // Tipo
+            100.0f,             // Valor padrão
+            "Padrão: 100"       // Descrição do padrão
+        );
+        
+        // Argumento opcional (--message "texto")
+        this.messageArg = this.withOptionalArg(
+            "message",
+            "Mensagem a exibir",
+            ArgTypes.STRING
+        );
+        
+        // Flag booleana (--debug)
+        this.debugArg = this.withFlagArg("debug", "Modo debug");
+    }
+
+    @Override
+    protected void execute(...) {
+        Float amount = this.amountArg.get(ctx);
+        String message = this.messageArg.get(ctx); // null se não fornecido
+        boolean debug = this.debugArg.get(ctx);    // true/false
+    }
+}
+```
+
+### Tipos de Argumento (ArgTypes)
+
+- `ArgTypes.STRING`
+- `ArgTypes.INTEGER`
+- `ArgTypes.FLOAT`
+- `ArgTypes.DOUBLE`
+- `ArgTypes.BOOLEAN`
+- `ArgTypes.UUID`
+
+### Registrar Comando
+
+```java
+@Override
+protected void setup() {
+    getCommandRegistry().registerCommand(new MyCommand());
+    getCommandRegistry().registerCommand(new HealCommand());
+}
+```
+
 ---
 
-## Sistema de Interação (Interaction)
+## Sistema de Eventos
 
-### 📍 Localização
-```
-com.hypixel.hytale.server.core.modules.interaction.*
-```
+### Eventos Globais (IEvent)
 
-### Classes Principais
+Eventos que não precisam de acesso ao ECS:
 
-#### 1. **InteractionModule**
 ```java
-public class InteractionModule extends JavaPlugin {
-    public static InteractionModule get();
-    
-    // Processar interação de mouse
-    public void doMouseInteraction(
-        Ref<EntityStore> entityRef,
-        ComponentAccessor<EntityStore> accessor,
-        MouseInteraction interaction,
-        Player player,
-        PlayerRef playerRef
+public class MyEventHandler {
+    public static void onPlayerReady(PlayerReadyEvent event) {
+        Player player = event.getPlayer();
+        player.sendMessage(Message.raw("Bem-vindo!"));
+    }
+}
+
+// Registrar
+@Override
+protected void setup() {
+    getEventRegistry().registerGlobal(
+        PlayerReadyEvent.class,
+        MyEventHandler::onPlayerReady
     );
-    
-    // Componentes
-    public ComponentType<EntityStore, Interactions> getInteractionsComponentType();
-    public ComponentType<EntityStore, InteractionManager> getInteractionManagerComponent();
-    
-    // Rastreamento de blocos colocados
-    public ResourceType<ChunkStore, BlockCounter> getBlockCounterResourceType();
 }
 ```
 
-#### 2. **Tipos de Interação**
+### Eventos ECS (EcsEvent)
+
+Eventos que precisam de acesso ao Store/Ref:
+
 ```java
-public enum InteractionType {
-    USE,           // Usar/interagir
-    ATTACK,        // Atacar
-    BREAK_BLOCK,   // Quebrar bloco
-    PLACE_BLOCK,   // Colocar bloco
-    // E outros
+public class MyDamageSystem extends EntityEventSystem<EntityStore, Damage> {
+    
+    public MyDamageSystem() {
+        super(Damage.class);
+    }
+
+    @Override
+    public void handle(
+            int index,
+            @Nonnull ArchetypeChunk<EntityStore> chunk,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull CommandBuffer<EntityStore> buffer,
+            @Nonnull Damage event) {
+        
+        // Processar evento de dano
+        float damageAmount = event.getDamageAmount();
+        
+        // Cancelar se necessário
+        event.setCancelled(true);
+    }
+
+    @Override
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
+    }
+}
+
+// Registrar
+@Override
+protected void setup() {
+    getEntityStoreRegistry().registerSystem(new MyDamageSystem());
 }
 ```
-
-### ⚙️ Status Atual
-**Funcional mas complexo** - Sistema usado internamente pelo Hytale para processar clicks, ataques, etc.
 
 ---
 
-## Sistema de Física (Physics)
+## Interface UI
 
-### 📍 Localização
+### Estrutura de Arquivos
+
 ```
-com.hypixel.hytale.server.core.modules.physics.*
-```
-
-### Componentes Principais
-
-#### 1. **Velocity** (Componente)
-```java
-public class Velocity {
-    // Velocidade da entidade em 3D
-    public Vector3d getVelocity();
-    public void setVelocity(Vector3d velocity);
-}
+resources/
+└── Common/
+    └── UI/
+        └── Custom/
+            ├── my_page.ui
+            └── textures/
+                └── background.png
 ```
 
-#### 2. **PhysicsValues** (Componente)
-```java
-public class PhysicsValues {
-    // Valores físicos como gravidade, fricção, etc.
-    public float getGravity();
-    public float getFriction();
-    // E outros
-}
-```
+**Importante:** `manifest.json` deve conter `"IncludesAssetPack": true`
 
-#### 3. **ForceProvider**
-Sistema para aplicar forças às entidades.
+### CustomUIHud (HUD permanente)
 
 ```java
-public interface ForceProvider {
-    void applyForce(ForceAccumulator accumulator);
+public class MyHud extends CustomUIHud {
+    
+    @Override
+    public void build(@Nonnull UICommandBuilder cmd) {
+        cmd.append("MyHud.ui");
+        cmd.set("#HealthText.Text", "100 HP");
+    }
 }
+
+// Mostrar
+player.getHudManager().setCustomHud(myHud);
 ```
 
-### ✅ Status Atual
-**Funcional** - Usado para movimento e física de entidades.
+### InteractiveCustomUIPage (Página interativa)
+
+```java
+public class MyPage extends InteractiveCustomUIPage<MyEventData> {
+
+    public static class MyEventData {
+        public String action;
+        
+        public static final BuilderCodec<MyEventData> CODEC = 
+            BuilderCodec.builder(MyEventData.class, MyEventData::new)
+                .append(
+                    new KeyedCodec<>("Action", Codec.STRING),
+                    (o, v) -> o.action = v,
+                    o -> o.action
+                )
+                .add()
+                .build();
+    }
+
+    public MyPage(@Nonnull PlayerRef playerRef) {
+        super(playerRef, CustomPageLifetime.CantClose, MyEventData.CODEC);
+    }
+
+    @Override
+    public void build(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull UIEventBuilder evt,
+            @Nonnull Store<EntityStore> store) {
+        
+        cmd.append("Pages/my_page.ui");
+        cmd.set("#Title.Text", "Minha Página");
+        
+        evt.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            "#ConfirmButton",
+            new EventData().append("Action", "confirm")
+        );
+    }
+
+    @Override
+    public void handleCustomUIEvent(@Nonnull CustomUIEvent<MyEventData> event) {
+        MyEventData data = event.getData();
+        if ("confirm".equals(data.action)) {
+            // Processar confirmação
+            event.closePage();
+        }
+    }
+}
+
+// Abrir página
+player.getPageManager().openCustomPage(ref, store, new MyPage(playerRef));
+```
 
 ---
 
-## Sistema de Colisão (Collision)
+## Persistência de Dados
 
-### 📍 Localização
-```
-com.hypixel.hytale.server.core.modules.collision.*
-```
-
-### Classes Principais
-
-#### 1. **CollisionModule**
-```java
-public class CollisionModule extends JavaPlugin {
-    public static CollisionModule get();
-    
-    // Detecção de colisões
-    public static boolean findCollisions(
-        Box boundingBox,
-        Vector3d position,
-        Vector3d movement,
-        CollisionResult result,
-        ComponentAccessor<EntityStore> accessor
-    );
-    
-    // Validação de posição
-    public int validatePosition(
-        World world,
-        Box boundingBox,
-        Vector3d position,
-        CollisionResult result
-    );
-    
-    // Constantes de validação
-    public static final int VALIDATE_INVALID = -1;
-    public static final int VALIDATE_OK = 0;
-    public static final int VALIDATE_ON_GROUND = 1;
-    public static final int VALIDATE_TOUCH_CEIL = 2;
-}
-```
-
-#### 2. **CollisionResult**
-Resultado de uma verificação de colisão.
+### Criar Componente Persistente
 
 ```java
-public class CollisionResult {
-    // Informações sobre colisões detectadas
-    public boolean hasCollision();
-    public Vector3d getCollisionNormal();
-    // E outros dados de colisão
-}
-```
-
-### ✅ Status Atual
-**Funcional** - Sistema usado para física e movimentação.
-
----
-
-## Componentes ECS
-
-### Sistema de Componentes
-Hytale usa o padrão ECS (Entity Component System) com a biblioteca Flecs.
-
-#### Estrutura Básica
-```java
-// Componente
-public class MeuComponente implements Component<EntityStore> {
-    private String data;
+public class MyPlayerData implements Component<EntityStore> {
     
+    private String selectedRace;
+    private int level;
+    
+    public static final BuilderCodec<MyPlayerData> CODEC =
+        BuilderCodec.builder(MyPlayerData.class, MyPlayerData::new)
+            .append(
+                new KeyedCodec<>("SelectedRace", Codec.STRING),
+                (d, v) -> d.selectedRace = v,
+                d -> d.selectedRace
+            )
+            .add()
+            .append(
+                new KeyedCodec<>("Level", Codec.INTEGER),
+                (d, v) -> d.level = v,
+                d -> d.level
+            )
+            .add()
+            .build();
+    
+    public MyPlayerData() {
+        this.selectedRace = null;
+        this.level = 1;
+    }
+    
+    @Nonnull
     @Override
     public Component<EntityStore> clone() {
-        MeuComponente copy = new MeuComponente();
-        copy.data = this.data;
+        MyPlayerData copy = new MyPlayerData();
+        copy.selectedRace = this.selectedRace;
+        copy.level = this.level;
         return copy;
     }
+    
+    // Getters e Setters...
 }
-
-// Codec para persistência
-public static final Codec<MeuComponente> CODEC = 
-    BuilderCodec.of(MeuComponente.class)
-        .field("data", Codecs.STRING, c -> c.data, (c, v) -> c.data = v)
-        .build();
-
-// Registrar
-ComponentType<EntityStore, MeuComponente> type = 
-    plugin.getEntityStoreRegistry().registerComponent(
-        MeuComponente.class,
-        "MeuComponente",
-        CODEC
-    );
-
-// Usar
-Holder holder = playerRef.getHolder();
-MeuComponente comp = holder.getComponent(type);
-holder.putComponent(type, novoComponente);
 ```
 
-### Componentes Comuns
-
-| Componente | Pacote | Descrição |
-|------------|---------|-----------|
-| `BoundingBox` | `entity.component` | Caixa de colisão |
-| `DisplayNameComponent` | `entity.component` | Nome exibido |
-| `EntityScaleComponent` | `entity.component` | Escala da entidade |
-| `ActiveAnimationComponent` | `entity.component` | Animação ativa |
-| `Velocity` | `physics.component` | Velocidade |
-| `PhysicsValues` | `physics.component` | Valores físicos |
-| `EntityStatMap` | `entitystats` | Mapa de stats |
-| `DeathComponent` | `entity.damage` | Dados de morte |
-
----
-
-## Eventos Disponíveis
-
-### Eventos ECS (com.hypixel.hytale.server.core.event.events.ecs)
+### Registrar Componente
 
 ```java
-// Blocos
-BreakBlockEvent        - Quando um bloco é quebrado
-PlaceBlockEvent        - Quando um bloco é colocado
-DamageBlockEvent       - Quando um bloco recebe dano
-UseBlockEvent          - Quando um bloco é usado (Pre/Post)
+public class MyPlugin extends JavaPlugin {
+    
+    private static ComponentType<EntityStore, MyPlayerData> playerDataType;
 
-// Itens
-DropItemEvent          - Quando um item é dropado
-InteractivelyPickupItemEvent - Quando item é coletado
-SwitchActiveSlotEvent  - Quando slot ativo muda
-
-// Crafting
-CraftRecipeEvent       - Quando receita é craftada (Pre/Post)
-
-// Outros
-ChangeGameModeEvent    - Mudança de modo de jogo
-DiscoverZoneEvent      - Descoberta de zona
-```
-
-### Eventos Globais (com.hypixel.hytale.server.core.event.events)
-
-```java
-// Player
-PlayerReadyEvent       - Jogador pronto (usado no mod)
-PlayerJoinEvent        - Jogador entra
-PlayerLeaveEvent       - Jogador sai
-
-// Entidade
-EntityEvent            - Evento base de entidade
-EntityRemoveEvent      - Entidade removida
-LivingEntityInventoryChangeEvent - Inventário muda
-
-// Sistema
-BootEvent              - Servidor iniciado
-```
-
-### Registrar Eventos
-```java
-EventRegistry events = plugin.getEventRegistry();
-
-// Evento global
-events.registerGlobal(PlayerReadyEvent.class, event -> {
-    Player player = event.getPlayer();
-    // Processar evento
-});
-
-// Evento ECS (via sistema)
-public class MeuSistema extends EntityEventSystem<EntityStore, BreakBlockEvent> {
     @Override
-    public void handle(BreakBlockEvent event, EntityStore entity) {
-        // Processar quebra de bloco
-    }
-}
-```
-
----
-
-## Como Usar
-
-### 1. Modificar Stats (✅ Funcionando)
-```java
-// No start() do plugin
-EntityStatMap stats = EntityStatsModule.get(player);
-stats.addModifier("Health", new StaticModifier(75f));
-stats.addModifier("Stamina", new StaticModifier(15f));
-stats.update();
-```
-
-### 2. Componentes Persistentes (✅ Funcionando)
-```java
-// Registrar componente
-ComponentType<EntityStore, MeuDado> type = 
-    getEntityStoreRegistry().registerComponent(
-        MeuDado.class,
-        "MeuDado",
-        MeuDado.CODEC
-    );
-
-// Ler/Escrever
-Holder holder = playerRef.getHolder();
-MeuDado dado = holder.getComponent(type);
-holder.putComponent(type, novoDado);
-```
-
-### 3. Comandos Customizados (✅ Funcionando)
-```java
-public class MeuComando extends Command {
-    public MeuComando() {
-        super("meucomando", "Descrição");
+    protected void setup() {
+        playerDataType = getEntityStoreRegistry().registerComponent(
+            MyPlayerData.class,
+            "MyPlayerData",      // ID único para persistência
+            MyPlayerData.CODEC
+        );
     }
     
+    public static ComponentType<EntityStore, MyPlayerData> getPlayerDataType() {
+        return playerDataType;
+    }
+}
+```
+
+### Ler/Escrever Dados
+
+```java
+// Ler
+MyPlayerData data = store.getComponent(ref, MyPlugin.getPlayerDataType());
+if (data == null) {
+    data = new MyPlayerData();
+}
+
+// Modificar
+data.setSelectedRace("elf");
+data.setLevel(5);
+
+// Salvar
+store.putComponent(ref, MyPlugin.getPlayerDataType(), data);
+```
+
+---
+
+## Sistema de Dano
+
+### Interceptar Dano (EcsEvent)
+
+```java
+public class DamageModifierSystem extends EntityEventSystem<EntityStore, Damage> {
+    
+    public DamageModifierSystem() {
+        super(Damage.class);
+    }
+
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        if (sender instanceof Player player) {
-            player.sendMessage("Olá!");
+    public void handle(
+            int index,
+            @Nonnull ArchetypeChunk<EntityStore> chunk,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull CommandBuffer<EntityStore> buffer,
+            @Nonnull Damage event) {
+        
+        Ref<EntityStore> victimRef = event.getVictimRef();
+        float originalDamage = event.getDamageAmount();
+        
+        // Verificar se tem resistência
+        MyPlayerData data = store.getComponent(victimRef, MyPlugin.getPlayerDataType());
+        if (data != null) {
+            float resistance = getResistance(data.getSelectedRace());
+            float newDamage = originalDamage * resistance;
+            event.setDamageAmount(newDamage);
         }
     }
-}
 
-// Registrar
-getCommandRegistry().registerCommand(new MeuComando());
-```
-
-### 4. UI Customizada (✅ Funcionando)
-```java
-public class MinhaPage extends InteractiveCustomUIPage {
     @Override
-    public Codec<EventData> getCodec() {
-        return EVENT_DATA_CODEC;
-    }
-    
-    @Override
-    protected void onCreate(Ref<EntityStore> ref, Store<EntityStore> store) {
-        // Criar UI
-    }
-}
-
-// Abrir
-player.getPageManager().openCustomPage(playerRef, store, new MinhaPage());
-```
-
-### 5. Sistema de Dano (⏸️ Aguardando API)
-```java
-// FUTURO - Quando API for documentada
-public class MeuDanoSystem extends DamageEventSystem {
-    @Override
-    public void handle(Damage damage, EntityStore entity) {
-        if (damage.getSource() instanceof Damage.EntitySource src) {
-            // Modificar dano baseado em condições
-            damage.setAmount(damage.getAmount() * multiplicador);
-        }
-    }
-    
-    @Override
-    protected void registerSystemGroup() {
-        DamageModule.get().getGatherDamageGroup().addToGroup(this);
+    public Query<EntityStore> getQuery() {
+        return Archetype.empty();
     }
 }
 ```
 
 ---
 
-## Referências
+## Referência de Eventos
 
-### Documentação Oficial
-- **Site**: https://hytale.com/
-- **Patch Notes**: https://hytale.com/news
-- **Modding Strategy**: https://hytale.com/news/2025/11/hytale-modding-strategy-and-status
-- **Suporte**: https://support.hytale.com/
-- **Discord**: https://discord.gg/hytale
+### Eventos Globais (IEvent)
 
-### Estrutura de Pacotes
-```
-com.hypixel.hytale
-├── server.core
-│   ├── modules          # Módulos do jogo
-│   │   ├── entity
-│   │   │   └── damage   # Sistema de dano
-│   │   ├── entitystats  # Stats
-│   │   ├── item         # Itens
-│   │   ├── interaction  # Interações
-│   │   ├── physics      # Física
-│   │   └── collision    # Colisão
-│   ├── entity           # Classes de entidades
-│   ├── command          # Sistema de comandos
-│   ├── event            # Sistema de eventos
-│   ├── inventory        # Sistema de inventário
-│   └── plugin           # Base de plugins
-├── component            # Sistema ECS
-├── codec                # Serialização
-└── protocol             # Protocolos de rede
-```
+| Evento | Descrição |
+|--------|-----------|
+| `PlayerReadyEvent` | Jogador entrou e está pronto |
+| `PlayerConnectEvent` | Jogador conectou ao servidor |
+| `PlayerDisconnectEvent` | Jogador desconectou |
+| `BootEvent` | Servidor iniciado |
+| `ShutdownEvent` | Servidor desligando |
+| `EntityRemoveEvent` | Entidade removida do mundo |
+| `AddWorldEvent` | Novo mundo criado |
+| `RemoveWorldEvent` | Mundo removido |
+
+### Eventos ECS (Canceláveis)
+
+| Evento | Descrição |
+|--------|-----------|
+| `Damage` | Entidade recebendo dano |
+| `BreakBlockEvent` | Bloco sendo quebrado |
+| `PlaceBlockEvent` | Bloco sendo colocado |
+| `CraftRecipeEvent.Pre` | Antes de craftar |
+| `CraftRecipeEvent.Post` | Depois de craftar |
+| `DropItemEvent` | Item sendo dropado |
+| `ChangeGameModeEvent` | Modo de jogo mudando |
 
 ---
 
-## Observações Finais
+## Links Úteis
 
-### ✅ APIs Totalmente Funcionais
-- Sistema de Stats (EntityStats)
-- Componentes ECS
-- Eventos globais
-- Comandos
-- UI customizada
-- Sistema de inventário
+### Documentação
+- [HytaleModding.dev](https://hytalemodding.dev) - Documentação da comunidade
+- [Guia de Comandos](https://hytalemodding.dev/en/docs/plugin/creating-commands)
+- [Guia de ECS](https://hytalemodding.dev/en/docs/plugin/ecs/hytale-ecs-theory)
+- [Guia de UI](https://hytalemodding.dev/en/docs/plugin/ui)
 
-### ⏸️ APIs Parcialmente Expostas
-- **Sistema de Dano** - Classes existem mas assinaturas não documentadas
-- Sistema de interação avançado
-- Física avançada
+### Vídeos
+- [Kaupenjoe's Modding Videos](https://www.youtube.com/@ModdingByKaupenjoe)
+- [TroubleDEV's Modding Videos](https://www.youtube.com/@TroubleDEV)
 
-### 🔮 Futuro
-O Hytale está em Early Access e a equipe comprometeu-se com:
-> "We are committed to maintaining a rapid patching cadence to address issues and improve the game as quickly as possible."
-
-Espera-se que a API de dano e outras funcionalidades sejam completamente documentadas em futuras atualizações.
+### Ferramentas
+- [Editor Visual de UI](https://hytale.ellie.au/)
+- [HyUI - Criar UI via Java](https://www.curseforge.com/hytale/mods/hyui)
 
 ---
 
-**Gerado automaticamente via exploração do HytaleServer.jar**  
-**Última atualização:** 22/01/2026
+*Este documento é uma referência rápida. Para documentação completa, consulte [hytalemodding.dev](https://hytalemodding.dev).*

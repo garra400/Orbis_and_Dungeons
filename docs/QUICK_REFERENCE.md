@@ -79,11 +79,21 @@ Final Stamina = 110 + Race.staminaBonus + Class.staminaModifier
 
 ## Commands Quick Reference
 
-| Command             | Description                           |
-|---------------------|---------------------------------------|
-| `/racereload`       | Reload JSON configs                   |
-| `/raceinfo`         | Show your race and class              |
-| `/racereset`        | Reset and reselect race/class         |
+| Command | Description |
+|---------|-------------|
+| `/race select` | Open race selection UI |
+| `/race change <race>` | Change race directly |
+| `/race reset` | Reset race to none |
+| `/race info` | Show race information |
+| `/race reload` | Reload configurations (admin) |
+| `/class select` | Open class selection UI |
+| `/class change <class>` | Change class directly |
+| `/class reset` | Reset class to none |
+| `/class info` | Show class information |
+| `/language set <code>` | Set server language |
+| `/language list` | List available languages |
+
+For detailed command documentation, see [COMMAND_GUIDE.md](COMMAND_GUIDE.md).
 
 ## Default Values
 
