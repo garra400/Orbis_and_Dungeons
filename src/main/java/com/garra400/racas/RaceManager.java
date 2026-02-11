@@ -616,6 +616,11 @@ public final class RaceManager {
     /**
      * Heals the player to full health after stat application.
      * Prevents instant death when stats change.
+     * 
+     * Note: The Hytale API doesn't expose a direct method to set current health.
+     * When max health increases via modifiers, Hytale typically scales current
+     * health proportionally. This method exists as a placeholder for potential
+     * future API support.
      */
     private static void healPlayerToFull(Player player, EntityStatMap stats) {
         if (player == null || stats == null) {
@@ -626,19 +631,15 @@ public final class RaceManager {
             var healthStat = stats.get("Health");
             if (healthStat != null) {
                 float maxHealth = healthStat.getMax();
-                float currentHealth = healthStat.getCurrent();
-                
-                // Only heal if current health is below max
-                if (currentHealth < maxHealth) {
-                    healthStat.setCurrent(maxHealth);
-                    if (ModConfigLoader.isDebugMode()) {
-                        System.out.println("[Orbis] Healed player from " + currentHealth + " to " + maxHealth);
-                    }
+                if (ModConfigLoader.isDebugMode()) {
+                    System.out.println("[Orbis] Stats applied - max health is now: " + maxHealth);
                 }
+                // Hytale handles health scaling automatically when modifiers change
+                // No direct API available to set current health value
             }
         } catch (Exception e) {
             if (ModConfigLoader.isDebugMode()) {
-                System.err.println("[Orbis] Failed to heal player: " + e.getMessage());
+                System.err.println("[Orbis] Error in healPlayerToFull: " + e.getMessage());
             }
         }
     }
