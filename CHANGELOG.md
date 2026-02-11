@@ -2,6 +2,62 @@
 
 ---
 
+## Version 2026.2.11 - Mod Compatibility & API Improvements
+
+### 🔧 Mod Configuration System (NEW)
+
+A new configuration system that allows disabling stat modifiers for compatibility with other mods that manage player stats.
+
+#### Configuration Files
+
+- **`ModConfig.java`** - Configuration class with settings:
+  - `applyHealthModifiers` - Enable/disable health stat modifications
+  - `applyStaminaModifiers` - Enable/disable stamina stat modifications
+  - `applyOtherModifiers` - Enable/disable other stat modifications
+  - `debugMode` - Enable verbose logging for troubleshooting
+
+- **`ModConfigLoader.java`** - Loads configuration from `config/orbis_dungeons.json`:
+  ```json
+  {
+    "stats": {
+      "applyHealthModifiers": true,
+      "applyStaminaModifiers": true,
+      "applyOtherModifiers": true
+    },
+    "debug": false
+  }
+  ```
+
+#### Use Case
+When running alongside other mods (like RPGLeveling), you can disable Orbis health/stamina modifiers to prevent conflicts and instant death issues.
+
+### 🩹 Player Healing Improvements
+
+- **`healPlayerToFull()`** method now uses `maximizeStatValue()` for proper healing
+- Uses string-based stat lookup (`stats.get("Health")`) for SDK compatibility
+- Added flexible stat bonus application with `applyBonus()` method improvements
+
+### 📚 Documentation
+
+- **New `COMMAND_GUIDE.md`** - Comprehensive command documentation
+- **New `docs/README.md`** - Documentation index linking all guides
+- **Updated `QUICK_REFERENCE.md`** - Added new race and class commands
+- **Improved `API_HYTALE_REFERENCIA.md`** - Streamlined Hytale API reference
+
+### 🌐 Language Updates
+
+Added new translation key across all languages:
+- `config.reload.success` - Configuration reload confirmation message
+
+### 🐛 Bug Fixes
+
+- Fixed HP being overwritten/reduced when using with other stat mods
+- Fixed instant death on login caused by stat conflicts
+- Improved null checks and fallback mechanisms in translation manager
+- Enhanced race/class selection pages with dynamic translation support
+
+---
+
 ## Version 2026.2.9 - Unified Commands, Mod Integration, Smart Resets & UI Modernization
 
 ### 🎮 Unified Command System (Complete Overhaul)
