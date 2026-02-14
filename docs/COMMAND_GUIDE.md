@@ -1,42 +1,43 @@
-# Guia de Comandos - Orbis and Dungeons
 
-> **Versão:** 2026.2.11  
-> **Baseado em:** [Hytale Command API](https://hytalemodding.dev/en/docs/plugin/creating-commands)
+# Command Guide - Orbis and Dungeons
 
-Este documento detalha todos os comandos disponíveis no mod Orbis and Dungeons.
+> **Version:** 2026.2.11  
+> **Based on:** [Hytale Command API](https://hytalemodding.dev/en/docs/plugin/creating-commands)
 
----
-
-## Índice
-
-1. [Comandos de Raça](#comandos-de-raça-race)
-2. [Comandos de Classe](#comandos-de-classe-class)
-3. [Comandos de Idioma](#comandos-de-idioma-language)
-4. [Referência Rápida](#referência-rápida)
-5. [Permissões](#permissões)
+This document details all available commands in the Orbis and Dungeons mod.
 
 ---
 
-## Comandos de Raça (`/race`)
+## Table of Contents
 
-Coleção de comandos para gerenciamento de raças.
+1. [Race Commands](#race-commands-race)
+2. [Class Commands](#class-commands-class)
+3. [Language Commands](#language-commands-language)
+4. [Quick Reference](#quick-reference)
+5. [Permissions](#permissions)
+
+---
+
+## Race Commands (`/race`)
+
+Collection of commands for race management.
 
 ### `/race select`
 
-Abre a interface de seleção de raça.
+Opens the race selection UI.
 
 ```
-/race select [--player <nome>]
+/race select [--player <name>]
 ```
 
-| Argumento | Tipo | Descrição |
-|-----------|------|-----------|
-| `--player` | Opcional | Nome do jogador alvo (admin) |
+| Argument | Type | Description |
+|----------|------|-------------|
+| `--player` | Optional | Target player name (admin) |
 
-**Exemplos:**
+**Examples:**
 ```
-/race select                    # Abre UI para você
-/race select --player Steve     # Abre UI para Steve (admin)
+/race select                    # Opens UI for you
+/race select --player Steve     # Opens UI for Steve (admin)
 ```
 
 ---

@@ -1,43 +1,43 @@
-# Orbis and Dungeons - Documentação
+# Orbis and Dungeons - Documentation
 
-> **Versão:** 2026.2.11  
-> **Mod para:** Hytale
+> **Version:** 2026.2.11  
+> **Mod for:** Hytale
 
-Bem-vindo à documentação do mod **Orbis and Dungeons**! Este índice organiza todos os documentos disponíveis.
-
----
-
-## Início Rápido
-
-| Documento | Descrição |
-|-----------|-----------|
-| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Referência rápida do sistema |
-| [COMMAND_GUIDE.md](COMMAND_GUIDE.md) | Guia completo de comandos |
+Welcome to the **Orbis and Dungeons** mod documentation! This index organizes all available documents.
 
 ---
 
-## Sistemas do Mod
+## Quick Start
 
-### Raças e Classes
+| Document | Description |
+|----------|-------------|
+| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Quick system reference |
+| [COMMAND_GUIDE.md](COMMAND_GUIDE.md) | Complete command guide |
 
-| Documento | Descrição |
-|-----------|-----------|
-| [RACE_CLASS_SYSTEM.md](RACE_CLASS_SYSTEM.md) | Visão geral do sistema de raças e classes |
-| [RACE_CONFIGURATION.md](RACE_CONFIGURATION.md) | Como configurar raças via JSON |
-| [BALANCE_GUIDE.md](BALANCE_GUIDE.md) | Guia de balanceamento |
-| [BALANCE_QUICK_REFERENCE.md](BALANCE_QUICK_REFERENCE.md) | Referência rápida de valores |
+---
 
-### Combate e Dano
+## Mod Systems
 
-| Documento | Descrição |
-|-----------|-----------|
-| [DAMAGE_RESISTANCE_GUIDE.md](DAMAGE_RESISTANCE_GUIDE.md) | Sistema de resistência a dano |
-| [SISTEMA_DANO_ORC.md](SISTEMA_DANO_ORC.md) | Sistema de dano especial para Orcs |
+### Races and Classes
+
+| Document | Description |
+|----------|-------------|
+| [RACE_CLASS_SYSTEM.md](RACE_CLASS_SYSTEM.md) | Overview of the race and class system |
+| [RACE_CONFIGURATION.md](RACE_CONFIGURATION.md) | How to configure races via JSON |
+| [BALANCE_GUIDE.md](BALANCE_GUIDE.md) | Balance guide |
+| [BALANCE_QUICK_REFERENCE.md](BALANCE_QUICK_REFERENCE.md) | Quick value reference |
+
+### Combat and Damage
+
+| Document | Description |
+|----------|-------------|
+| [DAMAGE_RESISTANCE_GUIDE.md](DAMAGE_RESISTANCE_GUIDE.md) | Damage resistance system |
+| [SISTEMA_DANO_ORC.md](SISTEMA_DANO_ORC.md) | Special damage system for Orcs |
 
 ### Interface
 
-| Documento | Descrição |
-|-----------|-----------|
+| Document | Description |
+|----------|-------------|
 | [UI_SYSTEM.md](UI_SYSTEM.md) | Sistema de interface do usuário |
 | [TRANSLATION_GUIDE.md](TRANSLATION_GUIDE.md) | Guia de tradução |
 
