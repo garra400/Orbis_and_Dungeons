@@ -2,6 +2,50 @@
 
 ---
 
+## Version 2026.2.22 - Class Lookup Persistence Fix
+
+### 🐛 Bug Fixes
+
+#### Fixed: `getPlayerClass()` Returning "none" for Valid Players
+
+**Problem:**
+`RaceManager.getPlayerClass(player)` was returning `"none"` even when the player had a class correctly set.
+
+**Root Cause:**
+The method only consulted `RaceStorage` (the in-memory/file cache). If the server restarted and the cache was not yet populated (e.g., the player hadn't triggered any class-setting action since the restart), the method returned `"none"` — even though the class was correctly persisted in the `RaceData` component.
+
+Compare with `getPlayerRace()`, which has a full fallback chain:
+1. `RaceData` component via `PlayerRef.getHolder()`
+2. In-memory `LAST_KNOWN_RACE` cache
+3. `RaceStorage` file cache
+
+`getPlayerClass()` previously only performed step 3.
+
+**Fix applied in `RaceManager.getPlayerClass()`:**
+```java
+// Before (only checked RaceStorage):
+String classId = RaceStorage.getPlayerClass(player.getUuid());
+
+// After (mirrors getPlayerRace's fallback logic):
+// 1. Check RaceStorage first
+// 2. If not found, fallback to RaceData component via PlayerRef.getHolder()
+// 3. When found in component, sync to RaceStorage for faster future lookups
+```
+
+When the class is recovered from the component, `RaceStorage` is automatically updated so subsequent calls resolve from cache.
+
+### 📝 Files Modified
+
+- `RaceManager.java` — Added component fallback to `getPlayerClass()`
+
+### 🚀 For Server Admins
+
+**No breaking changes.** This is a transparent fix — no config wipes or command changes required.
+
+If players were seeing `"none"` as their class after a server restart, this update resolves the issue automatically on the next call to `getPlayerClass()`.
+
+---
+
 ## Version 2026.2.11 - Mod Compatibility & API Improvements
 
 ### 🔧 Mod Configuration System (NEW)

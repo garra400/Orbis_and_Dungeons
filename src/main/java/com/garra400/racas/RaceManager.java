@@ -368,12 +368,38 @@ public final class RaceManager {
         }
 
         try {
-            // Usa RaceStorage como fonte primária (foi salvo via store.putComponent)
+            // Fonte primária: RaceStorage (cache em memória/arquivo)
             String classId = RaceStorage.getPlayerClass(player.getUuid());
             if (classId != null && !classId.equals("none")) {
                 System.out.println("getPlayerClass: Retrieved class=" + classId + " from storage");
                 return classId;
             }
+
+            // Fallback: componente RaceData persistido (espelho do que getPlayerRace faz)
+            if (raceDataType != null) {
+                PlayerRef playerRef = player.getPlayerRef();
+                if (playerRef != null) {
+                    Holder holder = playerRef.getHolder();
+                    if (holder != null) {
+                        RaceData raceData = (RaceData) holder.ensureAndGetComponent(raceDataType);
+                        if (raceData != null) {
+                            String componentClass = raceData.getSelectedClass();
+                            if (componentClass != null && !componentClass.equals("none")) {
+                                System.out.println("getPlayerClass: Retrieved class=" + componentClass + " from component, syncing storage");
+                                // Sincroniza o RaceStorage para próximas consultas
+                                String raceId = raceData.getSelectedRace();
+                                if (raceId != null) {
+                                    String username = null;
+                                    try { username = playerRef.getUsername(); } catch (Exception ignored) {}
+                                    RaceStorage.putRaceAndClass(player.getUuid(), username, raceId, componentClass);
+                                }
+                                return componentClass;
+                            }
+                        }
+                    }
+                }
+            }
+
             return "none";
         } catch (Exception e) {
             System.err.println("getPlayerClass: Exception - " + e.getMessage());
